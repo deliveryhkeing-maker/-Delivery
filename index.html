@@ -434,7 +434,6 @@
               renderRestaurants();
               resolve();
             },
-            // maximumAge: 0 บังคับให้มือถือหาพิกัดใหม่เสมอ ไม่ใช้พิกัดเก่าที่ค้างในระบบ
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
         } else {
@@ -543,7 +542,7 @@
 
       const orderData = {
         resName: selectedRestaurant.name,
-        resLat: selected selectedRestaurant.lat,
+        resLat: selectedRestaurant.lat, // แก้ไข Typo ตรงนี้แล้วครับ
         resLng: selectedRestaurant.lng,
         status: 'searching',
         totalPrice: totalAmount, // บันทึกยอดเงินไว้สำหรับการคืนเงิน
