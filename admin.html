@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Admin Dashboard - ระบบจัดการหลังบ้าน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    :root {
+      --admin-bg: #f1f5f9;
+      --sidebar-bg: #1e293b;
+      --sidebar-hover: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --white: #ffffff;
+      --text-dark: #0f172a;
+      --text-gray: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Prompt', sans-serif; background-color: var(--admin-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+
+    #admin-login-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      display: flex; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .login-box {
+      background: var(--white); padding: 40px; border-radius: 16px;
+      width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .login-box h2 { margin-bottom: 20px; color: var(--text-dark); }
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-gray); }
+    .input-group input { 
+      width: 100%; padding: 12px; border: 1px solid var(--border); 
+      border-radius: 8px; font-family: 'Prompt'; font-size: 14px; outline: none; transition: 0.3s;
+    }
+    .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .btn-login {
+      width: 100%; background: var(--primary); color: var(--white); border: none;
+      padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+      font-family: 'Prompt'; transition: 0.3s;
+    }
+    .btn-login:hover { background: var(--primary-hover); }
+
+    #dashboard-screen { display: none; width: 100%; height: 100%; }
+    
+    .sidebar {
+      width: 260px; background-color: var(--sidebar-bg); color: var(--white);
+      display: flex; flex-direction: column; transition: 0.3s;
+    }
+    .sidebar-logo {
+      padding: 24px; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-list { list-style: none; padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item {
+      padding: 15px 24px; display: flex; align-items: center; gap: 15px; cursor: pointer;
+      color: #cbd5e1; transition: 0.2s; font-size: 15px;
+    }
+    .nav-item:hover, .nav-item.active { background-color: var(--sidebar-hover); color: var(--white); border-left: 4px solid var(--primary); }
+    
+    .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      background: var(--white); height: 70px; display: flex; justify-content: space-between; align-items: center;
+      padding: 0 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 10;
+    }
+    .topbar-title { font-size: 20px; font-weight: 600; }
+    .admin-profile { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .admin-avatar { width: 40px; height: 40px; background: var(--primary); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+    .content-area { padding: 30px; overflow-y: auto; flex-grow: 1; }
+    .view-section { display: none; animation: fadeIn 0.3s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { background: var(--white); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: 600; margin: 0; }
+    
+    .btn { padding: 10px 16px; border-radius: 8px; font-family: 'Prompt'; font-size: 14px; font-weight: 500; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-primary { background: var(--primary); color: var(--white); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-dark); }
+    .btn-outline:hover { background: var(--admin-bg); }
+    .btn-danger { background: var(--danger); color: var(--white); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+    th { color: var(--text-gray); font-weight: 500; background-color: #f8fafc; }
+    tr:hover td { background-color: #f8fafc; }
+    
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15,23,42,0.6); z-index: 200; justify-content: center; align-items: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: var(--white); width: 100%; max-width: 500px; border-radius: 16px;
+      padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+      animation: modalScale 0.3s ease-out;
+    }
+    @keyframes modalScale { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text-dark); }
+    .form-control { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Prompt'; font-size: 14px; outline: none; }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    .toast {
+      position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+      background: var(--text-dark); color: var(--white); padding: 12px 24px;
+      border-radius: 30px; font-size: 14px; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      transition: bottom 0.4s ease; z-index: 300; display: flex; align-items: center; gap: 10px;
+    }
+    .toast.show { bottom: 30px; }
+  </style>
+</head>
+<body>
+
+  <div id="admin-login-screen">
+    <div class="login-box">
+      <div style="font-size: 48px; color: var(--primary); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">admin_panel_settings</span></div>
+      <h2>เข้าสู่ระบบ Admin</h2>
+      <div class="input-group">
+        <label>รหัสผ่านผู้ดูแลระบบ</label>
+        <input type="password" id="admin-password" placeholder="ใส่รหัสผ่านเพื่อเข้าสู่ระบบ..." onkeypress="if(event.key === 'Enter') adminLogin()">
+      </div>
+      <button class="btn-login" onclick="adminLogin()">เข้าสู่ระบบจัดการ</button>
+      <p style="margin-top: 15px; font-size: 12px; color: var(--text-gray);">*สำหรับทีมผู้ดูแลระบบ (Developer/Admin) เท่านั้น</p>
+    </div>
+  </div>
+
+  <div id="dashboard-screen">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <span class="material-icons">rocket_launch</span> Delivery Admin
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item active" onclick="switchView('config', this)">
+          <span class="material-icons">settings</span> ตั้งค่าระบบพื้นฐาน
+        </li>
+        <li class="nav-item" onclick="switchView('merchants', this)">
+          <span class="material-icons">storefront</span> ฐานข้อมูลร้านค้า
+        </li>
+        <li class="nav-item" onclick="switchView('riders', this)">
+          <span class="material-icons">sports_motorsports</span> ฐานข้อมูลไรเดอร์
+        </li>
+        <li class="nav-item" onclick="switchView('users', this)">
+          <span class="material-icons">group</span> ฐานข้อมูลลูกค้า
+        </li>
+        <li class="nav-item" onclick="switchView('promo', this)">
+          <span class="material-icons">local_offer</span> จัดการโปรโมชัน
+        </li>
+        <li class="nav-item" onclick="switchView('broadcast', this)">
+          <span class="material-icons">campaign</span> ส่งแจ้งเตือน (Broadcast)
+        </li>
+      </ul>
+      <div style="padding: 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+        <button class="btn btn-outline" style="width: 100%; justify-content: center; color: white; border-color: rgba(255,255,255,0.2);" onclick="location.reload()">
+          <span class="material-icons">logout</span> ออกจากระบบ
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="topbar-title">ตั้งค่าระบบพื้นฐาน</div>
+        <div class="admin-profile">
+          <div class="admin-avatar">AD</div>
+          <span>Super Admin</span>
+        </div>
+      </div>
+
+      <div class="content-area">
+        
+        <!-- ================= SECTION: ตั้งค่าระบบ (Config) ================= -->
+        <div id="view-config" class="view-section active">
+          <div class="card">
+            <h3 class="card-title" style="margin-bottom: 20px;">ตั้งค่าอัตราค่าจัดส่ง (Delivery Fees)</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div class="form-group">
+                <label>ค่าส่งเริ่มต้น (Base Fare) - บาท</label>
+                <input type="number" class="form-control" value="15">
+              </div>
+              <div class="form-group">
+                <label>ค่าส่งต่อกิโลเมตรถัดไป (บาท/กม.)</label>
+                <input type="number" class="form-control" value="5">
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveSetting()"><span class="material-icons">save</span> บันทึกการตั้งค่า</button>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title" style="margin-bottom: 20px;">จัดการแบนเนอร์หน้าแรก (แอปลูกค้า)</h3>
+            <div class="form-group">
+              <label>หัวข้อโปรโมชัน (Title)</label>
+              <input type="text" class="form-control" value="โค้ดลดพิเศษชุมชน">
+            </div>
+            <div class="form-group">
+              <label>รายละเอียดโปรโมชัน (Subtitle)</label>
+              <input type="text" class="form-control" value="ใส่โค้ด LOCAL50 ลดทันที 50 บาท!">
+            </div>
+            <button class="btn btn-primary" onclick="saveSetting()"><span class="material-icons">save</span> บันทึกข้อความแบนเนอร์</button>
+          </div>
+        </div>
+
+        <!-- ================= SECTION: ข้อมูลร้านค้า (Merchants) ================= -->
+        <div id="view-merchants" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">ฐานข้อมูลร้านค้า (Merchants)</h3>
+              <button class="btn btn-primary" onclick="openModal('merchantModal')"><span class="material-icons">add</span> เพิ่มร้านค้าใหม่</button>
+            </div>
+            <table>
+              <thead><tr><th>รหัสร้าน</th><th>ชื่อร้าน</th><th>เจ้าของร้าน</th><th>เบอร์โทร</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>MER-001</td><td>ป้าแจ๋ว อาหารตามสั่ง</td><td>นางแจ๋ว ใจดี</td><td>081-111-2222</td>
+                  <td><span class="badge badge-success">เปิดให้บริการ</span></td>
+                  <td>
+                    <button class="btn btn-outline" style="padding: 5px; display: inline-flex;" onclick="openModal('merchantModal')"><span class="material-icons" style="font-size: 18px;">edit</span></button> 
+                    <button class="btn btn-danger" style="padding: 5px; display: inline-flex;" onclick="deleteItem(this)"><span class="material-icons" style="font-size: 18px;">delete</span></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>MER-002</td><td>ก๋วยเตี๋ยวเรือ เจ๊นก</td><td>นกน้อย บินไป</td><td>082-333-4444</td>
+                  <td><span class="badge badge-warning">ปิดปรับปรุง</span></td>
+                  <td>
+                    <button class="btn btn-outline" style="padding: 5px; display: inline-flex;" onclick="openModal('merchantModal')"><span class="material-icons" style="font-size: 18px;">edit</span></button> 
+                    <button class="btn btn-danger" style="padding: 5px; display: inline-flex;" onclick="deleteItem(this)"><span class="material-icons" style="font-size: 18px;">delete</span></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= SECTION: ข้อมูลไรเดอร์ (Riders) ================= -->
+        <div id="view-riders" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">ฐานข้อมูลไรเดอร์ (Riders)</h3>
+              <button class="btn btn-primary" onclick="openModal('riderModal')"><span class="material-icons">add</span> เพิ่มไรเดอร์ใหม่</button>
+            </div>
+            <table>
+              <thead><tr><th>รหัสไรเดอร์</th><th>ชื่อ-นามสกุล</th><th>ทะเบียนรถ</th><th>เบอร์โทร</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>RID-001</td><td>สมชาย สายแว้น</td><td>1กข 1234 กทม</td><td>089-999-8888</td>
+                  <td><span class="badge badge-success">ยืนยันแล้ว</span></td>
+                  <td>
+                    <button class="btn btn-outline" style="padding: 5px; display: inline-flex;" onclick="openModal('riderModal')"><span class="material-icons" style="font-size: 18px;">edit</span></button> 
+                    <button class="btn btn-danger" style="padding: 5px; display: inline-flex;" onclick="deleteItem(this)"><span class="material-icons" style="font-size: 18px;">delete</span></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>RID-002</td><td>วินัย ใจสู้</td><td>2ขค 5678 อด</td><td>088-777-6666</td>
+                  <td><span class="badge badge-warning">รอตรวจสอบเอกสาร</span></td>
+                  <td>
+                    <button class="btn btn-outline" style="padding: 5px; display: inline-flex;" onclick="openModal('riderModal')"><span class="material-icons" style="font-size: 18px;">edit</span></button> 
+                    <button class="btn btn-danger" style="padding: 5px; display: inline-flex;" onclick="deleteItem(this)"><span class="material-icons" style="font-size: 18px;">delete</span></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= SECTION: ข้อมูลลูกค้า (Users) ================= -->
+        <div id="view-users" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">ฐานข้อมูลลูกค้า (Customers)</h3>
+              <button class="btn btn-primary" onclick="openModal('userModal')"><span class="material-icons">add</span> เพิ่มลูกค้าด้วยตนเอง</button>
+            </div>
+            <table>
+              <thead><tr><th>รหัสลูกค้า</th><th>ชื่อ-นามสกุล</th><th>เบอร์โทร</th><th>สมัครเมื่อ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>CUST-001</td><td>Sahaphap Naosang</td><td>099-745-5250</td><td>20 ก.ค. 2026</td>
+                  <td><span class="badge badge-success">ใช้งานปกติ</span></td>
+                  <td>
+                    <button class="btn btn-outline" style="padding: 5px; display: inline-flex;" onclick="openModal('userModal')"><span class="material-icons" style="font-size: 18px;">edit</span></button> 
+                    <button class="btn btn-danger" style="padding: 5px; display: inline-flex;" onclick="deleteItem(this)"><span class="material-icons" style="font-size: 18px;">delete</span></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= SECTION: โปรโมชัน (Promo) ================= -->
+        <div id="view-promo" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">จัดการรหัสส่วนลด</h3>
+              <button class="btn btn-primary" onclick="openModal('promoModal')"><span class="material-icons">add</span> สร้างโค้ดส่วนลด</button>
+            </div>
+            <table>
+              <thead><tr><th>โค้ดส่วนลด</th><th>ประเภท</th><th>มูลค่า</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>LOCAL50</strong></td><td>ลดราคาอาหาร</td><td>50 บาท</td><td><span class="badge badge-success">ใช้งานได้</span></td>
+                  <td><button class="btn btn-danger" style="padding: 5px; display: inline-flex;" onclick="deleteItem(this)"><span class="material-icons" style="font-size: 18px;">delete</span></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= SECTION: แจ้งเตือน (Broadcast) ================= -->
+        <div id="view-broadcast" class="view-section">
+          <div class="card" style="max-width: 600px;">
+            <h3 class="card-title" style="margin-bottom: 20px;">ส่งข้อความแจ้งเตือน (Push Notifications)</h3>
+            <div class="form-group">
+              <label>กลุ่มเป้าหมาย (Send to)</label>
+              <select class="form-control">
+                <option>ทุกคน (ลูกค้า, ร้านค้า, ไรเดอร์)</option>
+                <option>เฉพาะแอปลูกค้า (Customer App)</option>
+                <option>เฉพาะร้านค้า (Merchant App)</option>
+                <option>เฉพาะไรเดอร์ (Rider App)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>หัวข้อแจ้งเตือน</label>
+              <input type="text" class="form-control" placeholder="เช่น โปรโมชันใหม่!, ประกาศปิดระบบ...">
+            </div>
+            <div class="form-group">
+              <label>รายละเอียดข้อความ</label>
+              <textarea class="form-control" rows="4" placeholder="พิมพ์ข้อความที่ต้องการแจ้งเตือน..."></textarea>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 16px;" onclick="broadcastMessage()">
+              <span class="material-icons">send</span> ส่งแจ้งเตือนทันที
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ร้านค้า -->
+  <div class="modal-overlay" id="merchantModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; font-size: 20px;">เพิ่ม/แก้ไข ข้อมูลร้านค้า</h3>
+      <div class="form-group"><label>ชื่อร้าน</label><input type="text" class="form-control" placeholder="เช่น ร้านป้าแจ๋ว"></div>
+      <div class="form-group"><label>เจ้าของร้าน</label><input type="text" class="form-control" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="form-group"><label>เบอร์โทรศัพท์</label><input type="text" class="form-control" placeholder="08X-XXX-XXXX"></div>
+      <div class="form-group">
+        <label>สถานะ</label>
+        <select class="form-control"><option>เปิดให้บริการ</option><option>ปิดปรับปรุง</option><option>ระงับการใช้งาน</option></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('merchantModal')">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveData('merchantModal')">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ไรเดอร์ -->
+  <div class="modal-overlay" id="riderModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; font-size: 20px;">เพิ่ม/แก้ไข ข้อมูลไรเดอร์</h3>
+      <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" class="form-control" placeholder="ชื่อไรเดอร์"></div>
+      <div class="form-group"><label>ทะเบียนรถ</label><input type="text" class="form-control" placeholder="เช่น 1กข 1234 กทม"></div>
+      <div class="form-group"><label>เบอร์โทรศัพท์</label><input type="text" class="form-control" placeholder="08X-XXX-XXXX"></div>
+      <div class="form-group">
+        <label>สถานะ</label>
+        <select class="form-control"><option>ยืนยันแล้ว (Active)</option><option>รอตรวจสอบเอกสาร</option><option>ระงับการใช้งาน (Banned)</option></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('riderModal')">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveData('riderModal')">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ลูกค้า -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; font-size: 20px;">เพิ่ม/แก้ไข ข้อมูลลูกค้า</h3>
+      <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" class="form-control" placeholder="ชื่อลูกค้า"></div>
+      <div class="form-group"><label>เบอร์โทรศัพท์</label><input type="text" class="form-control" placeholder="08X-XXX-XXXX"></div>
+      <div class="form-group">
+        <label>สถานะ</label>
+        <select class="form-control"><option>ใช้งานปกติ (Active)</option><option>ระงับการใช้งาน (Banned)</option></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('userModal')">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveData('userModal')">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal โปรโมชัน -->
+  <div class="modal-overlay" id="promoModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; font-size: 20px;">สร้างโค้ดส่วนลดใหม่</h3>
+      <div class="form-group"><label>รหัสโค้ด (Promo Code)</label><input type="text" class="form-control" placeholder="เช่น FREEDEL, NEWUSER"></div>
+      <div class="form-group">
+        <label>ประเภทส่วนลด</label>
+        <select class="form-control"><option>ลดค่าอาหาร (บาท)</option><option>ส่งฟรี</option></select>
+      </div>
+      <div class="form-group"><label>มูลค่าส่วนลด (บาท)</label><input type="number" class="form-control" placeholder="ใส่ตัวเลข"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('promoModal')">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveData('promoModal')">สร้างโปรโมชัน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span class="material-icons" style="font-size: 20px;">check_circle</span>
+    <span id="toast-msg">ข้อความ</span>
+  </div>
+
+  <script>
+    
+    // ระบบ Login จำลอง
+    function adminLogin() {
+      const pass = document.getElementById('admin-password').value;
+      if (pass !== '') { // ทดสอบใช้งาน ใส่รหัสอะไรก็ได้
+        document.getElementById('admin-login-screen').style.display = 'none';
+        document.getElementById('dashboard-screen').style.display = 'flex';
+        showToast('เข้าสู่ระบบผู้ดูแลสำเร็จ');
+      } else {
+        alert('กรุณาใส่รหัสผ่าน');
+      }
+    }
+
+    // เปลี่ยนหน้าเมนู Sidebar
+    function switchView(viewId, element) {
+      // ปิด Content เก่า
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      // ลบ Active สีที่เมนู
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      
+      // เปิด Content ใหม่
+      document.getElementById('view-' + viewId).classList.add('active');
+      element.classList.add('active');
+      
+      // อัปเดต Title บาร์ด้านบน
+      document.getElementById('topbar-title').innerText = element.innerText.trim();
+    }
+
+    // ควบคุม Modal
+    function openModal(modalId) { 
+      document.getElementById(modalId).style.display = 'flex'; 
+    }
+    function closeModal(modalId) { 
+      document.getElementById(modalId).style.display = 'none'; 
+    }
+
+    // ฟังก์ชันจำลองการทำงานของปุ่มต่างๆ
+    function saveData(modalId) {
+      closeModal(modalId);
+      showToast('บันทึกข้อมูลลงฐานข้อมูลสำเร็จ!');
+    }
+
+    function deleteItem(btn) {
+      if(confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้ออกจากระบบ? (การกระทำนี้ย้อนกลับไม่ได้)')) {
+        const row = btn.closest('tr');
+        row.parentNode.removeChild(row);
+        showToast('ลบข้อมูลเสร็จสิ้น');
+      }
+    }
+
+    function saveSetting() {
+      showToast('อัปเดตการตั้งค่าระบบและแบนเนอร์สำเร็จ');
+    }
+
+    function broadcastMessage() {
+      showToast('ระบบได้ส่งแจ้งเตือน (Push Notification) ไปยังกลุ่มเป้าหมายเรียบร้อยแล้ว!');
+    }
+
+    // Toast Notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rider App - คนขับ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    /* โทนสีส้ม/ดำ สไตล์แอปไรเดอร์ */
+    :root {
+      --rider-primary: #FF7300; 
+      --rider-dark: #cc5c00;
+      --bg-color: #f0f2f5;
+      --text-dark: #1a1a1a;
+      --text-light: #757575;
+      --white: #ffffff;
+      --success: #00B900;
+      --danger: #f44336;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Prompt', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark); padding-bottom: 70px; }
+
+    /* ---------------- คอมโพเนนต์ทั่วไป ---------------- */
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    #map-screen { display: flex; }
+    
+    .btn-main { width: 100%; background-color: var(--rider-primary); color: white; border: none; border-radius: 12px; padding: 18px; font-family: 'Prompt'; font-weight: 700; font-size: 18px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(255,115,0,0.3); text-transform: uppercase; letter-spacing: 1px; }
+    .btn-main:active { background-color: var(--rider-dark); transform: scale(0.98); }
+    
+    .btn-success { background-color: var(--success); box-shadow: 0 4px 15px rgba(0,185,0,0.3); }
+
+    /* ---------------- หน้าหลัก (Map / Standby) ---------------- */
+    .rider-header { background-color: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .rider-profile { display: flex; align-items: center; gap: 12px; }
+    .profile-img { width: 40px; height: 40px; border-radius: 50%; background-color: #eee; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    .status-toggle { display: flex; align-items: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 8px rgba(0,185,0,0.5); }
+
+    .map-container { flex-grow: 1; background-color: #e0e0e0; position: relative; display: flex; justify-content: center; align-items: center; background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center; }
+    /* จำลองหมุดไรเดอร์ */
+    .rider-pin { width: 50px; height: 50px; background: var(--white); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; z-index: 2; border: 3px solid var(--rider-primary); }
+    .rider-pin .material-icons { color: var(--rider-primary); font-size: 28px; }
+    
+    .stats-bar { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); margin-top: -20px; position: relative; z-index: 10; }
+    .stat-box { text-align: center; flex: 1; border-right: 1px solid #eee; }
+    .stat-box:last-child { border-right: none; }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0; }
+    .stat-label { font-size: 12px; color: var(--text-light); margin: 0; }
+
+    /* ---------------- ป๊อปอัป มีงานเข้า (Order Alert) ---------------- */
+    .order-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: flex-end; }
+    .order-alert-content { background: var(--white); width: 100%; border-radius: 24px 24px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    
+    .alert-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .alert-title { font-size: 22px; font-weight: 700; color: var(--rider-primary); margin: 0; display: flex; align-items: center; gap: 10px; }
+    .alert-title .material-icons { animation: ring 1s infinite; }
+    @keyframes ring { 0% { transform: rotate(0); } 20% { transform: rotate(15deg); } 40% { transform: rotate(-15deg); } 60% { transform: rotate(10deg); } 80% { transform: rotate(-10deg); } 100% { transform: rotate(0); } }
+    
+    .job-details { background: var(--bg-color); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+    .location-row { display: flex; margin-bottom: 15px; position: relative; }
+    .location-row::before { content: ''; position: absolute; left: 11px; top: 25px; bottom: -10px; width: 2px; background-color: #ddd; }
+    .location-row:last-child::before { display: none; }
+    .loc-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 15px; z-index: 2; flex-shrink: 0; }
+    .loc-icon.store { background-color: var(--rider-primary); color: white; }
+    .loc-icon.customer { background-color: var(--success); color: white; }
+    .loc-icon .material-icons { font-size: 14px; }
+    .loc-text h4 { margin: 0 0 3px 0; font-size: 15px; }
+    .loc-text p { margin: 0; font-size: 12px; color: var(--text-light); }
+
+    .job-price { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 18px; font-weight: 700; }
+    .job-price span:last-child { color: var(--rider-primary); font-size: 24px; }
+
+    /* ---------------- หน้ากำลังจัดส่ง (Active Order) ---------------- */
+    #active-order-screen { background-color: var(--bg-color); }
+    .active-map { height: 35vh; background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center; position: relative; }
+    .nav-overlay { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 10px 15px; border-radius: 12px; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; }
+    
+    .order-panel { background: var(--white); border-radius: 24px 24px 0 0; padding: 25px; margin-top: -20px; position: relative; z-index: 10; min-height: 65vh; display: flex; flex-direction: column; }
+    .panel-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+    .customer-info { display: flex; align-items: center; gap: 15px; }
+    .call-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--success); display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    
+    .order-items-list { flex-grow: 1; }
+    .order-items-list h3 { margin: 0 0 10px 0; font-size: 16px; }
+    .item-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: var(--text-dark); }
+    
+    .total-collect { background: var(--primary-light); border: 1px solid var(--success); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .total-collect p { margin: 0; color: var(--success); font-weight: 600; }
+    .total-collect h2 { margin: 0; color: var(--success); font-size: 22px; }
+
+    /* ---------------- เมนูด้านล่าง ---------------- */
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 33.33%; }
+    .nav-item.active { color: var(--rider-primary); }
+    .nav-item .material-icons { font-size: 26px; }
+
+    /* Custom Toast */
+    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 90px; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
+    .toast.show { visibility: visible; opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= หน้าหลัก / แผนที่รอรับงาน ================= -->
+  <div id="map-screen" class="screen">
+    <div class="rider-header">
+      <div class="rider-profile">
+        <div class="profile-img"><span class="material-icons" style="color: #999;">person</span></div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px;">สมชาย สายแว้น</div>
+          <div style="font-size: 12px; color: var(--text-light);">ID: RD-001</div>
+        </div>
+      </div>
+      <div class="status-toggle" id="status-btn" onclick="simulateNewOrder()">
+        <div class="status-dot"></div> พร้อมรับงาน
+      </div>
+    </div>
+
+    <div class="map-container">
+      <div class="rider-pin"><span class="material-icons">sports_motorsports</span></div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-box">
+        <p class="stat-value">5</p>
+        <p class="stat-label">งานวันนี้</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-value" style="color: var(--rider-primary);">฿245</p>
+        <p class="stat-label">รายได้รวม</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-value" style="color: var(--success);">100%</p>
+        <p class="stat-label">คะแนนรับงาน</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ป๊อปอัปเตือนมีงานเข้า ================= -->
+  <div class="order-alert-overlay" id="order-alert">
+    <div class="order-alert-content">
+      <div class="alert-header">
+        <h3 class="alert-title"><span class="material-icons">notifications_active</span> มีงานใหม่เข้า!</h3>
+        <span style="font-size: 14px; color: var(--text-light); font-weight: 600;">(25 วิ)</span>
+      </div>
+      
+      <div class="job-details">
+        <div class="location-row">
+          <div class="loc-icon store"><span class="material-icons">storefront</span></div>
+          <div class="loc-text">
+            <h4>ป้าแจ๋ว อาหารตามสั่ง</h4>
+            <p>ระยะรับอาหาร 1.2 กม.</p>
+          </div>
+        </div>
+        <div class="location-row">
+          <div class="loc-icon customer"><span class="material-icons">person</span></div>
+          <div class="loc-text">
+            <h4>จัดส่งที่: ชุมชนบ้านห้วยเกิ้ง</h4>
+            <p>ระยะจัดส่ง 2.5 กม.</p>
+          </div>
+        </div>
+        <div class="job-price">
+          <span>ค่ารอบจัดส่ง</span>
+          <span>฿35</span>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="acceptJob()">รับงานนี้</button>
+      <div style="text-align: center; margin-top: 15px;">
+        <span style="color: var(--text-light); font-size: 14px; cursor: pointer;" onclick="rejectJob()">ปัดทิ้ง (ลดคะแนนรับงาน)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= หน้ากำลังจัดส่ง (Active Order) ================= -->
+  <div id="active-order-screen" class="screen">
+    <div class="active-map">
+      <div class="nav-overlay">
+        <span class="material-icons" style="color: var(--rider-primary);">navigation</span> 1.2 กม. (5 นาที)
+      </div>
+    </div>
+
+    <div class="order-panel">
+      <div class="panel-header">
+        <div class="customer-info">
+          <div class="profile-img"><span class="material-icons" style="color: #999;">person</span></div>
+          <div>
+            <div style="font-weight: 600; font-size: 16px;">ลูกค้า: คุณบอย</div>
+            <div style="font-size: 13px; color: var(--text-light);">รหัสออเดอร์: #ORD-0092</div>
+          </div>
+        </div>
+        <div class="call-btn" onclick="showToast('กำลังโทรหาลูกค้า...')"><span class="material-icons">call</span></div>
+      </div>
+
+      <div class="order-items-list">
+        <h3>รายละเอียดอาหาร (รับที่ ป้าแจ๋ว ตามสั่ง)</h3>
+        <div class="item-row"><span>1x ข้าวกะเพราหมูสับ</span><span>฿50</span></div>
+        <div class="item-row"><span>1x ข้าวผัดกุ้ง</span><span>฿60</span></div>
+      </div>
+
+      <div class="total-collect">
+        <div>
+          <p>เก็บเงินสดจากลูกค้า</p>
+          <span style="font-size: 12px;">(รวมค่าอาหารและค่าส่งแล้ว)</span>
+        </div>
+        <h2>฿125</h2>
+      </div>
+
+      <!-- ปุ่มจะเปลี่ยนสถานะไปเรื่อยๆ -->
+      <button class="btn-main" id="action-btn" onclick="updateOrderStatus()">ฉันถึงร้านอาหารแล้ว</button>
+    </div>
+  </div>
+
+  <!-- ================= หน้ากระเป๋าเงิน (Wallet) ================= -->
+  <div id="wallet-screen" class="screen" style="background: white;">
+    <div class="rider-header" style="justify-content: center;"><h3 style="margin:0;">กระเป๋าเงินไรเดอร์</h3></div>
+    <div style="padding: 30px 20px; text-align: center; background: var(--rider-primary); color: white;">
+      <p style="margin: 0 0 10px 0; opacity: 0.9;">ยอดเงินที่ถอนได้</p>
+      <h1 style="margin: 0; font-size: 42px;">฿1,245.00</h1>
+      <button style="background: white; color: var(--rider-primary); border: none; padding: 10px 30px; border-radius: 20px; font-family: 'Prompt'; font-weight: 700; margin-top: 20px; cursor: pointer;">ถอนเงินเข้าบัญชี</button>
+    </div>
+    <div style="padding: 20px;">
+      <h3 style="margin-top: 0;">ประวัติรายได้ล่าสุด</h3>
+      <div style="display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee;">
+        <div><div style="font-weight: 600;">ค่ารอบ #ORD-0091</div><div style="font-size: 12px; color: #777;">วันนี้, 11:30 น.</div></div>
+        <div style="color: var(--success); font-weight: 700;">+฿35</div>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee;">
+        <div><div style="font-weight: 600;">ค่ารอบ #ORD-0090</div><div style="font-size: 12px; color: #777;">วันนี้, 10:15 น.</div></div>
+        <div style="color: var(--success); font-weight: 700;">+฿40</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= เมนูด้านล่าง ================= -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-map" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
+    <div class="nav-item" id="nav-wallet" onclick="showScreen('wallet-screen')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
+    <div class="nav-item" id="nav-profile"><span class="material-icons">person</span><span>โปรไฟล์</span></div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="custom-toast" class="toast">ข้อความแจ้งเตือน</div>
+
+  <script>
+    let currentStatus = 0; // 0: ถึงร้าน, 1: รับอาหารแล้ว, 2: ส่งสำเร็จ
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.getElementById(screenId).style.display = 'flex';
+      
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      const activeNavId = screenId.replace('-screen', '');
+      if (document.getElementById('nav-' + activeNavId)) {
+        document.getElementById('nav-' + activeNavId).classList.add('active');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("custom-toast");
+      toast.innerText = message;
+      toast.className = "toast show";
+      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    // จำลองเมื่อมีคนสั่งอาหารเข้ามา
+    function simulateNewOrder() {
+      // แกล้งทำเป็นรอ 2 วินาทีแล้วมีงานเข้า
+      showToast("ระบบกำลังค้นหางานให้คุณ...");
+      setTimeout(() => {
+        document.getElementById('order-alert').style.display = 'flex';
+      }, 2000);
+    }
+
+    function rejectJob() {
+      document.getElementById('order-alert').style.display = 'none';
+      showToast("คุณได้ปฏิเสธงานนี้ (คะแนนรับงานลดลง)");
+    }
+
+    function acceptJob() {
+      document.getElementById('order-alert').style.display = 'none';
+      showScreen('active-order-screen');
+      showToast("รับงานสำเร็จ! กรุณาเดินทางไปที่ร้านอาหาร");
+      currentStatus = 0;
+      resetActionButton();
+    }
+
+    // จัดการปุ่มอัปเดตสถานะ (Flow การทำงานของไรเดอร์)
+    function updateOrderStatus() {
+      const btn = document.getElementById('action-btn');
+      
+      if(currentStatus === 0) {
+        btn.innerText = "ฉันรับอาหารเรียบร้อยแล้ว";
+        btn.style.backgroundColor = "#2196F3"; // สีฟ้า
+        document.querySelector('.nav-overlay').innerHTML = '<span class="material-icons" style="color: #2196F3;">navigation</span> 2.5 กม. (บ้านลูกค้า)';
+        showToast("แจ้งลูกค้าแล้วว่าคุณถึงร้าน");
+        currentStatus++;
+      } 
+      else if(currentStatus === 1) {
+        btn.innerText = "จัดส่งสำเร็จ (ถ่ายรูป)";
+        btn.style.backgroundColor = "var(--success)"; // สีเขียว
+        showToast("ระบบแจ้งลูกค้าว่ากำลังไปส่งอาหาร");
+        currentStatus++;
+      }
+      else if(currentStatus === 2) {
+        alert("จำลองการเปิดกล้องเพื่อถ่ายรูปยืนยัน...");
+        showToast("จัดส่งสำเร็จ! ได้รับค่ารอบ ฿35");
+        
+        // กลับไปหน้าจอรอรับงาน
+        setTimeout(() => {
+          showScreen('map-screen');
+        }, 1500);
+      }
+    }
+
+    function resetActionButton() {
+      const btn = document.getElementById('action-btn');
+      btn.innerText = "ฉันถึงร้านอาหารแล้ว";
+      btn.style.backgroundColor = "var(--rider-primary)";
+      document.querySelector('.nav-overlay').innerHTML = '<span class="material-icons" style="color: var(--rider-primary);">navigation</span> 1.2 กม. (5 นาที)';
+    }
+  </script>
+</body>
+</html>
