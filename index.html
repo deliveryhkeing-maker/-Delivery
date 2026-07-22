@@ -13,9 +13,12 @@
   
   <!-- LINE LIFF SDK -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- Leaflet CSS & JS (สำหรับแผนที่) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
   <style>
-    /* ---------------- สีหลักและโครงสร้าง ---------------- */
     :root {
       --primary-color: #00B900; --primary-dark: #009900; --primary-light: #e6f7e6;
       --bg-color: #f8f9fa; --text-dark: #212121; --text-light: #757575;
@@ -26,17 +29,19 @@
 
     .screen { display: none; min-height: 100vh; background-color: var(--bg-color); }
     #home-screen { display: block; }
+    
     .top-bar { display: flex; align-items: center; padding: 15px 20px; background: var(--white); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .back-btn-simple { display: flex; align-items: center; cursor: pointer; color: var(--text-dark); padding: 5px; }
     .page-title { flex-grow: 1; text-align: center; font-size: 18px; font-weight: 600; margin-right: 24px; }
 
-    .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,185,0,0.2); }
+    /* Buttons */
+    .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,185,0,0.2); }
     .btn-primary:active { background-color: var(--primary-dark); transform: scale(0.98); }
+    .btn-primary:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
     
-    .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); transition: 0.2s; }
+    .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); transition: 0.2s; }
     .btn-line:active { background-color: #05a546; transform: scale(0.98); }
-    .btn-outline { width: 100%; background-color: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 8px; padding: 12px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-outline:active { background-color: #fee2e2; }
+    .btn-outline { width: 100%; background-color: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 12px; padding: 12px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
 
     .header { background-color: var(--white); padding: 15px 20px 10px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
     .location-box { display: flex; align-items: center; gap: 8px; }
@@ -46,99 +51,75 @@
     .location-text span:last-child { font-size: 15px; font-weight: 600; display: flex; align-items: center; }
     
     .search-section { background-color: var(--white); padding: 5px 20px 15px; }
-    .search-bar { background-color: var(--bg-color); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; }
+    .search-bar { background-color: var(--bg-color); border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; }
     .search-bar input { border: none; background: transparent; width: 100%; font-family: 'Prompt'; outline: none; font-size: 14px; }
     
     .banner-section { padding: 15px 20px; background: var(--white); }
-    .banner { width: 100%; height: 130px; background: linear-gradient(135deg, #00B900, #4caf50); border-radius: 12px; display: flex; align-items: center; padding: 20px; color: var(--white); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,185,0,0.2); }
+    .banner { width: 100%; height: 130px; background: linear-gradient(135deg, #00B900, #4caf50); border-radius: 16px; display: flex; align-items: center; padding: 20px; color: var(--white); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,185,0,0.2); }
     .banner h3 { margin: 0 0 5px 0; font-size: 22px; z-index: 2; font-weight: 700; }
     .banner p { margin: 0; font-size: 14px; z-index: 2; opacity: 0.9; }
 
     .categories { display: flex; overflow-x: auto; padding: 15px 20px; gap: 15px; scrollbar-width: none; background: var(--white); }
     .categories::-webkit-scrollbar { display: none; }
     .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; transition: transform 0.2s; }
-    .category-item:active { transform: scale(0.95); }
     .category-icon { width: 60px; height: 60px; background-color: var(--primary-light); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 30px; }
-    .category-item span { font-size: 13px; font-weight: 500; color: var(--text-dark); }
     
     .restaurant-section { padding: 15px 20px; }
-    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: var(--text-dark); }
-    .restaurant-card { background-color: var(--white); border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; }
+    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }
+    .restaurant-card:active { transform: scale(0.98); }
+    .restaurant-card.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(50%); }
     .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; position: relative; }
     .promo-tag { position: absolute; top: 12px; left: 0; background-color: var(--danger); color: var(--white); padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 0 12px 12px 0; }
+    .distance-tag { position: absolute; bottom: 12px; right: 12px; background-color: rgba(255,255,255,0.9); color: var(--text-dark); padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .out-of-range-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 10; white-space: nowrap; }
     .res-info { padding: 15px; }
     .res-name { font-size: 18px; font-weight: 600; margin: 0 0 5px; }
     .res-meta { display: flex; align-items: center; font-size: 13px; color: var(--text-light); gap: 12px; margin-bottom: 8px; }
 
     #menu-screen { background-color: var(--white); }
     .menu-header { position: relative; height: 220px; background-size: cover; background-position: center; }
-    .back-btn-img { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .back-btn-img { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;}
     .menu-shop-info { padding: 20px; border-bottom: 8px solid var(--bg-color); }
-    .menu-shop-info h2 { margin: 0 0 10px 0; font-size: 24px; }
-    .menu-list { padding: 0 20px; }
+    .menu-list { padding: 0 20px 100px; }
     .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
     .menu-item-left { display: flex; gap: 15px; flex-grow: 1; }
-    .menu-item-img { width: 70px; height: 70px; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; }
-    .menu-item-info h4 { margin: 0 0 5px 0; font-size: 16px; color: var(--text-dark); }
-    .menu-item-info p { margin: 0; color: var(--text-light); font-size: 14px; }
+    .menu-item-img { width: 70px; height: 70px; border-radius: 8px; background-size: cover; background-position: center; }
     .add-btn { background-color: var(--primary-light); color: var(--primary-color); border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
 
-    .checkout-items { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .checkout-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .summary-card { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--text-dark); }
-    .summary-total { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; font-size: 18px; font-weight: 700; color: var(--primary-color); }
-    .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .method-option { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; cursor: pointer; }
-    .method-icon { width: 40px; height: 40px; background: var(--primary-light); border-radius: 8px; display: flex; justify-content: center; align-items: center; margin-right: 15px; color: var(--primary-color); }
-    .method-text { flex-grow: 1; font-weight: 500; font-size: 15px; }
-    .radio-circle { width: 22px; height: 22px; border: 2px solid #ccc; border-radius: 50%; position: relative; }
-    .method-option.selected .radio-circle { border-color: var(--primary-color); }
-    .method-option.selected .radio-circle::after { content: ''; width: 12px; height: 12px; background: var(--primary-color); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
+    /* Payment & Profile UI (ซ่อนไว้ย่อๆ เพราะใช้รูปแบบเดิม) */
+    .checkout-items, .summary-card, .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .profile-header { background: var(--white); padding: 40px 20px; text-align: center; border-bottom: 1px solid #eee; }
-    .avatar-placeholder { width: 100px; height: 100px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-    .profile-menu { background: var(--white); margin-top: 15px; }
-    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 16px; cursor: pointer; transition: 0.2s; }
-    .profile-menu-item:active { background: #f9f9f9; }
-    .profile-menu-item .material-icons { margin-right: 15px; color: var(--text-light); }
-
-    /* หน้าประวัติออเดอร์ (Order History) */
-    .order-history-list { padding: 15px; }
-    .history-card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .history-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
-    .history-status { color: var(--primary-color); font-weight: 600; font-size: 14px; }
-    .history-date { color: var(--text-light); font-size: 12px; }
-    .history-body { display: flex; justify-content: space-between; align-items: center; }
-    .history-shop-name { font-weight: 600; font-size: 16px; margin: 0 0 5px 0; }
-
-    /* หน้าโปรโมชัน */
-    .promo-list { padding: 15px; }
-    .promo-ticket { background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .use-btn { background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
-
-    #waiting-screen { background-color: var(--white); text-align: center; padding-top: 60px; }
-    .status-text { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
-    .status-subtext { color: var(--text-light); font-size: 15px; margin-bottom: 40px; }
-    .radar-container { position: relative; width: 180px; height: 180px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
-    .motorcycle-icon { background: var(--white); width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; position: relative; }
-    .motorcycle-icon .material-icons { font-size: 40px; color: var(--primary-color); }
-    .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background-color: rgba(0, 185, 0, 0.2); animation: ripple 2s infinite ease-out; z-index: 1; }
+    .avatar-placeholder { width: 100px; height: 100px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 16px; cursor: pointer; }
+    
+    #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; }
+    #map-container { flex: 1; min-height: 40vh; background: #ddd; position: relative; z-index: 1; }
+    .tracking-status-card { background: var(--white); border-radius: 24px 24px 0 0; padding: 30px 20px; margin-top: -20px; position: relative; z-index: 10; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); text-align: center; }
+    
+    /* Animation ค้นหาไรเดอร์ (คล้ายภาพ S__5226498) */
+    .radar-container { position: relative; width: 150px; height: 150px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; }
+    .motorcycle-icon { background: var(--white); width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,185,0,0.2); z-index: 10; position: relative; }
+    .motorcycle-icon .material-icons { font-size: 30px; color: var(--primary-color); }
+    .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background-color: rgba(0, 185, 0, 0.15); animation: ripple 2s infinite ease-out; z-index: 1; }
     .pulse-ring:nth-child(2) { animation-delay: 0.6s; }
     .pulse-ring:nth-child(3) { animation-delay: 1.2s; }
-    @keyframes ripple { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+    @keyframes ripple { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+    
+    .tracking-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
+    .tracking-subtitle { color: var(--text-light); font-size: 14px; margin-bottom: 20px; }
 
-    #cart-bar { display: none; position: fixed; bottom: 75px; left: 20px; right: 20px; background-color: var(--primary-color); color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,185,0,0.3); z-index: 101; cursor: pointer; }
-    .cart-info { display: flex; align-items: center; gap: 12px; font-weight: 600; }
-    .cart-count { background: white; color: var(--primary-color); width: 26px; height: 26px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; }
-
+    #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; }
+    #cart-bar { bottom: 75px; background-color: var(--primary-color); }
+    #active-order-bar { bottom: 75px; background-color: #2196F3; } /* สีฟ้า สำหรับออเดอร์ที่กำลังทำงาน */
+    
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 25%; }
     .nav-item.active { color: var(--primary-color); }
     .nav-item .material-icons { font-size: 26px; }
 
-    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, bottom 0.3s; font-family: 'Prompt', sans-serif; }
-    .toast.show { visibility: visible; opacity: 1; bottom: 100px; }
+    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; opacity: 0; transition: opacity 0.3s, bottom 0.3s; }
+    .toast.show { visibility: visible; opacity: 1; bottom: 140px; }
   </style>
 </head>
 <body>
@@ -148,53 +129,31 @@
     <div class="header">
       <div class="location-box">
         <span class="material-icons pin">location_on</span>
-        <div class="location-text"><span>จัดส่งที่</span><span>ชุมชนบ้านห้วยเกิ้ง <i class="material-icons" style="font-size: 16px;">keyboard_arrow_down</i></span></div>
+        <div class="location-text">
+          <span>จัดส่งที่</span>
+          <span id="current-location-text">กำลังค้นหาตำแหน่ง GPS...</span>
+        </div>
       </div>
-      <span class="material-icons" style="color: var(--text-dark); margin-top: 5px;">favorite_border</span>
+      <span class="material-icons" style="color: var(--text-dark); margin-top: 5px;" onclick="getLocation()">my_location</span>
     </div>
 
     <div class="search-section">
       <div class="search-bar"><span class="material-icons" style="color: #999;">search</span><input type="text" placeholder="หิวอะไรดี? ค้นหาร้านอาหาร, เมนู..."></div>
     </div>
 
-    <div class="banner-section">
-      <div class="banner">
-        <div style="z-index: 2;"><h3>โค้ดลดชุมชน</h3><p>ใส่โค้ด LOCAL50 ลดทันที 50.-</p></div>
-        <div style="position: absolute; right: -20px; top: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 50%;"></div>
-      </div>
-    </div>
-
     <div class="categories">
-      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ตามสั่ง')"><div class="category-icon">🍛</div><span>ตามสั่ง</span></div>
-      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ก๋วยเตี๋ยว')"><div class="category-icon">🍜</div><span>ก๋วยเตี๋ยว</span></div>
-      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: เครื่องดื่ม')"><div class="category-icon">☕</div><span>เครื่องดื่ม</span></div>
-      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ของหวาน')"><div class="category-icon">🍰</div><span>ของหวาน</span></div>
+      <div class="category-item"><div class="category-icon">🍛</div><span>ตามสั่ง</span></div>
+      <div class="category-item"><div class="category-icon">🍜</div><span>ก๋วยเตี๋ยว</span></div>
+      <div class="category-item"><div class="category-icon">☕</div><span>เครื่องดื่ม</span></div>
+      <div class="category-item"><div class="category-icon">🍗</div><span>ไก่ทอด</span></div>
     </div>
 
     <div class="restaurant-section">
-      <div class="section-title">ร้านแนะนำใกล้บ้านคุณ</div>
-      <div id="restaurant-list"></div>
-    </div>
-  </div>
-
-  <!-- ================= หน้าโปรโมชัน (Promo) ================= -->
-  <div id="promo-screen" class="screen">
-    <div class="top-bar"><div class="page-title">โปรโมชัน & ส่วนลด</div></div>
-    <div class="promo-list">
-      <div class="promo-ticket">
-        <div><h4 style="margin: 0 0 5px 0; color: var(--primary-color);">ลด 50 บาท (โค้ด: LOCAL50)</h4><p style="margin: 0; font-size: 13px; color: var(--text-light);">ขั้นต่ำ 150 บาท • หมดอายุ 31 ก.ค.</p></div>
-        <button class="use-btn" onclick="showToast('เก็บโค้ดส่วนลด LOCAL50 เรียบร้อยแล้ว!')">เก็บโค้ด</button>
+      <div class="section-title">
+        <span>ร้านอาหารใกล้คุณ (ไม่เกิน 5 กม.)</span>
       </div>
-    </div>
-  </div>
-
-  <!-- ================= หน้าออเดอร์ / ประวัติการสั่งซื้อ (Orders) ================= -->
-  <div id="order-screen" class="screen">
-    <div class="top-bar"><div class="page-title">ประวัติการสั่งซื้อ</div></div>
-    <div class="order-history-list">
-      <div class="history-card">
-        <div class="history-header"><span class="history-status">จัดส่งสำเร็จ</span><span class="history-date">วันนี้, 12:30 น.</span></div>
-        <div class="history-body"><div><h4 class="history-shop-name">ป้าแจ๋ว อาหารตามสั่ง</h4><p style="margin:0; font-size:13px; color:var(--text-light);">ข้าวกะเพราหมูสับ 1 ที่</p></div><div style="font-weight:700; font-size:16px;">฿65</div></div>
+      <div id="restaurant-list">
+        <!-- ร้านอาหารจะถูก Render ด้วย JavaScript -->
       </div>
     </div>
   </div>
@@ -202,33 +161,21 @@
   <!-- ================= หน้าฉัน / Profile ================= -->
   <div id="profile-screen" class="screen">
     <div class="top-bar"><div class="page-title" style="margin: 0;">บัญชีของฉัน</div></div>
-    
     <div class="profile-header">
-      <!-- รูปโปรไฟล์ -->
       <div class="avatar-placeholder" id="profile-image-container">
         <span class="material-icons" style="font-size: 50px; color: #fff;">person</span>
       </div>
-      
-      <!-- ชื่อและคำอธิบาย -->
       <h2 id="profile-name" style="margin: 0 0 15px; font-size: 20px;">เข้าสู่ระบบเพื่อใช้งาน</h2>
       <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">สมัครสมาชิกหรือเข้าสู่ระบบเพื่อสะสมแต้ม</p>
       
-      <!-- ปุ่ม Login -->
       <button id="btn-line-login" class="btn-line" onclick="loginWithLine()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-          <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738S0 4.935 0 10.304c0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.038 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967C23.153 14.394 24 12.458 24 10.304z"/>
-        </svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738S0 4.935 0 10.304c0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.038 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967C23.153 14.394 24 12.458 24 10.304z"/></svg>
         เข้าสู่ระบบด้วย LINE
       </button>
-
-      <!-- ปุ่ม Logout (จะโชว์เมื่อล็อกอินแล้ว) -->
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
-
-    <!-- เมนูต่างๆ ในหน้าโปรไฟล์ รวมถึงประวัติการสั่งซื้อ -->
     <div class="profile-menu">
       <div class="profile-menu-item"><span class="material-icons">location_on</span> ที่อยู่จัดส่งของฉัน</div>
-      <div class="profile-menu-item" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span> ประวัติการสั่งซื้อ (คลิกที่นี่)</div>
       <div class="profile-menu-item"><span class="material-icons">help_outline</span> ศูนย์ช่วยเหลือ</div>
     </div>
   </div>
@@ -242,7 +189,7 @@
       <h2 id="menu-name">ชื่อร้าน</h2>
       <div class="res-meta" style="margin-bottom: 0;">
         <span class="rating"><i class="material-icons" style="font-size:16px;">star</i> <span id="menu-rating">4.8</span></span>
-        <span>• จัดส่ง 15 นาที</span>
+        <span>• <span id="menu-distance">1.2 กม.</span></span>
       </div>
     </div>
     <div class="menu-list">
@@ -254,57 +201,58 @@
   <!-- ================= หน้าชำระเงิน (Payment) ================= -->
   <div id="payment-screen" class="screen">
     <div class="top-bar"><div class="back-btn-simple" onclick="showScreen('menu-screen')"><span class="material-icons">arrow_back</span></div><div class="page-title">ยืนยันคำสั่งซื้อ</div></div>
-    
     <h3 style="margin: 20px 20px 0; font-size: 16px;">รายการอาหาร</h3>
     <div class="checkout-items" id="checkout-items-list"></div>
-
     <div class="summary-card">
-      <h3 style="margin-top: 0; font-size: 16px;">สรุปการชำระเงิน</h3>
       <div class="summary-row"><span>ค่าอาหาร</span><span>฿<span id="pay-food-total">0</span></span></div>
-      <div class="summary-row"><span>ค่าจัดส่ง (พิเศษ)</span><span>฿15</span></div>
+      <div class="summary-row"><span>ค่าจัดส่ง (ตามระยะทาง)</span><span>฿<span id="pay-delivery-fee">15</span></span></div>
       <div class="summary-total"><span>ยอดรวมทั้งหมด</span><span>฿<span id="pay-grand-total">0</span></span></div>
     </div>
-
-    <div class="payment-methods">
-      <h3 style="margin-top: 0; font-size: 16px;">ชำระเงินผ่าน</h3>
-      <div class="method-option selected" onclick="selectPayment(this)">
-        <div class="method-icon"><span class="material-icons">payments</span></div>
-        <div class="method-text">เงินสด (ชำระที่ไรเดอร์)</div><div class="radio-circle"></div>
-      </div>
-    </div>
-
     <div style="padding: 10px 20px 30px;"><button class="btn-primary" onclick="processPayment()">สั่งอาหารเลย</button></div>
   </div>
 
-  <!-- ================= หน้ารอไรเดอร์ (Waiting) ================= -->
-  <div id="waiting-screen" class="screen">
-    <div class="radar-container" style="margin-top: 60px; margin-bottom: 20px;">
-      <div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-ring"></div>
-      <div class="motorcycle-icon"><span class="material-icons">two_wheeler</span></div>
+  <!-- ================= หน้าติดตามสถานะ / แผนที่ (Tracking) ================= -->
+  <div id="tracking-screen" class="screen">
+    <div class="top-bar" style="position: absolute; width: 100%; background: transparent; box-shadow: none;">
+      <div class="back-btn-img" onclick="showScreen('home-screen')" style="top: 15px; left: 15px;"><span class="material-icons">close</span></div>
     </div>
-    <div class="status-text" id="status-title">กำลังค้นหาไรเดอร์</div>
-    <div class="status-subtext">ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด</div>
+    
+    <!-- แผนที่ Leaflet -->
+    <div id="map-container"></div>
+    
+    <div class="tracking-status-card">
+      <div class="radar-container">
+        <div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-ring"></div>
+        <div class="motorcycle-icon"><span class="material-icons">two_wheeler</span></div>
+      </div>
+      <div class="tracking-title" id="tracking-title">กำลังค้นหาไรเดอร์</div>
+      <div class="tracking-subtitle" id="tracking-subtitle">ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด</div>
+      <button class="btn-outline" style="width: auto; padding: 8px 30px; font-size: 14px;" onclick="cancelOrder()">ยกเลิกคำสั่งซื้อ</button>
+    </div>
   </div>
 
-  <!-- ================= ตะกร้า ================= -->
+  <!-- ================= ตะกร้า & ติดตามออเดอร์ (Floating Bars) ================= -->
   <div id="cart-bar" onclick="goToPayment()">
-    <div class="cart-info"><div class="cart-count" id="cart-count">1</div><span>ดูตะกร้าของคุณ</span></div>
+    <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;"><div class="cart-count" id="cart-count" style="background: white; color: var(--primary-color); width: 26px; height: 26px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">1</div><span>ดูตะกร้าของคุณ</span></div>
     <div style="font-weight: 600;">฿<span id="cart-total">0</span></div>
+  </div>
+
+  <div id="active-order-bar" onclick="showScreen('tracking-screen')">
+    <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;">
+      <span class="material-icons">local_shipping</span> <span>กำลังติดตามคำสั่งซื้อ...</span>
+    </div>
+    <span class="material-icons">chevron_right</span>
   </div>
 
   <!-- ================= เมนูด้านล่าง ================= -->
   <div class="bottom-nav">
     <div class="nav-item active" id="nav-home" onclick="showScreen('home-screen')"><span class="material-icons">storefront</span><span>หน้าแรก</span></div>
-    <div class="nav-item" id="nav-promo" onclick="showScreen('promo-screen')"><span class="material-icons">local_offer</span><span>โปรโมชัน</span></div>
-    <div class="nav-item" id="nav-order" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span><span>ออเดอร์</span></div>
     <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">person</span><span>ฉัน</span></div>
   </div>
 
-  <!-- ================= Toast Notification ================= -->
   <div id="custom-toast" class="toast">ข้อความแจ้งเตือน</div>
 
   <script>
-    // 1. ตั้งค่า Firebase (จากโปรเจกต์ของคุณ)
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -316,78 +264,102 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. ตั้งค่า LINE LIFF
     const LIFF_ID = "2010799042-aNBObgM9"; 
     let userProfile = null; 
+    let cartItems = []; 
+    let selectedRestaurant = null;
 
-    // เริ่มทำงานเมื่อเปิดเว็บ
+    // ตัวแปรพิกัด (Default ให้เป็น อุดรธานี หาก GPS ไม่ทำงาน)
+    let userLat = 17.1500;
+    let userLng = 102.9500;
+    let leafletMap = null;
+    let routingLayer = null;
+
+    const restaurants = [
+      {
+        id: 1, name: "ป้าแจ๋ว อาหารตามสั่ง (ห้วยเกิ้ง)", 
+        image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80", 
+        rating: "4.8", lat: 17.1520, lng: 102.9520, // ใกล้มาก
+        menus: [
+          { name: "ข้าวกะเพราหมูสับ", price: 50, img: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80" },
+          { name: "ข้าวผัดกุ้ง", price: 60, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80" }
+        ]
+      },
+      {
+        id: 2, name: "ก๋วยเตี๋ยวเรือ เจ๊นก", 
+        image: "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=500&q=80", 
+        rating: "4.5", lat: 17.1650, lng: 102.9650, // ห่างออกไปนิดหน่อย (~2 กม.)
+        menus: [{ name: "เส้นเล็กน้ำตกหมู", price: 40, img: "https://images.unsplash.com/photo-1594998893017-361fd798fb6b?auto=format&fit=crop&w=150&q=80" }]
+      },
+      {
+        id: 3, name: "ไก่ทอดหาดใหญ่ (สาขาไกล)", 
+        image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=500&q=80", 
+        rating: "4.9", lat: 17.2200, lng: 103.0000, // ห่างเกิน 5 กม. (จะถูกบล็อค)
+        menus: [{ name: "ไก่ทอด 1 ชิ้น", price: 25, img: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=150&q=80" }]
+      }
+    ];
+
     window.onload = async function() {
-      // โหลดรายชื่อร้านอาหาร
-      renderRestaurants();
-      
-      // ดูว่าคราวก่อนเปิดหน้าไหนทิ้งไว้ (เช่น เพิ่งกลับมาจากหน้าล็อกอิน)
+      // 1. ตรวจสอบว่าเคยล็อกอินทิ้งไว้หน้าไหน (แก้ปัญหาเด้งกลับหน้าแรก)
       const savedScreen = sessionStorage.getItem('activeScreen') || 'home-screen';
       showScreen(savedScreen);
 
-      // เรียกใช้งาน LINE LIFF
+      // 2. ดึง GPS ปัจจุบันของผู้ใช้
+      await getLocation();
+
+      // 3. จัดการระบบ LINE Login
       await initializeLiff(); 
+
+      // 4. เช็คว่ามี "ออเดอร์ที่สั่งค้างไว้" อยู่ไหม
+      checkActiveOrder();
     };
 
-    // ฟังก์ชันเชื่อมต่อ LINE LIFF
     async function initializeLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
-        
         if (liff.isLoggedIn()) {
-          // ถ้าล็อกอินสำเร็จแล้ว ดึงข้อมูลผู้ใช้มาโชว์
           userProfile = await liff.getProfile();
-          
           document.getElementById('profile-name').innerText = userProfile.displayName;
           document.getElementById('profile-desc').innerText = "เชื่อมต่อบัญชี LINE ของคุณเรียบร้อยแล้ว";
           document.getElementById('profile-image-container').innerHTML = `<img src="${userProfile.pictureUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
-          
-          // สลับปุ่ม
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
         }
-      } catch (error) {
-        console.error('LIFF Init Error:', error);
-      }
+      } catch (error) { console.error('LIFF Error:', error); }
     }
 
-    // กดปุ่มล็อกอิน
-    function loginWithLine() {
-      if (!liff.isLoggedIn()) {
-        // ให้กลับมาที่ URL ปัจจุบัน หลังจากล็อกอินเสร็จ
-        liff.login({ redirectUri: window.location.href });
-      }
-    }
-
-    // กดปุ่มออกจากระบบ
-    function logoutLine() {
-      if (liff.isLoggedIn()) {
-        liff.logout();
-        window.location.reload(); 
-      }
-    }
+    function loginWithLine() { if (!liff.isLoggedIn()) liff.login({ redirectUri: window.location.href }); }
+    function logoutLine() { if (liff.isLoggedIn()) { liff.logout(); window.location.reload(); } }
 
     function showScreen(screenId) {
-      // บันทึกหน้าปัจจุบันไว้ (แก้ปัญหากดล็อกอินแล้วเด้งกลับหน้าแรก)
       sessionStorage.setItem('activeScreen', screenId);
-
       document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-      document.getElementById(screenId).style.display = 'block';
+      document.getElementById(screenId).style.display = screenId === 'tracking-screen' ? 'flex' : 'block';
       window.scrollTo(0, 0);
 
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      const activeNavId = screenId.replace('-screen', '');
-      if (document.getElementById('nav-' + activeNavId)) {
-        document.getElementById('nav-' + activeNavId).classList.add('active');
+      if (document.getElementById('nav-' + screenId.replace('-screen', ''))) {
+        document.getElementById('nav-' + screenId.replace('-screen', '')).classList.add('active');
       }
 
-      if((screenId === 'home-screen' || screenId === 'menu-screen') && cartItems.length > 0) {
+      // วาดแผนที่ใหม่ถ้าเปิดหน้า Tracking
+      if(screenId === 'tracking-screen' && leafletMap) {
+        setTimeout(() => { leafletMap.invalidateSize(); }, 200);
+      }
+
+      updateFloatingBars(screenId);
+    }
+
+    function updateFloatingBars(currentScreen) {
+      const hasOrder = localStorage.getItem('activeOrder') !== null;
+      if (hasOrder && currentScreen !== 'tracking-screen') {
+        document.getElementById('active-order-bar').style.display = 'flex';
+        document.getElementById('cart-bar').style.display = 'none';
+      } else if (!hasOrder && (currentScreen === 'home-screen' || currentScreen === 'menu-screen') && cartItems.length > 0) {
+        document.getElementById('active-order-bar').style.display = 'none';
         document.getElementById('cart-bar').style.display = 'flex';
       } else {
+        document.getElementById('active-order-bar').style.display = 'none';
         document.getElementById('cart-bar').style.display = 'none';
       }
     }
@@ -396,44 +368,72 @@
       const toast = document.getElementById("custom-toast");
       toast.innerText = message;
       toast.className = "toast show";
-      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
 
-    // ข้อมูลร้านค้าจำลอง
-    const restaurants = [
-      {
-        id: 1, name: "ป้าแจ๋ว อาหารตามสั่ง", image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80", rating: "4.8", promo: "ส่งฟรี",
-        menus: [
-          { name: "ข้าวกะเพราหมูสับ", price: 50, img: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80" },
-          { name: "ข้าวผัดกุ้ง", price: 60, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80" }
-        ]
-      }
-    ];
+    function getLocation() {
+      return new Promise((resolve) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              userLat = position.coords.latitude;
+              userLng = position.coords.longitude;
+              document.getElementById('current-location-text').innerText = "พิกัดปัจจุบัน (GPS)";
+              renderRestaurants();
+              resolve();
+            },
+            (error) => {
+              showToast("ไม่สามารถดึง GPS ได้ ใช้ตำแหน่งเริ่มต้น");
+              document.getElementById('current-location-text').innerText = "ตำแหน่งเริ่มต้น";
+              renderRestaurants();
+              resolve();
+            }
+          );
+        } else {
+          renderRestaurants();
+          resolve();
+        }
+      });
+    }
 
-    let cartItems = []; 
+    // สูตร Haversine คํานวณระยะทางจริง (กิโลเมตร) ระหว่าง 2 จุด
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; 
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return (R * c).toFixed(1);
+    }
 
     function renderRestaurants() {
       const listContainer = document.getElementById('restaurant-list');
       listContainer.innerHTML = '';
+      
       restaurants.forEach((res, index) => {
+        const distance = getDistance(userLat, userLng, res.lat, res.lng);
+        const isTooFar = distance > 5.0; // กฏ: ห้ามเกิน 5 กิโลเมตร
+        
         listContainer.innerHTML += `
-          <div class="restaurant-card" onclick="openRestaurant(${index})">
+          <div class="restaurant-card ${isTooFar ? 'disabled' : ''}" onclick="${isTooFar ? '' : `openRestaurant(${index}, ${distance})`}">
             <div class="res-image" style="background-image: url('${res.image}')">
-              ${res.promo ? `<div class="promo-tag">${res.promo}</div>` : ''}
+              ${isTooFar ? `<div class="out-of-range-tag">ไกลเกิน 5 กม. (จัดส่งไม่ได้)</div>` : ''}
+              <div class="distance-tag"><span class="material-icons" style="font-size:14px; color:var(--primary-color);">location_on</span> ${distance} กม.</div>
             </div>
             <div class="res-info">
               <h3 class="res-name">${res.name}</h3>
-              <div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px">star</i> ${res.rating}</span></div>
+              <div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px; color: #ff9800;">star</i> ${res.rating}</span></div>
             </div>
           </div>`;
       });
     }
 
-    function openRestaurant(index) {
+    function openRestaurant(index, distance) {
       const res = restaurants[index];
+      selectedRestaurant = res;
       document.getElementById('menu-image').style.backgroundImage = `url('${res.image}')`;
       document.getElementById('menu-name').innerText = res.name;
-      document.getElementById('menu-rating').innerText = res.rating;
+      document.getElementById('menu-distance').innerText = distance + " กม.";
       
       const foodList = document.getElementById('food-list');
       foodList.innerHTML = '';
@@ -442,31 +442,29 @@
           <div class="menu-item">
             <div class="menu-item-left">
               <div class="menu-item-img" style="background-image: url('${menu.img}')"></div>
-              <div class="menu-item-info"><h4>${menu.name}</h4><p>฿${menu.price}</p></div>
+              <div><h4 style="margin: 0 0 5px;">${menu.name}</h4><p style="margin: 0; color:var(--text-light); font-size:14px;">฿${menu.price}</p></div>
             </div>
-            <button class="add-btn" onclick="addToCart(${index}, ${i})">+ เพิ่ม</button>
+            <button class="add-btn" onclick="addToCart(${i})">+ เพิ่ม</button>
           </div>`;
       });
       showScreen('menu-screen');
     }
 
-    function addToCart(resIdx, menuIdx) {
-      const item = restaurants[resIdx].menus[menuIdx];
-      cartItems.push(item);
-      updateCartUI();
-      showToast(`เพิ่ม ${item.name} ลงตะกร้าแล้ว`);
-    }
-
-    function updateCartUI() {
+    function addToCart(menuIdx) {
+      if(!selectedRestaurant) return;
+      cartItems.push(selectedRestaurant.menus[menuIdx]);
+      
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
       document.getElementById('cart-count').innerText = cartItems.length;
       document.getElementById('cart-total').innerText = total;
-      document.getElementById('cart-bar').style.display = 'flex';
+      updateFloatingBars(sessionStorage.getItem('activeScreen'));
+      showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
     function goToPayment() {
       if (!liff.isLoggedIn()) {
-        showToast("กรุณาเข้าสู่ระบบด้วย LINE ก่อนสั่งอาหารครับ");
+        sessionStorage.setItem('activeScreen', 'profile-screen');
+        showToast("กรุณาเข้าสู่ระบบด้วย LINE ก่อนครับ");
         showScreen('profile-screen');
         return;
       }
@@ -474,55 +472,91 @@
       const checkoutList = document.getElementById('checkout-items-list');
       checkoutList.innerHTML = '';
       cartItems.forEach(item => {
-        checkoutList.innerHTML += `
-          <div class="checkout-item">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <div style="width:50px; height:50px; border-radius:8px; background-size:cover; background-image: url('${item.img}')"></div>
-              <h4 style="margin:0;">${item.name}</h4>
-            </div>
-            <span>฿${item.price}</span>
-          </div>`;
+        checkoutList.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${item.name}</span><span>฿${item.price}</span></div>`;
       });
 
-      const total = cartItems.reduce((sum, item) => sum + item.price, 0);
-      document.getElementById('pay-food-total').innerText = total;
-      document.getElementById('pay-grand-total').innerText = total + 15;
+      const foodTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+      const distance = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
+      // คิดค่าส่ง: 15 บาทเริ่มต้น + 5 บาทต่อกิโลเมตร
+      const deliveryFee = 15 + Math.floor(distance * 5); 
+      
+      document.getElementById('pay-food-total').innerText = foodTotal;
+      document.getElementById('pay-delivery-fee').innerText = deliveryFee;
+      document.getElementById('pay-grand-total').innerText = foodTotal + deliveryFee;
       
       showScreen('payment-screen');
     }
 
-    function selectPayment(element) {
-      document.querySelectorAll('.method-option').forEach(el => el.classList.remove('selected'));
-      element.classList.add('selected');
+    function processPayment() {
+      const orderData = {
+        resName: selectedRestaurant.name,
+        resLat: selectedRestaurant.lat,
+        resLng: selectedRestaurant.lng,
+        status: 'searching', // สถานะ: กำลังหาไรเดอร์
+        timestamp: new Date().getTime()
+      };
+      
+      // บันทึกสถานะออเดอร์ลงเครื่องมือถือ (เพื่อไม่ให้หายตอนปิดแอป)
+      localStorage.setItem('activeOrder', JSON.stringify(orderData));
+      
+      // บันทึกลง Firebase (ส่งไปหา Rider)
+      // db.collection("orders").add(...) 
+
+      cartItems = []; // ล้างตะกร้า
+      initTrackingMap(); // สร้างแผนที่
+      showScreen('tracking-screen');
     }
 
-    function processPayment() {
-      showScreen('waiting-screen');
+    function checkActiveOrder() {
+      const activeData = localStorage.getItem('activeOrder');
+      if(activeData) {
+        updateFloatingBars(sessionStorage.getItem('activeScreen'));
+        // โหลดข้อมูลแผนที่เตรียมไว้ หากผู้ใช้กดเข้ามาดู
+        selectedRestaurant = JSON.parse(activeData); 
+        initTrackingMap();
+      }
+    }
+
+    function initTrackingMap() {
+      const order = JSON.parse(localStorage.getItem('activeOrder'));
+      if(!order) return;
+
+      // ถ้าแผนที่เคยสร้างแล้ว ไม่ต้องสร้างซ้ำ แค่เคลียร์หมุด
+      if (leafletMap !== null) {
+        leafletMap.remove();
+      }
+
+      // สร้างแผนที่ใหม่ เซ็ตจุดกึ่งกลางระหว่างลูกค้ากับร้าน
+      const centerLat = (userLat + order.resLat) / 2;
+      const centerLng = (userLng + order.resLng) / 2;
       
-      const total = cartItems.reduce((sum, item) => sum + item.price, 0) + 15; 
-      const customerName = userProfile ? userProfile.displayName : "ลูกค้าทั่วไป";
-      const lineId = userProfile ? userProfile.userId : "ไม่ระบุ";
+      leafletMap = L.map('map-container', { zoomControl: false }).setView([centerLat, centerLng], 14);
 
-      const orderData = {
-        customerName: customerName,
-        lineUserId: lineId,
-        total: total,
-        status: "รอไรเดอร์",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        items: cartItems.map(item => item.name)
-      };
+      // โหลดแผ่นที่จาก OpenStreetMap
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(leafletMap);
 
-      // บันทึกลง Firebase Firestore ทันที!
-      db.collection("orders").add(orderData)
-        .then((docRef) => {
-          console.log("บันทึกออเดอร์สำเร็จ! ID: ", docRef.id);
-          showToast("ส่งคำสั่งซื้อสำเร็จ! กำลังหาไรเดอร์");
-        })
-        .catch((error) => {
-          console.error("Error saving order: ", error);
-          showToast("เกิดข้อผิดพลาดในการสั่งอาหาร โปรดลองอีกครั้ง");
-          showScreen('home-screen');
-        });
+      // สร้างไอคอนหมุดที่สวยงาม
+      const userIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:#f44336; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>` });
+      const storeIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:#00B900; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">storefront</span></div>` });
+
+      // ปักหมุดลูกค้าและร้าน
+      L.marker([userLat, userLng], {icon: userIcon}).addTo(leafletMap).bindPopup("จุดจัดส่งของคุณ");
+      L.marker([order.resLat, order.resLng], {icon: storeIcon}).addTo(leafletMap).bindPopup(order.resName).openPopup();
+
+      // ลากเส้นเชื่อมระหว่าง 2 จุด
+      const latlngs = [ [userLat, userLng], [order.resLat, order.resLng] ];
+      L.polyline(latlngs, {color: '#00B900', weight: 4, dashArray: '5, 10'}).addTo(leafletMap);
+      
+      // ปรับซูมให้เห็นพอดีทั้ง 2 จุด
+      leafletMap.fitBounds(latlngs, { padding: [50, 50] });
+    }
+
+    function cancelOrder() {
+      localStorage.removeItem('activeOrder'); // ลบออเดอร์ทิ้ง
+      showToast("ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว");
+      showScreen('home-screen');
     }
   </script>
 </body>
