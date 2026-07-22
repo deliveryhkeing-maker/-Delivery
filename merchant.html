@@ -567,6 +567,12 @@
       if(screenId === 'settings-screen') setTimeout(initMerchantMap, 300);
     }
 
+    // ฟังก์ชันสำหรับสลับหน้าต่าง ล็อกอิน / สมัครสมาชิก
+    function showAuthScreen(screenId) {
+      document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+      document.getElementById(screenId).style.display = 'flex';
+    }
+
     function switchTab(element, tabId) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       element.classList.add('active');
