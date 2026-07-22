@@ -699,7 +699,10 @@
               }
             }
           });
-        }, (err) => { console.error("Error listening to orders:", err); });
+        }, (err) => { 
+          alert("❌ ร้านค้าไม่สามารถดึงข้อมูลออเดอร์ได้: " + err.message + "\n\n(คำแนะนำ: โปรดเช็ค Rules ใน Firebase)");
+          console.error("Error listening to orders:", err); 
+        });
     }
 
     function triggerRealOrderAlert(orderId, orderData) {

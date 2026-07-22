@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
   <!-- LINE LIFF SDK -->
-  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script charset="utf-8" src๐()="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <!-- Leaflet CSS & JS (สำหรับแผนที่) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -790,6 +790,9 @@
         console.log("บันทึก Firebase สำเร็จ");
         // ยิงแจ้งเตือนเข้า LINE ตัวเอง
         sendLineNotification(selectedRestaurant.name, totalAmount);
+      }).catch((error) => {
+        // ถ้าระบบฐานข้อมูลพัง หรือ Rules บล็อก จะเด้งแจ้งเตือนตรงนี้!
+        alert("❌ ไม่สามารถส่งออเดอร์ได้: " + error.message + "\n\n(คำแนะนำ: โปรดเช็ค Rules ใน Firebase ว่าเป็น allow read, write: if true; หรือยัง)");
       });
 
       cartItems = []; 
