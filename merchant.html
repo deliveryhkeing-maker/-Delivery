@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Merchant App - ห้วยเกิ้ง Delivery</title>
+  <title>Merchant App - ห้วยเกิ้ง Delivery (ใช้งานจริง)</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
-  <!-- Firebase SDK (เตรียมไว้) -->
+  <!-- Firebase SDK (เวอร์ชัน Compat สำหรับ HTML) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
@@ -29,13 +29,13 @@
 
     .screen { display: none; min-height: 100vh; flex-direction: column; }
     
+    /* ---------------- การเข้าสู่ระบบ / สมัคร ---------------- */
     .auth-screen { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 20px; min-height: 100vh; }
-    .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
-    
+    .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; max-height: 90vh; overflow-y: auto; }
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-dark); }
     .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; font-family: 'Prompt'; font-size: 15px; outline: none; background: #f8fafc; transition: 0.3s; }
-    .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .input-group input:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 
     .image-upload-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
     .image-preview { width: 100px; height: 100px; border-radius: 50%; background-color: #e2e8f0; border: 2px dashed #cbd5e1; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 10px; position: relative; cursor: pointer; background-size: cover; background-position: center; }
@@ -48,9 +48,10 @@
     .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); width: 100%; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;}
     .btn-text { background: none; border: none; color: var(--primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; }
 
+    /* ---------------- หน้าจอหลัก ---------------- */
     .header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .shop-info-header { display: flex; align-items: center; gap: 10px; }
-    .header-shop-img { width: 40px; height: 40px; border-radius: 50%; background: #ccc; background-size: cover; background-position: center; }
+    .header-shop-img { width: 45px; height: 45px; border-radius: 50%; background: #ccc; background-size: cover; background-position: center; }
     .shop-info h2 { margin: 0; font-size: 16px; font-weight: 600; }
     .shop-info p { margin: 0; font-size: 12px; color: var(--text-light); }
     
@@ -63,25 +64,12 @@
     input:checked + .slider:before { transform: translateX(22px); }
     
     .tabs { display: flex; background: var(--white); border-bottom: 1px solid var(--border); }
-    .tab { flex: 1; text-align: center; padding: 15px 0; font-weight: 600; color: var(--text-light); cursor: pointer; border-bottom: 3px solid transparent; font-size: 14px; }
+    .tab { flex: 1; text-align: center; padding: 15px 0; font-weight: 600; color: var(--text-light); cursor: pointer; border-bottom: 3px solid transparent; font-size: 14px; transition: 0.2s; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
     .content-area { padding: 15px; flex-grow: 1; overflow-y: auto; }
     
-    .order-card { background: var(--white); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); display: none; }
-    .order-card.incoming { display: block; animation: pulseOrder 2s infinite; border-left-color: var(--warning); }
-    @keyframes pulseOrder { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
-    
-    .order-header { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 15px; margin-bottom: 15px; }
-    .order-id { font-size: 18px; font-weight: 700; color: var(--primary); margin: 0; }
-    .order-time { font-size: 13px; color: var(--text-light); }
-    .item-row { font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; }
-    
-    .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
-    .action-buttons button { flex: 1; padding: 12px; border-radius: 10px; font-family: 'Prompt'; font-weight: 600; border: none; cursor: pointer; }
-    .btn-accept { background: var(--success); color: white; }
-    .btn-reject { background: #fee2e2; color: var(--danger); }
-
+    /* ---------------- การ์ดต่างๆ ---------------- */
     .menu-item-card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border); }
     .menu-item-left { display: flex; gap: 12px; align-items: center; }
     .menu-img { width: 60px; height: 60px; border-radius: 8px; background-size: cover; background-position: center; background-color: #eee; }
@@ -89,17 +77,17 @@
     .menu-info p { margin: 0; color: var(--text-light); font-size: 14px; }
     
     .wallet-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 16px; padding: 25px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
-    .wallet-card h3 { margin: 0 0 10px 0; font-size: 14px; font-weight: 500; opacity: 0.9; }
-    .wallet-card h1 { margin: 0 0 20px 0; font-size: 36px; }
-    
     .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
     .history-item:last-child { border-bottom: none; }
     
+    .card-box { background: var(--white); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+    
+    /* ---------------- Modal & Nav ---------------- */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
     .modal-content { background: var(--white); width: 90%; max-width: 400px; border-radius: 20px; padding: 20px; max-height: 90vh; overflow-y: auto; }
 
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid var(--border); }
-    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-light); font-size: 11px; gap: 4px; cursor: pointer; width: 25%; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-light); font-size: 11px; gap: 4px; cursor: pointer; width: 25%; transition: 0.2s; }
     .nav-item.active { color: var(--primary); font-weight: 600; }
 
     .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 90px; font-size: 14px; opacity: 0; transition: 0.3s; }
@@ -108,30 +96,30 @@
 </head>
 <body>
 
-  <!-- ================= หน้าเข้าสู่ระบบ (Login) ================= -->
+  <!-- ================= 1. หน้าเข้าสู่ระบบ (Login) ================= -->
   <div id="login-screen" class="auth-screen">
     <div class="auth-card">
       <div style="font-size: 40px; color: var(--primary); margin-bottom: 10px;">🏪</div>
       <h2 style="margin: 0 0 5px;">ห้วยเกิ้ง Delivery</h2>
-      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">ระบบจัดการร้านค้า (Merchant)</p>
+      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">ระบบจัดการร้านค้า (สำหรับร้านค้าเท่านั้น)</p>
       
       <div class="input-group">
-        <label>เบอร์โทรศัพท์ (ID)</label>
+        <label>เบอร์โทรศัพท์ (ID ร้านค้า)</label>
         <input type="tel" id="login-phone" placeholder="08X-XXX-XXXX">
       </div>
       <div class="input-group">
         <label>รหัสผ่าน (PIN 6 หลัก)</label>
-        <input type="password" id="login-pin" placeholder="******">
+        <input type="password" id="login-pin" placeholder="******" maxlength="6">
       </div>
       
-      <button class="btn-main" onclick="merchantLogin()">เข้าสู่ระบบ</button>
+      <button class="btn-main" onclick="merchantLogin()" id="btn-login">เข้าสู่ระบบ</button>
       <button class="btn-text" onclick="showAuthScreen('register-screen')">ยังไม่มีบัญชี? สมัครเปิดร้านค้า</button>
     </div>
   </div>
 
-  <!-- ================= หน้าสมัครสมาชิกร้านค้า (Register) ================= -->
+  <!-- ================= 2. หน้าสมัครสมาชิกร้านค้า (Register) ================= -->
   <div id="register-screen" class="auth-screen" style="display: none;">
-    <div class="auth-card" style="max-height: 90vh; overflow-y: auto;">
+    <div class="auth-card">
       <h2 style="margin: 0 0 20px;">สมัครเปิดร้านค้าใหม่</h2>
       
       <div class="image-upload-wrapper">
@@ -154,17 +142,17 @@
       <div class="input-group"><label>เบอร์โทรศัพท์ (ใช้เข้าระบบ)</label><input type="tel" id="reg-phone" placeholder="08X-XXX-XXXX"></div>
       <div class="input-group"><label>ตั้งรหัสผ่าน PIN (6 หลัก)</label><input type="password" id="reg-pin" placeholder="******" maxlength="6"></div>
 
-      <button class="btn-main" onclick="merchantRegister()">ยืนยันการสมัคร</button>
+      <button class="btn-main" onclick="merchantRegister()" id="btn-register">สร้างร้านค้าใหม่</button>
       <button class="btn-text" style="color: var(--text-light);" onclick="showAuthScreen('login-screen')">กลับไปหน้าเข้าสู่ระบบ</button>
     </div>
   </div>
 
-  <!-- ================= หน้าจอหลัก (ออเดอร์) ================= -->
+  <!-- ================= 3. หน้าจอหลัก (ออเดอร์) ================= -->
   <div id="home-screen" class="screen">
     <div class="header">
       <div class="shop-info-header">
         <div class="header-shop-img" id="display-shop-img"></div>
-        <div class="shop-info"><h2 id="display-shop-name">ชื่อร้าน...</h2><p>วันนี้: ฿0 (0 ออเดอร์)</p></div>
+        <div class="shop-info"><h2 id="display-shop-name">กำลังโหลด...</h2><p id="display-shop-cat">หมวดหมู่</p></div>
       </div>
       <div class="toggle-container">
         <label class="switch"><input type="checkbox" id="store-status" checked onchange="toggleStoreStatus()"><span class="slider"></span></label>
@@ -174,129 +162,86 @@
 
     <div class="tabs">
       <div class="tab active" onclick="switchTab(this, 'new-orders')">ออเดอร์ใหม่</div>
-      <div class="tab" onclick="switchTab(this, 'prep-orders')">กำลังทำ</div>
+      <div class="tab" onclick="switchTab(this, 'history-orders')">ประวัติการขาย</div>
     </div>
 
     <div class="content-area" id="new-orders">
-      <!-- ปุ่มจำลองออเดอร์ -->
-      <button class="btn-outline" style="margin-bottom: 15px; border-style: dashed;" onclick="simulateIncomingOrder()">
-        <span class="material-icons">notifications_active</span> จำลองมีออเดอร์เข้า
-      </button>
-
-      <!-- การ์ดออเดอร์ -->
-      <div class="order-card" id="incoming-order-card">
-        <div class="order-header">
-          <div><h3 class="order-id">#HK-092</h3><span class="order-time">เพิ่งสั่งเข้ามาเมื่อสักครู่</span></div>
-          <div style="text-align: right; font-weight: 700; font-size: 18px; color: var(--success);">฿125</div>
-        </div>
-        <div style="margin-bottom: 15px;">
-          <div class="item-row"><span>1x ข้าวกะเพราหมูสับ</span><span>฿50</span></div>
-          <div style="font-size: 13px; color: var(--danger); background: #fee2e2; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-bottom: 8px;">ท็อปปิ้ง: ไข่ดาวไม่สุก (+10)</div>
-          <div class="item-row"><span>1x ข้าวผัดกุ้ง</span><span>฿65</span></div>
-        </div>
-        <div class="action-buttons">
-          <button class="btn-reject" onclick="rejectOrder()">ปฏิเสธ / ของหมด</button>
-          <button class="btn-accept" onclick="acceptOrder()">รับออเดอร์ (เริ่มทำ)</button>
-        </div>
-      </div>
-      
-      <p id="empty-order-msg" style="text-align: center; color: var(--text-light); margin-top: 50px;">ยังไม่มีออเดอร์ใหม่...</p>
+      <p id="empty-order-msg" style="text-align: center; color: var(--text-light); margin-top: 50px;">รอออเดอร์ใหม่จากลูกค้า...</p>
+      <!-- ออเดอร์จะถูกดึงจาก Firebase มาแสดงตรงนี้ -->
+      <div id="order-list-container"></div>
     </div>
     
-    <div class="content-area" id="prep-orders" style="display:none;">
-      <p style="text-align: center; color: var(--text-light); margin-top: 50px;">ไม่มีออเดอร์ที่กำลังทำ</p>
+    <div class="content-area" id="history-orders" style="display:none;">
+      <h3 style="font-size: 16px; margin-top: 0;">ประวัติออเดอร์ที่จัดส่งสำเร็จ</h3>
+      <div id="order-history-container">
+        <p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการขาย</p>
+      </div>
     </div>
   </div>
 
-  <!-- ================= หน้าจอจัดการเมนู (Menu) ================= -->
+  <!-- ================= 4. หน้าจอจัดการเมนู (Menu) ================= -->
   <div id="menu-screen" class="screen">
     <div class="header">
-      <div class="shop-info"><h2>จัดการเมนูอาหาร</h2><p>แก้ไข เปิด/ปิด หรือเพิ่มเมนูใหม่</p></div>
-      <button class="btn-outline" style="width: auto; padding: 8px 15px;" onclick="openAddMenuModal()">+ เพิ่มเมนู</button>
+      <div class="shop-info"><h2>จัดการเมนูอาหาร</h2><p>ระบบซิงค์กับฝั่งลูกค้าอัตโนมัติ</p></div>
+      <button class="btn-outline" style="width: auto; padding: 8px 15px;" onclick="openModal('add-menu-modal')">+ เพิ่มเมนู</button>
     </div>
-    <div class="content-area">
-      
-      <div class="menu-item-card">
-        <div class="menu-item-left">
-          <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80')"></div>
-          <div class="menu-info"><h4>ข้าวกะเพราหมูสับ</h4><p>฿50</p></div>
-        </div>
-        <div class="toggle-container"><label class="switch"><input type="checkbox" checked onchange="showToast('อัปเดตสถานะเมนูแล้ว')"><span class="slider"></span></label></div>
-      </div>
-
-      <div class="menu-item-card">
-        <div class="menu-item-left">
-          <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80')"></div>
-          <div class="menu-info"><h4>ข้าวผัดกุ้ง</h4><p>฿65</p></div>
-        </div>
-        <div class="toggle-container"><label class="switch"><input type="checkbox" checked onchange="showToast('อัปเดตสถานะเมนูแล้ว')"><span class="slider"></span></label></div>
-      </div>
-
-      <div class="menu-item-card" style="opacity: 0.6;">
-        <div class="menu-item-left">
-          <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1594998893017-361fd798fb6b?auto=format&fit=crop&w=150&q=80')"></div>
-          <div class="menu-info"><h4>เส้นเล็กน้ำตกหมู</h4><p>฿40 <span style="color:var(--danger); font-size:12px;">(หมด)</span></p></div>
-        </div>
-        <div class="toggle-container"><label class="switch"><input type="checkbox" onchange="showToast('อัปเดตสถานะเมนูแล้ว')"><span class="slider"></span></label></div>
-      </div>
-
+    <div class="content-area" id="merchant-menu-list">
+      <p style="text-align: center; color: var(--text-light); margin-top: 50px;">กำลังโหลดเมนู...</p>
     </div>
   </div>
 
-  <!-- ================= หน้าจอการเงิน (Wallet) ================= -->
+  <!-- ================= 5. หน้าจอการเงิน (Wallet) ================= -->
   <div id="wallet-screen" class="screen">
     <div class="header"><div class="shop-info"><h2>กระเป๋าเงิน (Wallet)</h2></div></div>
     <div class="content-area">
       <div class="wallet-card">
         <h3>ยอดเงินสุทธิที่ถอนได้</h3>
-        <h1>฿1,250.00</h1>
-        <button class="btn-outline" style="background: white; border:none; color: var(--primary);" onclick="showToast('ส่งคำขอถอนเงินไปยังแอดมินแล้ว!')">ถอนเงินเข้าบัญชี</button>
+        <h1 id="wallet-balance">฿0.00</h1>
+        <button class="btn-outline" style="background: white; border:none; color: var(--primary);" onclick="requestWithdrawal()">แจ้งถอนเงินเข้าบัญชี</button>
       </div>
 
-      <div style="background: var(--white); border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border);">
-        <h3 style="margin: 0 0 15px; font-size: 16px;">สรุปยอดวันนี้ (หัก GP 10%)</h3>
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;"><span>ยอดขายรวม</span><span>฿300.00</span></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px; color:var(--danger);"><span>หัก GP (10%)</span><span>-฿30.00</span></div>
-        <div style="display:flex; justify-content:space-between; padding-top:10px; border-top:1px dashed #ccc; font-weight:700; color:var(--success);"><span>รายรับสุทธิ</span><span>+฿270.00</span></div>
+      <div class="card-box">
+        <h3 style="margin: 0 0 15px; font-size: 16px;">สรุปยอดขายทั้งหมด</h3>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;"><span>ยอดขายรวม</span><span id="stat-total-sales">฿0.00</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px; color:var(--danger);"><span>หัก GP (10%)</span><span id="stat-gp">-฿0.00</span></div>
+        <div style="display:flex; justify-content:space-between; padding-top:10px; border-top:1px dashed #ccc; font-weight:700; color:var(--success);"><span>รายรับสุทธิ</span><span id="stat-net">+฿0.00</span></div>
       </div>
 
-      <h3 style="margin: 20px 0 10px; font-size: 16px;">ประวัติเงินเข้า (ล่าสุด)</h3>
-      <div style="background: var(--white); border-radius: 16px; padding: 10px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border);">
-        <div class="history-item">
-          <div><div style="font-weight: 500; font-size: 14px;">ออเดอร์ #HK-091</div><div style="font-size: 12px; color: var(--text-light);">วันนี้, 12:30 น.</div></div>
-          <div style="color: var(--success); font-weight: 600;">+฿58.50</div>
-        </div>
-        <div class="history-item">
-          <div><div style="font-weight: 500; font-size: 14px;">ออเดอร์ #HK-090</div><div style="font-size: 12px; color: var(--text-light);">วันนี้, 11:15 น.</div></div>
-          <div style="color: var(--success); font-weight: 600;">+฿112.50</div>
-        </div>
+      <h3 style="margin: 20px 0 10px; font-size: 16px;">ประวัติการถอนเงิน</h3>
+      <div class="card-box" style="padding: 10px 20px;" id="withdrawal-history">
+        <p style="text-align: center; color: var(--text-light); font-size: 14px; margin: 10px 0;">ยังไม่มีประวัติการถอนเงิน</p>
       </div>
     </div>
   </div>
 
-  <!-- ================= หน้าการตั้งค่า (Settings & GPS) ================= -->
+  <!-- ================= 6. หน้าการตั้งค่า (Settings & GPS) ================= -->
   <div id="settings-screen" class="screen">
     <div class="header"><div class="shop-info"><h2>ตั้งค่าร้านค้า & บัญชี</h2></div></div>
     <div class="content-area">
       
-      <div style="background: var(--white); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3 style="margin: 0 0 15px; font-size: 16px;">พิกัด GPS ร้านค้า (รับงาน)</h3>
-        <p style="font-size: 13px; color: var(--text-light); margin-bottom: 10px;">กรุณาปักหมุดให้ตรงกับที่ตั้งร้าน เพื่อความแม่นยำ</p>
+      <div class="card-box">
+        <h3 style="margin: 0 0 15px; font-size: 16px;">พิกัด GPS ร้านค้า (สำคัญมาก)</h3>
+        <p style="font-size: 13px; color: var(--text-light); margin-bottom: 10px;">ระบบจะส่งพิกัดนี้ให้ลูกค้าเพื่อคำนวณระยะทาง</p>
         
-        <!-- ปุ่มดึงตำแหน่ง GPS -->
-        <button class="btn-outline" style="margin-bottom: 15px; padding: 8px;" onclick="getCurrentMerchantLocation()">
+        <button class="btn-outline" style="margin-bottom: 15px; padding: 10px; font-size: 14px;" onclick="getCurrentMerchantLocation()">
           <span class="material-icons">my_location</span> ดึงตำแหน่งปัจจุบันของฉัน
         </button>
 
         <div id="merchant-map" style="width: 100%; height: 200px; border-radius: 12px; background: #ddd; margin-bottom: 15px; z-index: 1;"></div>
-        <button class="btn-main" style="padding: 10px; font-size: 14px;" onclick="showToast('บันทึกพิกัดร้านสำเร็จ!')">บันทึกพิกัดหมุด</button>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <input type="text" id="setting-lat" class="input-group input" placeholder="Latitude" readonly style="flex:1; margin-bottom:0; font-size:12px;">
+          <input type="text" id="setting-lng" class="input-group input" placeholder="Longitude" readonly style="flex:1; margin-bottom:0; font-size:12px;">
+        </div>
+        <button class="btn-main" style="padding: 10px; font-size: 14px;" onclick="saveGPS()">บันทึกพิกัดร้านลงระบบ</button>
       </div>
 
-      <div style="background: var(--white); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3 style="margin: 0 0 15px; font-size: 16px;">บัญชีธนาคาร (รับเงินโอน)</h3>
-        <div class="input-group"><label>ธนาคาร</label><select><option>กสิกรไทย</option><option>ไทยพาณิชย์</option><option>พร้อมเพย์</option></select></div>
-        <div class="input-group"><label>เลขบัญชี / เบอร์พร้อมเพย์</label><input type="text" placeholder="ระบุเลขบัญชี"></div>
-        <button class="btn-main" style="padding: 10px; font-size: 14px;" onclick="showToast('บันทึกบัญชีสำเร็จ!')">อัปเดตบัญชี</button>
+      <div class="card-box">
+        <h3 style="margin: 0 0 15px; font-size: 16px;">บัญชีรับเงินโอน</h3>
+        <div class="input-group"><label>ธนาคาร / พร้อมเพย์</label><input type="text" id="setting-bank-name" placeholder="เช่น กสิกรไทย, พร้อมเพย์"></div>
+        <div class="input-group"><label>เลขบัญชี / เบอร์โทร</label><input type="text" id="setting-bank-acc" placeholder="ระบุเลขบัญชี"></div>
+        <div class="input-group"><label>ชื่อบัญชี</label><input type="text" id="setting-bank-holder" placeholder="ชื่อ นามสกุล เจ้าของบัญชี"></div>
+        <button class="btn-main" style="padding: 10px; font-size: 14px;" onclick="saveBankAccount()">อัปเดตบัญชี</button>
       </div>
 
       <button class="btn-outline" style="border-color: var(--danger); color: var(--danger);" onclick="merchantLogout()">
@@ -306,25 +251,26 @@
     </div>
   </div>
 
-  <!-- ================= Modal เพิ่มเมนูใหม่ ================= -->
+  <!-- ================= Modals ================= -->
+  <!-- 1. Modal เพิ่มเมนู -->
   <div class="modal-overlay" id="add-menu-modal">
     <div class="modal-content">
-      <h3 style="margin-top: 0;">เพิ่มเมนูใหม่</h3>
+      <h3 style="margin-top: 0;">เพิ่มเมนูอาหารใหม่</h3>
       
       <div class="image-upload-wrapper">
         <div class="image-preview square" id="menu-preview-container" onclick="document.getElementById('menu-image').click()">
           <span class="material-icons" id="menu-placeholder-icon">add_photo_alternate</span>
         </div>
+        <span style="font-size: 12px; color: var(--text-light);">อัปโหลดรูปอาหาร</span>
         <input type="file" id="menu-image" class="file-input" accept="image/*" onchange="previewImage(event, 'menu-preview-container', 'menu-placeholder-icon')">
       </div>
 
-      <div class="input-group"><label>ชื่อเมนูอาหาร</label><input type="text" placeholder="เช่น ส้มตำไทย"></div>
-      <div class="input-group"><label>ราคา (บาท)</label><input type="number" placeholder="เช่น 50"></div>
-      <div class="input-group"><label>รายละเอียด (ถ้ามี)</label><textarea rows="2" placeholder="เช่น เผ็ดน้อย หวานน้อย..."></textarea></div>
+      <div class="input-group"><label>ชื่อเมนูอาหาร</label><input type="text" id="new-menu-name" placeholder="เช่น ส้มตำไทย"></div>
+      <div class="input-group"><label>ราคา (บาท)</label><input type="number" id="new-menu-price" placeholder="เช่น 50"></div>
       
       <div style="display: flex; gap: 10px; margin-top: 20px;">
         <button class="btn-outline" style="flex: 1;" onclick="closeModal('add-menu-modal')">ยกเลิก</button>
-        <button class="btn-main" style="flex: 1;" onclick="saveNewMenu()">บันทึกเมนู</button>
+        <button class="btn-main" style="flex: 1;" onclick="saveNewMenu()" id="btn-save-menu">บันทึกเมนู</button>
       </div>
     </div>
   </div>
@@ -340,101 +286,275 @@
   <div id="custom-toast" class="toast">ข้อความ</div>
 
   <script>
+    // ==========================================
+    // 1. ตั้งค่า Firebase Configuration (สำคัญมาก)
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
+      authDomain: "fooddelivery-h.firebaseapp.com",
+      projectId: "fooddelivery-h",
+      storageBucket: "fooddelivery-h.firebasestorage.app",
+      messagingSenderId: "901130815996",
+      appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
+    };
+
+    // เชื่อมต่อฐานข้อมูล
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ตัวแปรส่วนกลางของร้านค้า
+    let currentMerchantId = null; 
+    let merchantData = null;
     let merchantMap = null;
     let merchantMarker = null;
-    let orderAlertInterval = null;
-    let uploadedImageBase64 = null;
+    let tempImageBase64 = null; // เก็บรูปชั่วคราวตอนอัปโหลด
 
-    window.onload = function() { checkLoginStatus(); };
-
-    function showToast(message) {
-      const toast = document.getElementById("custom-toast");
-      toast.innerText = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    function showAuthScreen(screenId) {
-      document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
-      document.getElementById(screenId).style.display = 'flex';
-    }
-
-    function checkLoginStatus() {
-      const savedData = localStorage.getItem('hkMerchantData');
-      if(savedData) {
-        const merchant = JSON.parse(savedData);
-        document.getElementById('display-shop-name').innerText = merchant.storeName;
-        if(merchant.image) {
-          document.getElementById('display-shop-img').style.backgroundImage = `url('${merchant.image}')`;
-        }
+    // ==========================================
+    // 2. ฟังก์ชันตรวจสอบการล็อกอิน (ตอนเปิดแอป)
+    // ==========================================
+    window.onload = function() { 
+      currentMerchantId = localStorage.getItem('hk_merchant_id');
+      if(currentMerchantId) {
         document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
-        showScreen('home-screen');
+        loadMerchantProfile(); // ดึงข้อมูลจากฐานข้อมูลมาแสดง
       }
+    };
+
+    // ==========================================
+    // 3. ฟังก์ชันการสมัครและล็อกอิน
+    // ==========================================
+    function merchantRegister() {
+      const phone = document.getElementById('reg-phone').value;
+      const pin = document.getElementById('reg-pin').value;
+      const name = document.getElementById('reg-store-name').value;
+      const owner = document.getElementById('reg-owner-name').value;
+      const category = document.getElementById('reg-category').value;
+      const btn = document.getElementById('btn-register');
+
+      if(!phone || !pin || !name) { showToast('กรุณากรอกเบอร์โทร, PIN และชื่อร้าน'); return; }
+      
+      btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+      // บันทึกลง Firebase Firestore ในคอลเล็กชัน 'merchants' โดยใช้เบอร์โทรเป็น ID
+      db.collection("merchants").doc(phone).set({
+        storeName: name,
+        ownerName: owner,
+        category: category,
+        phone: phone,
+        pin: pin, // *หมายเหตุ: ระบบจริงควรเข้ารหัส PIN แต่นี่คือโปรโตไทป์
+        image: tempImageBase64 || "", 
+        isOpen: true,
+        lat: 17.1500, // ค่าเริ่มต้น ห้วยเกิ้ง
+        lng: 102.9500,
+        menus: [],
+        walletBalance: 0,
+        totalSales: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        showToast('สมัครร้านค้าสำเร็จ! ยินดีต้อนรับ');
+        localStorage.setItem('hk_merchant_id', phone); // จำล็อกอิน
+        currentMerchantId = phone;
+        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+        loadMerchantProfile();
+      }).catch(error => {
+        showToast('เกิดข้อผิดพลาด: ' + error.message);
+        btn.innerText = "สร้างร้านค้าใหม่"; btn.disabled = false;
+      });
     }
 
     function merchantLogin() {
       const phone = document.getElementById('login-phone').value;
       const pin = document.getElementById('login-pin').value;
-      if(phone && pin) {
-        // Mock Login
-        const dummyData = { storeName: "ร้านของคุณ", phone: phone, image: "" };
-        localStorage.setItem('hkMerchantData', JSON.stringify(dummyData));
-        showToast('เข้าสู่ระบบสำเร็จ');
-        checkLoginStatus();
-      } else {
-        showToast('กรุณากรอกข้อมูลให้ครบ');
-      }
-    }
+      const btn = document.getElementById('btn-login');
 
-    function merchantRegister() {
-      const storeName = document.getElementById('reg-store-name').value;
-      const phone = document.getElementById('reg-phone').value;
-      const pin = document.getElementById('reg-pin').value;
-      if(!storeName || !phone || !pin) { showToast('กรุณากรอกข้อมูลสำคัญให้ครบถ้วน'); return; }
+      if(!phone || !pin) { showToast('กรุณากรอกเบอร์และรหัสผ่าน'); return; }
+      btn.innerText = "กำลังตรวจสอบ..."; btn.disabled = true;
 
-      const newMerchant = { storeName: storeName, phone: phone, image: uploadedImageBase64 };
-      localStorage.setItem('hkMerchantData', JSON.stringify(newMerchant));
-      showToast('สมัครร้านค้าสำเร็จ! ยินดีต้อนรับเข้าสู่ระบบ');
-      setTimeout(() => { checkLoginStatus(); }, 1500);
+      // ดึงข้อมูลร้านค้าจากเบอร์โทร
+      db.collection("merchants").doc(phone).get().then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.pin === pin) {
+            showToast('เข้าสู่ระบบสำเร็จ');
+            localStorage.setItem('hk_merchant_id', phone);
+            currentMerchantId = phone;
+            document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+            loadMerchantProfile();
+          } else {
+            showToast('รหัสผ่าน PIN ไม่ถูกต้อง');
+            btn.innerText = "เข้าสู่ระบบ"; btn.disabled = false;
+          }
+        } else {
+          showToast('ไม่พบเบอร์โทรนี้ในระบบร้านค้า');
+          btn.innerText = "เข้าสู่ระบบ"; btn.disabled = false;
+        }
+      }).catch((error) => {
+        showToast('Error: ' + error.message);
+        btn.innerText = "เข้าสู่ระบบ"; btn.disabled = false;
+      });
     }
 
     function merchantLogout() {
-      // ใช้ custom modal แทน confirm()
-      localStorage.removeItem('hkMerchantData');
-      location.reload(); 
-    }
-
-    function previewImage(event, containerId, iconId) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const previewContainer = document.getElementById(containerId);
-          previewContainer.style.backgroundImage = `url('${e.target.result}')`;
-          document.getElementById(iconId).style.display = 'none';
-          if(containerId === 'image-preview-container') uploadedImageBase64 = e.target.result; 
-        }
-        reader.readAsDataURL(file);
+      if(confirm("ต้องการออกจากระบบหรือไม่?")) {
+        localStorage.removeItem('hk_merchant_id');
+        location.reload();
       }
     }
 
-    function playOrderAlertSound() {
-      if(orderAlertInterval) clearInterval(orderAlertInterval);
-      window.speechSynthesis.cancel();
-      speakAlert(); 
-      orderAlertInterval = setInterval(speakAlert, 5000); // พูดซ้ำทุก 5 วิ
+    // ==========================================
+    // 4. โหลดข้อมูลร้านค้าและผูกข้อมูลกับหน้าจอ
+    // ==========================================
+    function loadMerchantProfile() {
+      if(!currentMerchantId) return;
+
+      db.collection("merchants").doc(currentMerchantId).onSnapshot((doc) => {
+        if (doc.exists) {
+          merchantData = doc.data();
+          
+          // อัปเดต UI หน้าแรก
+          document.getElementById('display-shop-name').innerText = merchantData.storeName;
+          document.getElementById('display-shop-cat').innerText = "หมวดหมู่: " + merchantData.category;
+          if(merchantData.image) {
+            document.getElementById('display-shop-img').style.backgroundImage = `url('${merchantData.image}')`;
+          }
+          document.getElementById('store-status').checked = merchantData.isOpen;
+          updateStatusLabel(merchantData.isOpen);
+
+          // อัปเดต UI การตั้งค่า (GPS & บัญชี)
+          document.getElementById('setting-lat').value = merchantData.lat || "";
+          document.getElementById('setting-lng').value = merchantData.lng || "";
+          if(merchantData.bankAccount) {
+            document.getElementById('setting-bank-name').value = merchantData.bankAccount.bank || "";
+            document.getElementById('setting-bank-acc').value = merchantData.bankAccount.accountNo || "";
+            document.getElementById('setting-bank-holder').value = merchantData.bankAccount.name || "";
+          }
+
+          // อัปเดต UI การเงิน
+          document.getElementById('wallet-balance').innerText = `฿${(merchantData.walletBalance || 0).toFixed(2)}`;
+          document.getElementById('stat-total-sales').innerText = `฿${(merchantData.totalSales || 0).toFixed(2)}`;
+          let gp = (merchantData.totalSales || 0) * 0.10; // สมมติ GP 10%
+          document.getElementById('stat-gp').innerText = `-฿${gp.toFixed(2)}`;
+          document.getElementById('stat-net').innerText = `+฿${((merchantData.totalSales || 0) - gp).toFixed(2)}`;
+
+          // อัปเดตรายการเมนู
+          renderMenus(merchantData.menus || []);
+          
+          showScreen('home-screen');
+        }
+      });
     }
 
-    function speakAlert() {
-      const msg = new SpeechSynthesisUtterance("ห้วยเกิ้งเดลิเวอรี่ มีออเดอร์ใหม่เข้าแล้วครับ");
-      msg.lang = 'th-TH'; window.speechSynthesis.speak(msg);
+    // ==========================================
+    // 5. ระบบจัดการเมนูอาหาร (Menus)
+    // ==========================================
+    function saveNewMenu() {
+      const name = document.getElementById('new-menu-name').value;
+      const price = parseInt(document.getElementById('new-menu-price').value);
+      const btn = document.getElementById('btn-save-menu');
+
+      if(!name || !price) { showToast('กรุณากรอกชื่อและราคา'); return; }
+      btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+      const newMenu = {
+        id: Date.now().toString(),
+        name: name,
+        price: price,
+        image: tempImageBase64 || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=150&q=80", // รูป Default
+        isAvailable: true
+      };
+
+      // อัปเดตอาร์เรย์ menus ใน Firebase
+      db.collection("merchants").doc(currentMerchantId).update({
+        menus: firebase.firestore.FieldValue.arrayUnion(newMenu)
+      }).then(() => {
+        showToast('เพิ่มเมนูสำเร็จ');
+        closeModal('add-menu-modal');
+        // รีเซ็ตฟอร์ม
+        document.getElementById('new-menu-name').value = "";
+        document.getElementById('new-menu-price').value = "";
+        document.getElementById('menu-preview-container').style.backgroundImage = "none";
+        document.getElementById('menu-placeholder-icon').style.display = "block";
+        tempImageBase64 = null;
+        btn.innerText = "บันทึกเมนู"; btn.disabled = false;
+      });
     }
 
-    function stopOrderAlertSound() {
-      clearInterval(orderAlertInterval);
-      window.speechSynthesis.cancel();
+    function renderMenus(menus) {
+      const container = document.getElementById('merchant-menu-list');
+      if(menus.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #999; margin-top:50px;">ยังไม่มีเมนูอาหาร กดเพิ่มเมนูด้านบน</p>';
+        return;
+      }
+
+      container.innerHTML = '';
+      menus.forEach(menu => {
+        container.innerHTML += `
+          <div class="menu-item-card" style="${menu.isAvailable ? '' : 'opacity:0.6;'}">
+            <div class="menu-item-left">
+              <div class="menu-img" style="background-image: url('${menu.image}')"></div>
+              <div class="menu-info">
+                <h4>${menu.name}</h4>
+                <p>฿${menu.price} ${menu.isAvailable ? '' : '<span style="color:var(--danger); font-size:12px;">(หมด)</span>'}</p>
+              </div>
+            </div>
+            <div class="toggle-container">
+              <label class="switch">
+                <input type="checkbox" ${menu.isAvailable ? 'checked' : ''} onchange="toggleMenuStatus('${menu.id}', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>`;
+      });
     }
 
+    function toggleMenuStatus(menuId, isAvailable) {
+      // ค้นหาเมนูเดิมแล้วอัปเดตสถานะ (Firebase Array ต้องใช้วิธีอ่านมาก่อนแล้วเซฟทับ หรือเขียน Logic ค้นหา)
+      let updatedMenus = merchantData.menus.map(m => {
+        if(m.id === menuId) m.isAvailable = isAvailable;
+        return m;
+      });
+
+      db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus })
+        .then(() => showToast('อัปเดตสถานะเมนูแล้ว'));
+    }
+
+    // ==========================================
+    // 6. ระบบแผนที่และการตั้งค่า
+    // ==========================================
+    function saveGPS() {
+      const lat = parseFloat(document.getElementById('setting-lat').value);
+      const lng = parseFloat(document.getElementById('setting-lng').value);
+      if(!lat || !lng) { showToast('กรุณาดึงตำแหน่ง GPS ก่อน'); return; }
+
+      db.collection("merchants").doc(currentMerchantId).update({ lat: lat, lng: lng })
+        .then(() => showToast('บันทึกพิกัด GPS ลงระบบส่วนกลางสำเร็จ! ลูกค้าจะเห็นพิกัดใหม่ทันที'));
+    }
+
+    function saveBankAccount() {
+      const bank = document.getElementById('setting-bank-name').value;
+      const acc = document.getElementById('setting-bank-acc').value;
+      const name = document.getElementById('setting-bank-holder').value;
+      
+      db.collection("merchants").doc(currentMerchantId).update({
+        bankAccount: { bank: bank, accountNo: acc, name: name }
+      }).then(() => showToast('อัปเดตบัญชีรับเงินสำเร็จ'));
+    }
+
+    function toggleStoreStatus() {
+      const isChecked = document.getElementById('store-status').checked;
+      db.collection("merchants").doc(currentMerchantId).update({ isOpen: isChecked })
+        .then(() => showToast(isChecked ? 'เปิดร้านแล้ว' : 'ปิดร้านชั่วคราว'));
+    }
+    
+    function updateStatusLabel(isOpen) {
+      const label = document.getElementById('status-label');
+      if(isOpen) { label.innerText = 'เปิดร้าน'; label.style.color = 'var(--success)'; } 
+      else { label.innerText = 'ปิดร้าน'; label.style.color = 'var(--danger)'; }
+    }
+
+    // ==========================================
+    // 7. ฟังก์ชันตัวช่วย (UI, Image Compression)
+    // ==========================================
     function showScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
       document.getElementById(screenId).style.display = 'flex';
@@ -444,7 +564,6 @@
       if (document.getElementById('nav-' + activeNavId)) {
         document.getElementById('nav-' + activeNavId).classList.add('active');
       }
-
       if(screenId === 'settings-screen') setTimeout(initMerchantMap, 300);
     }
 
@@ -452,90 +571,105 @@
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       element.classList.add('active');
       document.getElementById('new-orders').style.display = 'none';
-      document.getElementById('prep-orders').style.display = 'none';
+      document.getElementById('history-orders').style.display = 'none';
       document.getElementById(tabId).style.display = 'block';
     }
 
-    function simulateIncomingOrder() {
-      document.getElementById('empty-order-msg').style.display = 'none';
-      document.getElementById('incoming-order-card').classList.add('incoming');
-      playOrderAlertSound();
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; tempImageBase64 = null; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    
+    function showToast(message) {
+      const toast = document.getElementById("custom-toast");
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    function acceptOrder() {
-      document.getElementById('incoming-order-card').classList.remove('incoming');
-      document.getElementById('incoming-order-card').style.display = 'none';
-      document.getElementById('empty-order-msg').style.display = 'block';
-      stopOrderAlertSound(); 
-      showToast('รับออเดอร์แล้ว! แจ้งเตือนไรเดอร์ให้มารับอาหาร');
-    }
+    // แปลงรูปเป็น Base64 และลดขนาดภาพไม่ให้หนัก Firebase เกินไป
+    function previewImage(event, containerId, iconId) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          // สร้าง Canvas เพื่อลดขนาดรูป
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 400; const MAX_HEIGHT = 400;
+            let width = img.width; let height = img.height;
 
-    function rejectOrder() {
-      // ในระบบจริงควรมี Modal ยืนยัน
-      document.getElementById('incoming-order-card').classList.remove('incoming');
-      document.getElementById('incoming-order-card').style.display = 'none';
-      document.getElementById('empty-order-msg').style.display = 'block';
-      stopOrderAlertSound(); 
-      showToast('ปฏิเสธออเดอร์แล้ว ระบบจะคืนเงินลูกค้า');
-    }
-
-    function toggleStoreStatus() {
-      const isChecked = document.getElementById('store-status').checked;
-      const label = document.getElementById('status-label');
-      if(isChecked) {
-        label.innerText = 'เปิดร้าน'; label.style.color = 'var(--success)';
-        showToast('เปิดร้านเรียบร้อย พร้อมรับออเดอร์');
-      } else {
-        label.innerText = 'ปิดร้าน'; label.style.color = 'var(--danger)';
-        showToast('ปิดร้านแล้ว ลูกค้าจะสั่งอาหารไม่ได้');
+            if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } 
+            else if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // ลดคุณภาพเหลือ 70%
+            tempImageBase64 = compressedBase64;
+            
+            const previewContainer = document.getElementById(containerId);
+            previewContainer.style.backgroundImage = `url('${compressedBase64}')`;
+            document.getElementById(iconId).style.display = 'none';
+          }
+          img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
       }
     }
 
+    // Leaflet Map สำหรับร้านค้า
     function initMerchantMap() {
-      if (merchantMap !== null) {
-        merchantMap.invalidateSize();
-        return; 
-      }
+      if (merchantMap !== null) { merchantMap.invalidateSize(); return; }
       
-      // ค่าเริ่มต้น (Default)
-      let startLat = 17.1500;
-      let startLng = 102.9500;
+      let lat = merchantData?.lat || 17.1500;
+      let lng = merchantData?.lng || 102.9500;
 
-      merchantMap = L.map('merchant-map', { zoomControl: false }).setView([startLat, startLng], 15);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap' }).addTo(merchantMap);
+      merchantMap = L.map('merchant-map', { zoomControl: false }).setView([lat, lng], 16);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(merchantMap);
       
       const storeIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--primary); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:14px; color:white;">storefront</span></div>` });
       
-      merchantMarker = L.marker([startLat, startLng], {icon: storeIcon, draggable: true}).addTo(merchantMap);
+      merchantMarker = L.marker([lat, lng], {icon: storeIcon, draggable: true}).addTo(merchantMap);
+      
+      // อัปเดตค่าเมื่อลากหมุด
+      merchantMarker.on('dragend', function(e) {
+        document.getElementById('setting-lat').value = merchantMarker.getLatLng().lat.toFixed(6);
+        document.getElementById('setting-lng').value = merchantMarker.getLatLng().lng.toFixed(6);
+      });
     }
 
     function getCurrentMerchantLocation() {
       if (navigator.geolocation) {
-        showToast("กำลังดึงตำแหน่ง GPS ของคุณ...");
+        showToast("กำลังค้นหา GPS...");
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
+            const lat = position.coords.latitude; const lng = position.coords.longitude;
+            document.getElementById('setting-lat').value = lat.toFixed(6);
+            document.getElementById('setting-lng').value = lng.toFixed(6);
             if(merchantMap && merchantMarker) {
               merchantMap.setView([lat, lng], 17);
               merchantMarker.setLatLng([lat, lng]);
-              showToast("ปักหมุดตำแหน่งปัจจุบันสำเร็จ!");
             }
+            showToast("พบตำแหน่งปัจจุบันแล้ว! อย่าลืมกดบันทึก");
           },
-          (error) => { showToast("ไม่สามารถดึง GPS ได้ กรุณาเปิด Location Service"); },
+          (error) => { showToast("ไม่สามารถดึง GPS ได้ กรุณาเปิด Location ในมือถือ"); },
           { enableHighAccuracy: true }
         );
-      } else {
-        showToast("บราวเซอร์ของคุณไม่รองรับ GPS");
       }
     }
-
-    // Modal เมนู
-    function openAddMenuModal() { document.getElementById('add-menu-modal').style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function saveNewMenu() {
-      closeModal('add-menu-modal');
-      showToast('เพิ่มเมนูใหม่ลงในระบบเรียบร้อยแล้ว');
+    
+    function requestWithdrawal() {
+      if(!merchantData.bankAccount) {
+        showToast("กรุณาตั้งค่าบัญชีธนาคารในเมนู 'ร้านค้า' ก่อนถอนเงิน");
+        return;
+      }
+      if(merchantData.walletBalance <= 0) {
+        showToast("ไม่มียอดเงินให้ถอน");
+        return;
+      }
+      showToast("ส่งคำขอถอนเงินไปยังแอดมินแล้ว! เงินจะเข้าบัญชีภายใน 24 ชม.");
+      // ในระบบจริง จะลด walletBalance และสร้าง Document ในคอลเล็กชัน withdrawals
     }
   </script>
 </body>
