@@ -68,7 +68,7 @@
     .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }
     .restaurant-card:active { transform: scale(0.98); }
     .restaurant-card.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(50%); }
-    .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; position: relative; }
+    .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; position: relative; background-color: #f0f0f0; }
     .distance-tag { position: absolute; bottom: 12px; right: 12px; background-color: rgba(255,255,255,0.9); color: var(--text-dark); padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .out-of-range-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 10; white-space: nowrap; }
     .res-info { padding: 15px; }
@@ -117,6 +117,7 @@
 </head>
 <body>
 
+  <!-- ================= หน้าหลัก (Home) ================= -->
   <div id="home-screen" class="screen">
     <!-- Header สีเขียวพร้อมปุ่มพิกัด GPS -->
     <div class="header">
@@ -156,11 +157,13 @@
     <div class="restaurant-section">
       <div class="section-title"><span>ร้านอาหารใกล้คุณ (เฉพาะใน 5 กม.)</span></div>
       <div id="restaurant-list">
-        <!-- ร้านอาหารจะถูก Render ด้วย JavaScript ที่นี่ -->
+        <!-- ร้านอาหารจาก Firebase จะถูก Render ที่นี่ -->
+        <p style="text-align: center; color: #999; padding: 20px;">กำลังโหลดข้อมูลร้านค้า...</p>
       </div>
     </div>
   </div>
 
+  <!-- ================= หน้าโปรโมชัน ================= -->
   <div id="promo-screen" class="screen">
     <div class="top-bar"><div class="page-title" style="margin: 0;">โปรโมชัน & ส่วนลด</div></div>
     <div style="padding: 15px;">
@@ -171,6 +174,7 @@
     </div>
   </div>
 
+  <!-- ================= หน้าออเดอร์ ================= -->
   <div id="order-screen" class="screen">
     <div class="top-bar"><div class="page-title" style="margin: 0;">ประวัติการสั่งซื้อ</div></div>
     <div style="padding: 15px;">
@@ -190,6 +194,7 @@
     </div>
   </div>
 
+  <!-- ================= หน้าฉัน (Profile) ================= -->
   <div id="profile-screen" class="screen">
     <div class="header" style="border-radius: 0; margin-bottom: 0; padding-bottom: 15px;">
       <h1 style="margin: 0; font-size: 18px; color: white; text-align: center;">บัญชีของฉัน</h1>
@@ -231,6 +236,7 @@
     </div>
   </div>
 
+  <!-- ================= หน้ารายการอาหารของร้าน (Menu) ================= -->
   <div id="menu-screen" class="screen">
     <div class="menu-header" id="menu-image">
       <div class="back-btn-img" onclick="showScreen('home-screen')"><span class="material-icons">arrow_back</span></div>
@@ -238,7 +244,7 @@
     <div class="menu-shop-info">
       <h2 id="menu-name">ชื่อร้าน</h2>
       <div class="res-meta" style="margin-bottom: 0;">
-        <span class="rating"><i class="material-icons" style="font-size:16px;">star</i> <span id="menu-rating">4.8</span></span>
+        <span class="rating"><i class="material-icons" style="font-size:16px;">star</i> <span id="menu-rating">5.0</span></span>
         <span>• <span id="menu-distance">1.2 กม.</span></span>
       </div>
     </div>
@@ -248,6 +254,7 @@
     </div>
   </div>
 
+  <!-- ================= หน้าจ่ายเงิน (Payment) ================= -->
   <div id="payment-screen" class="screen">
     <div class="top-bar"><div class="back-btn-simple" onclick="showScreen('menu-screen')"><span class="material-icons">arrow_back</span></div><div class="page-title">ยืนยันคำสั่งซื้อ</div></div>
     <h3 style="margin: 20px 20px 0; font-size: 16px;">รายการอาหาร</h3>
@@ -260,6 +267,7 @@
     <div style="padding: 10px 20px 30px;"><button class="btn-primary" onclick="processPayment()">ยืนยันสั่งอาหารเลย</button></div>
   </div>
 
+  <!-- ================= หน้าติดตามไรเดอร์ (Tracking) ================= -->
   <div id="tracking-screen" class="screen">
     <div class="top-bar" style="position: absolute; width: 100%; background: transparent; box-shadow: none; z-index: 400;">
       <div class="back-btn-img" onclick="showScreen('home-screen')" style="top: 15px; left: 15px;"><span class="material-icons">close</span></div>
@@ -275,6 +283,7 @@
     </div>
   </div>
 
+  <!-- ================= แถบตะกร้าลอยตัว ================= -->
   <div id="cart-bar" onclick="goToPayment()">
     <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;"><div class="cart-count" id="cart-count" style="background: white; color: var(--primary-color); width: 26px; height: 26px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">1</div><span>ดูตะกร้าของคุณ</span></div>
     <div style="font-weight: 600;">฿<span id="cart-total">0</span></div>
@@ -287,6 +296,7 @@
     <span class="material-icons">chevron_right</span>
   </div>
 
+  <!-- ================= แถบเมนูด้านล่าง (Bottom Nav) ================= -->
   <div class="bottom-nav">
     <div class="nav-item active" id="nav-home" onclick="showScreen('home-screen')"><span class="material-icons">storefront</span><span>หน้าแรก</span></div>
     <div class="nav-item" id="nav-promo" onclick="showScreen('promo-screen')"><span class="material-icons">local_offer</span><span>โปรโมชัน</span></div>
@@ -294,6 +304,7 @@
     <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">person</span><span>ฉัน</span></div>
   </div>
 
+  <!-- ================= Toast แจ้งเตือน ================= -->
   <div id="custom-toast" class="toast">ข้อความแจ้งเตือน</div>
 
   <script>
@@ -316,33 +327,11 @@
     let userLng = 102.9500;
     let leafletMap = null;
 
+    // เปลี่ยนมาใช้ Array ว่าง เพื่อรอรับข้อมูลร้านค้าของจริงจาก Firebase
+    let restaurants = [];
+
     // ระบบ Wallet ของลูกค้า
     let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
-
-    // ข้อมูลร้านค้าจำลอง
-    const restaurants = [
-      {
-        id: 1, name: "ป้าแจ๋ว อาหารตามสั่ง (ห้วยเกิ้ง)", 
-        image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80", 
-        rating: "4.8", lat: 17.1520, lng: 102.9520, // ใกล้มาก
-        menus: [
-          { name: "ข้าวกะเพราหมูสับ", price: 50, img: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80" },
-          { name: "ข้าวผัดกุ้ง", price: 65, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80" }
-        ]
-      },
-      {
-        id: 2, name: "ก๋วยเตี๋ยวเรือ เจ๊นก", 
-        image: "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=500&q=80", 
-        rating: "4.5", lat: 17.1650, lng: 102.9650, // ห่างออกไปนิดหน่อย (~2 กม.)
-        menus: [{ name: "เส้นเล็กน้ำตกหมู", price: 40, img: "https://images.unsplash.com/photo-1594998893017-361fd798fb6b?auto=format&fit=crop&w=150&q=80" }]
-      },
-      {
-        id: 3, name: "ไก่ทอดหาดใหญ่ (สาขาไกล)", 
-        image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=500&q=80", 
-        rating: "4.9", lat: 17.2200, lng: 103.0000, // ห่างเกิน 5 กม. (จะถูกบล็อค)
-        menus: [{ name: "ไก่ทอด 1 ชิ้น", price: 25, img: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=150&q=80" }]
-      }
-    ];
 
     window.onload = async function() {
       // โหลดข้อมูล Wallet
@@ -353,9 +342,38 @@
       showScreen(savedScreen);
       
       await initializeLiff(); 
-      await getLocation();
+      await getLocation(); // getLocation จะทำการ fetchRestaurants() ให้เอง
       checkActiveOrder();
     };
+
+    // ฟังก์ชันดึงข้อมูลร้านค้าทั้งหมดที่เปิดร้านอยู่ จาก Firebase
+    async function fetchRestaurants() {
+      try {
+        // ค้นหาร้านที่ตั้งค่าเปิดร้านไว้
+        const snapshot = await db.collection("merchants").where("isOpen", "==", true).get();
+        restaurants = [];
+        
+        snapshot.forEach(doc => {
+          let data = doc.data();
+          restaurants.push({
+            id: doc.id, // ใช้เบอร์โทรเป็น ID ตามที่แอปร้านค้าสร้างไว้
+            name: data.storeName,
+            image: data.image || "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80",
+            rating: "5.0", // สามารถใส่ฟังก์ชันรีวิวในอนาคตได้
+            lat: data.lat,
+            lng: data.lng,
+            menus: data.menus || [] // ดึงเมนูที่ร้านค้าสร้างไว้
+          });
+        });
+        
+        // เมื่อได้ข้อมูลครบแล้ว ให้เอาไปโชว์ในหน้าจอ
+        renderRestaurants();
+      } catch (error) {
+        console.error("Firebase Error: ", error);
+        showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า");
+        document.getElementById('restaurant-list').innerHTML = '<p style="text-align:center;color:red;">ไม่สามารถเชื่อมต่อฐานข้อมูลได้</p>';
+      }
+    }
 
     async function initializeLiff() {
       try {
@@ -425,20 +443,20 @@
               userLng = position.coords.longitude;
               document.getElementById('current-location-text').innerText = "ตำแหน่งล่าสุด (อัปเดตแล้ว)";
               showToast("รับพิกัดแม่นยำสูงสำเร็จ!");
-              renderRestaurants();
+              fetchRestaurants(); // ดึงข้อมูลและโชว์ร้าน
               resolve();
             },
             (error) => {
-              showToast("ไม่สามารถดึง GPS ได้ (อาจถูกบล็อกโดยเบราว์เซอร์)");
+              showToast("ไม่สามารถดึง GPS ได้ ระบบจะใช้พิกัดเริ่มต้น");
               document.getElementById('current-location-text').innerText = "พิกัดเริ่มต้น (ห้วยเกิ้ง)";
-              renderRestaurants();
+              fetchRestaurants(); // ดึงข้อมูลและโชว์ร้าน
               resolve();
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
         } else {
           document.getElementById('current-location-text').innerText = "เบราว์เซอร์ไม่รองรับ GPS";
-          renderRestaurants();
+          fetchRestaurants();
           resolve();
         }
       });
@@ -457,9 +475,14 @@
       const listContainer = document.getElementById('restaurant-list');
       listContainer.innerHTML = '';
       
+      if(restaurants.length === 0) {
+        listContainer.innerHTML = '<p style="text-align: center; color: #999;">ขณะนี้ยังไม่มีร้านค้าเปิดให้บริการ</p>';
+        return;
+      }
+
       restaurants.forEach((res, index) => {
         const distance = getDistance(userLat, userLng, res.lat, res.lng);
-        const isTooFar = distance > 5.0; // กฎ: ห้ามเกิน 5 กิโลเมตร
+        const isTooFar = distance > 5.0; // ล็อก 5 กิโลเมตร
         
         listContainer.innerHTML += `
           <div class="restaurant-card ${isTooFar ? 'disabled' : ''}" onclick="${isTooFar ? 'showToast(\'ร้านนี้อยู่ไกลเกิน 5 กม. ไม่สามารถจัดส่งได้ครับ\')' : `openRestaurant(${index}, ${distance})`}">
@@ -484,16 +507,27 @@
       
       const foodList = document.getElementById('food-list');
       foodList.innerHTML = '';
-      res.menus.forEach((menu, i) => {
-        foodList.innerHTML += `
-          <div class="menu-item">
-            <div class="menu-item-left">
-              <div class="menu-item-img" style="background-image: url('${menu.img}')"></div>
-              <div><h4 style="margin: 0 0 5px; font-size:15px;">${menu.name}</h4><p style="margin: 0; color:var(--text-light); font-size:14px;">฿${menu.price}</p></div>
-            </div>
-            <button class="add-btn" onclick="addToCart(${i})">+ เพิ่ม</button>
-          </div>`;
-      });
+      
+      // กรองเฉพาะเมนูที่ร้านค้าตั้งว่า "พร้อมขาย" (isAvailable !== false)
+      const availableMenus = res.menus.filter(m => m.isAvailable !== false);
+      
+      if(availableMenus.length === 0) {
+        foodList.innerHTML = '<p style="text-align:center; padding: 20px; color:#999;">ร้านค้านี้ยังไม่มีเมนูอาหาร</p>';
+      } else {
+        // ใช้ forEach วนลูปเมนูต้นฉบับทั้งหมด เพื่อให้ index ตอนกดเพิ่มตะกร้าตรงกัน
+        res.menus.forEach((menu, i) => {
+          if (menu.isAvailable === false) return; // ข้ามเมนูที่หมด
+          
+          foodList.innerHTML += `
+            <div class="menu-item">
+              <div class="menu-item-left">
+                <div class="menu-item-img" style="background-image: url('${menu.image}')"></div>
+                <div><h4 style="margin: 0 0 5px; font-size:15px;">${menu.name}</h4><p style="margin: 0; color:var(--text-light); font-size:14px;">฿${menu.price}</p></div>
+              </div>
+              <button class="add-btn" onclick="addToCart(${i})">+ เพิ่ม</button>
+            </div>`;
+        });
+      }
       showScreen('menu-screen');
     }
 
@@ -542,7 +576,7 @@
 
       const orderData = {
         resName: selectedRestaurant.name,
-        resLat: selectedRestaurant.lat, // แก้ไข Typo ตรงนี้แล้วครับ
+        resLat: selectedRestaurant.lat,
         resLng: selectedRestaurant.lng,
         status: 'searching',
         totalPrice: totalAmount, // บันทึกยอดเงินไว้สำหรับการคืนเงิน
