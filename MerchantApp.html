@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Merchant App - จัดการร้าน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    :root { --merchant-primary: #008f68; --bg-color: #f4f7f6; --white: #ffffff; --text-dark: #333; --text-gray: #777; --border-color: #eee; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Prompt', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark); padding-bottom: 70px; }
+
+    .header { background-color: var(--merchant-primary); color: var(--white); padding: 20px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .shop-info h1 { margin: 0; font-size: 18px; font-weight: 600; }
+    .shop-info p { margin: 0; font-size: 13px; opacity: 0.9; }
+
+    .tabs { display: flex; background: var(--white); border-bottom: 1px solid var(--border-color); position: sticky; top: 68px; z-index: 99; }
+    .tab { flex: 1; text-align: center; padding: 15px 0; font-weight: 500; color: var(--text-gray); cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab.active { color: var(--merchant-primary); border-bottom-color: var(--merchant-primary); }
+    .tab-content { display: none; padding: 20px; }
+    .tab-content.active { display: block; }
+
+    /* Menu Item */
+    .menu-item { background: var(--white); border-radius: 12px; padding: 12px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .menu-img { width: 70px; height: 70px; border-radius: 8px; background-size: cover; background-position: center; background-color: #eee; }
+    .menu-info { flex: 1; }
+    .menu-name { margin: 0 0 5px 0; font-size: 16px; font-weight: 600; }
+    .menu-price { margin: 0; color: var(--merchant-primary); font-weight: 600; }
+
+    .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: var(--merchant-primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,143,104,0.4); cursor: pointer; z-index: 100; }
+    
+    /* Modal อัปโหลดเมนู */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end; }
+    .modal-content { background: var(--white); width: 100%; border-radius: 20px 20px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 14px; margin-bottom: 5px; color: var(--text-gray); }
+    .form-group input[type="text"], .form-group input[type="number"] { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-family: 'Prompt'; font-size: 15px; }
+    
+    /* สไตล์ช่องอัปโหลดรูปภาพ */
+    .file-upload-wrapper { border: 2px dashed #ccc; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; position: relative; background: #fafafa; }
+    .file-upload-wrapper input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+    .image-preview { width: 100%; height: 150px; border-radius: 8px; background-size: cover; background-position: center; display: none; margin-top: 10px; }
+
+    .btn-save { width: 100%; background: var(--merchant-primary); color: white; border: none; padding: 15px; border-radius: 8px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; margin-top: 10px; cursor: pointer; }
+    .btn-cancel { width: 100%; background: transparent; color: var(--text-gray); border: none; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; margin-top: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="shop-info"><h1>ป้าแจ๋ว อาหารตามสั่ง</h1><p>ระบบจัดการร้านค้า</p></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab" onclick="switchTab('orders', this)">ออเดอร์</div>
+    <div class="tab active" onclick="switchTab('menus', this)">จัดการเมนู</div>
+  </div>
+
+  <div id="tab-orders" class="tab-content">
+    <p style="text-align:center; color:#999;">ยังไม่มีออเดอร์ใหม่ในขณะนี้</p>
+  </div>
+
+  <div id="tab-menus" class="tab-content active">
+    <div id="menu-list-container">
+      <!-- เพิ่มเมนูตั้งต้นให้ดูเยอะขึ้น -->
+      <div class="menu-item">
+        <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80')"></div>
+        <div class="menu-info"><h4 class="menu-name">ข้าวกะเพราหมูสับ</h4><p class="menu-price">฿50</p></div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80')"></div>
+        <div class="menu-info"><h4 class="menu-name">ข้าวผัดกุ้ง</h4><p class="menu-price">฿60</p></div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=150&q=80')"></div>
+        <div class="menu-info"><h4 class="menu-name">ชาไทยเย็น</h4><p class="menu-price">฿35</p></div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img" style="background-image: url('https://images.unsplash.com/photo-1572490122747-3968b75f8115?auto=format&fit=crop&w=150&q=80')"></div>
+        <div class="menu-info"><h4 class="menu-name">กาแฟโบราณ</h4><p class="menu-price">฿30</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fab" id="fab-add" onclick="openModal()"><span class="material-icons">add</span></div>
+
+  <!-- Modal อัปโหลดรูปจากเครื่อง -->
+  <div class="modal-overlay" id="addMenuModal">
+    <div class="modal-content">
+      <h2 style="margin-top: 0;">เพิ่มเมนูใหม่</h2>
+      
+      <div class="form-group">
+        <label>รูปภาพเมนู (เลือกจากคอมพิวเตอร์)</label>
+        <div class="file-upload-wrapper">
+          <span class="material-icons" style="font-size: 32px; color: #ccc;">cloud_upload</span>
+          <p style="margin: 5px 0 0; color: #777; font-size: 13px;">แตะเพื่ออัปโหลดรูปภาพ</p>
+          <input type="file" id="inputFile" accept="image/*" onchange="previewImage(event)">
+        </div>
+        <!-- พื้นที่แสดงรูปตัวอย่าง -->
+        <div class="image-preview" id="imagePreview"></div>
+      </div>
+
+      <div class="form-group">
+        <label>ชื่อเมนู</label>
+        <input type="text" id="inputName" placeholder="เช่น สุกี้น้ำรวมมิตร">
+      </div>
+      
+      <div class="form-group">
+        <label>ราคา (บาท)</label>
+        <input type="number" id="inputPrice" placeholder="เช่น 50">
+      </div>
+      
+      <button class="btn-save" id="saveBtn" onclick="saveMenu()">บันทึกข้อมูล</button>
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+    </div>
+  </div>
+
+  <script>
+    let uploadedImageBase64 = ''; // เก็บรูปภาพที่ถูกแปลงเป็นข้อความ (Base64)
+
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      element.classList.add('active');
+      document.getElementById('fab-add').style.display = tabId === 'menus' ? 'flex' : 'none';
+    }
+
+    function openModal() { document.getElementById('addMenuModal').style.display = 'flex'; }
+    function closeModal() { 
+      document.getElementById('addMenuModal').style.display = 'none'; 
+      document.getElementById('inputName').value = '';
+      document.getElementById('inputPrice').value = '';
+      document.getElementById('inputFile').value = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      uploadedImageBase64 = '';
+    }
+
+    // ระบบแปลงไฟล์ภาพจากเครื่องเป็น Base64 เพื่อให้แสดงผลและบันทึกได้ทันที
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImageBase64 = e.target.result; // ได้ข้อมูลภาพมาแล้ว
+          const previewDiv = document.getElementById('imagePreview');
+          previewDiv.style.backgroundImage = `url(${uploadedImageBase64})`;
+          previewDiv.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveMenu() {
+      const name = document.getElementById('inputName').value;
+      const price = document.getElementById('inputPrice').value;
+      // ใช้รูปที่อัปโหลดมา หรือถ้าไม่ได้อัป ให้ใช้รูปว่างๆ 代แทน
+      const finalImage = uploadedImageBase64 || 'https://via.placeholder.com/150?text=No+Image';
+
+      if(!name || !price) {
+        alert("กรุณากรอกชื่อและราคาเมนู");
+        return;
+      }
+
+      // แสดงเมนูใหม่ในหน้าจอทันที
+      const menuContainer = document.getElementById('menu-list-container');
+      const newMenuHtml = `
+        <div class="menu-item" style="border-left: 4px solid var(--merchant-primary);">
+          <div class="menu-img" style="background-image: url('${finalImage}')"></div>
+          <div class="menu-info">
+            <h4 class="menu-name">${name}</h4>
+            <p class="menu-price">฿${price}</p>
+          </div>
+        </div>
+      `;
+      menuContainer.innerHTML = newMenuHtml + menuContainer.innerHTML;
+      
+      alert("เพิ่มเมนูใหม่สำเร็จ!");
+      closeModal();
+    }
+  </script>
+</body>
+</html>

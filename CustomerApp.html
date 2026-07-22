@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>สั่งอาหาร - Food Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
+  <!-- 1. Firebase SDK (เวอร์ชัน Compat สำหรับใช้งานร่วมกับ HTML โดยตรง) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  
+  <style>
+    :root {
+      --primary-color: #00B900; --primary-dark: #009900; --primary-light: #e6f7e6;
+      --bg-color: #f8f9fa; --text-dark: #212121; --text-light: #757575;
+      --white: #ffffff; --warning: #ff9800; --danger: #f44336; --line-color: #06C755;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Prompt', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark); padding-bottom: 80px; }
+
+    /* ---------------- คอมโพเนนต์ทั่วไป ---------------- */
+    .screen { display: none; min-height: 100vh; background-color: var(--bg-color); }
+    #home-screen { display: block; }
+    
+    .top-bar { display: flex; align-items: center; padding: 15px 20px; background: var(--white); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .back-btn-simple { display: flex; align-items: center; cursor: pointer; color: var(--text-dark); padding: 5px; }
+    .page-title { flex-grow: 1; text-align: center; font-size: 18px; font-weight: 600; margin-right: 24px; }
+
+    .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,185,0,0.2); }
+    .btn-primary:active { background-color: var(--primary-dark); transform: scale(0.98); }
+    
+    .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); }
+    .btn-line:active { background-color: #05a546; }
+
+    /* ---------------- หน้าแรก (Home) ---------------- */
+    .header { background-color: var(--white); padding: 15px 20px 10px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .location-box { display: flex; align-items: center; gap: 8px; }
+    .location-box .pin { color: var(--danger); font-size: 24px; }
+    .location-text { display: flex; flex-direction: column; }
+    .location-text span:first-child { font-size: 12px; color: var(--text-light); }
+    .location-text span:last-child { font-size: 15px; font-weight: 600; display: flex; align-items: center; }
+    
+    .search-section { background-color: var(--white); padding: 5px 20px 15px; }
+    .search-bar { background-color: var(--bg-color); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; }
+    .search-bar input { border: none; background: transparent; width: 100%; font-family: 'Prompt'; outline: none; font-size: 14px; }
+
+    .banner-section { padding: 15px 20px; background: var(--white); }
+    .banner { width: 100%; height: 130px; background: linear-gradient(135deg, #00B900, #4caf50); border-radius: 12px; display: flex; align-items: center; padding: 20px; color: var(--white); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,185,0,0.2); }
+    .banner h3 { margin: 0 0 5px 0; font-size: 22px; z-index: 2; font-weight: 700; }
+    .banner p { margin: 0; font-size: 14px; z-index: 2; opacity: 0.9; }
+
+    .categories { display: flex; overflow-x: auto; padding: 15px 20px; gap: 15px; scrollbar-width: none; background: var(--white); }
+    .categories::-webkit-scrollbar { display: none; }
+    .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; transition: transform 0.2s; }
+    .category-item:active { transform: scale(0.95); }
+    .category-icon { width: 60px; height: 60px; background-color: var(--primary-light); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 30px; }
+    .category-item span { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+    
+    .restaurant-section { padding: 15px 20px; }
+    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: var(--text-dark); }
+    .restaurant-card { background-color: var(--white); border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+    .restaurant-card:active { transform: scale(0.98); }
+    .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; position: relative; }
+    .promo-tag { position: absolute; top: 12px; left: 0; background-color: var(--danger); color: var(--white); padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 0 12px 12px 0; }
+    .res-info { padding: 15px; }
+    .res-name { font-size: 18px; font-weight: 600; margin: 0 0 5px; }
+    .res-meta { display: flex; align-items: center; font-size: 13px; color: var(--text-light); gap: 12px; margin-bottom: 8px; }
+
+    /* ---------------- หน้าร้านอาหาร (Menu Screen) ---------------- */
+    #menu-screen { background-color: var(--white); }
+    .menu-header { position: relative; height: 220px; background-size: cover; background-position: center; }
+    .back-btn-img { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .menu-shop-info { padding: 20px; border-bottom: 8px solid var(--bg-color); }
+    .menu-shop-info h2 { margin: 0 0 10px 0; font-size: 24px; }
+    .menu-list { padding: 0 20px; }
+    .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+    .menu-item-left { display: flex; gap: 15px; flex-grow: 1; }
+    .menu-item-img { width: 70px; height: 70px; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .menu-item-info h4 { margin: 0 0 5px 0; font-size: 16px; color: var(--text-dark); }
+    .menu-item-info p { margin: 0; color: var(--text-light); font-size: 14px; }
+    .add-btn { background-color: var(--primary-light); color: var(--primary-color); border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
+    .add-btn:active { background-color: #d0f0d0; }
+
+    /* ---------------- หน้าชำระเงิน (Payment Screen) ---------------- */
+    .checkout-items { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .checkout-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .checkout-item:last-child { margin-bottom: 0; }
+    .checkout-item-detail { display: flex; gap: 12px; align-items: center; }
+    .checkout-item-img { width: 50px; height: 50px; border-radius: 8px; background-size: cover; background-position: center; }
+    .checkout-item-name { font-size: 15px; font-weight: 500; margin: 0; }
+    
+    .summary-card { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--text-dark); }
+    .summary-total { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; font-size: 18px; font-weight: 700; color: var(--primary-color); }
+    
+    .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .method-option { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; cursor: pointer; }
+    .method-option:last-child { border-bottom: none; }
+    .method-icon { width: 40px; height: 40px; background: var(--primary-light); border-radius: 8px; display: flex; justify-content: center; align-items: center; margin-right: 15px; color: var(--primary-color); }
+    .method-text { flex-grow: 1; font-weight: 500; font-size: 15px; }
+    .radio-circle { width: 22px; height: 22px; border: 2px solid #ccc; border-radius: 50%; position: relative; }
+    .method-option.selected .radio-circle { border-color: var(--primary-color); }
+    .method-option.selected .radio-circle::after { content: ''; width: 12px; height: 12px; background: var(--primary-color); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+    /* ---------------- หน้ารอไรเดอร์ (Waiting Screen) ---------------- */
+    #waiting-screen { background-color: var(--white); text-align: center; padding-top: 60px; }
+    .status-text { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .status-subtext { color: var(--text-light); font-size: 15px; margin-bottom: 40px; }
+    .timer-display { font-size: 56px; font-weight: 700; color: var(--primary-color); margin: 30px 0; font-variant-numeric: tabular-nums; }
+    .radar-container { position: relative; width: 180px; height: 180px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+    .motorcycle-icon { background: var(--white); width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; position: relative; }
+    .motorcycle-icon .material-icons { font-size: 40px; color: var(--primary-color); }
+    .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background-color: rgba(0, 185, 0, 0.2); animation: ripple 2s infinite ease-out; z-index: 1; }
+    .pulse-ring:nth-child(2) { animation-delay: 0.6s; }
+    .pulse-ring:nth-child(3) { animation-delay: 1.2s; }
+    @keyframes ripple { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+    .btn-cancel { background: white; color: var(--danger); border: 1px solid var(--danger); border-radius: 8px; padding: 12px; width: 100%; font-family: 'Prompt'; font-size: 16px; font-weight: 600; margin-top: 20px; display: none; }
+
+    /* ---------------- หน้าอื่นๆ (Promo, Order, Profile) ---------------- */
+    .promo-list, .order-history-list { padding: 15px; }
+    .promo-ticket { background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .promo-ticket h4 { margin: 0 0 5px 0; font-size: 16px; color: var(--primary-color); }
+    .promo-ticket p { margin: 0; font-size: 13px; color: var(--text-light); }
+    .use-btn { background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
+    
+    .history-card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .history-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+    .history-status { color: var(--primary-color); font-weight: 600; font-size: 14px; }
+    .history-date { color: var(--text-light); font-size: 12px; }
+    .history-body { display: flex; justify-content: space-between; align-items: center; }
+    .history-shop-name { font-weight: 600; font-size: 16px; margin: 0 0 5px 0; }
+    
+    .profile-header { background: var(--white); padding: 40px 20px; text-align: center; border-bottom: 1px solid #eee; }
+    .avatar-placeholder { width: 100px; height: 100px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; }
+    .profile-menu { background: var(--white); margin-top: 15px; }
+    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 16px; cursor: pointer; }
+    .profile-menu-item .material-icons { margin-right: 15px; color: var(--text-light); }
+
+    /* ---------------- แถบตะกร้า และ เมนูด้านล่าง ---------------- */
+    #cart-bar { display: none; position: fixed; bottom: 75px; left: 20px; right: 20px; background-color: var(--primary-color); color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,185,0,0.3); z-index: 101; cursor: pointer; }
+    .cart-info { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+    .cart-count { background: white; color: var(--primary-color); width: 26px; height: 26px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 25%; }
+    .nav-item.active { color: var(--primary-color); }
+    .nav-item .material-icons { font-size: 26px; }
+
+    /* ---------------- Custom Toast Notification (แทน alert) ---------------- */
+    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, bottom 0.3s; font-family: 'Prompt', sans-serif; }
+    .toast.show { visibility: visible; opacity: 1; bottom: 100px; } /* เด้งขึ้นมาเหนือเมนูด้านล่าง */
+  </style>
+</head>
+<body>
+
+  <!-- ================= หน้าแรก (Home) ================= -->
+  <div id="home-screen" class="screen">
+    <div class="header">
+      <div class="location-box">
+        <span class="material-icons pin">location_on</span>
+        <div class="location-text"><span>จัดส่งที่</span><span>ชุมชนบ้านห้วยเกิ้ง <i class="material-icons" style="font-size: 16px;">keyboard_arrow_down</i></span></div>
+      </div>
+      <span class="material-icons" style="color: var(--text-dark); margin-top: 5px;">favorite_border</span>
+    </div>
+
+    <div class="search-section">
+      <div class="search-bar"><span class="material-icons" style="color: #999;">search</span><input type="text" placeholder="หิวอะไรดี? ค้นหาร้านอาหาร, เมนู..."></div>
+    </div>
+
+    <div class="banner-section">
+      <div class="banner">
+        <div style="z-index: 2;"><h3>โค้ดลดชุมชน</h3><p>ใส่โค้ด LOCAL50 ลดทันที 50.-</p></div>
+        <div style="position: absolute; right: -20px; top: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 50%;"></div>
+      </div>
+    </div>
+
+    <div class="categories">
+      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ตามสั่ง')"><div class="category-icon">🍛</div><span>ตามสั่ง</span></div>
+      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ก๋วยเตี๋ยว')"><div class="category-icon">🍜</div><span>ก๋วยเตี๋ยว</span></div>
+      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: เครื่องดื่ม')"><div class="category-icon">☕</div><span>เครื่องดื่ม</span></div>
+      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ของหวาน')"><div class="category-icon">🍰</div><span>ของหวาน</span></div>
+      <div class="category-item" onclick="showToast('กำลังกรองร้านอาหารหมวด: ไก่ทอด')"><div class="category-icon">🍗</div><span>ไก่ทอด</span></div>
+    </div>
+
+    <div class="restaurant-section">
+      <div class="section-title">ร้านแนะนำใกล้บ้านคุณ</div>
+      <div id="restaurant-list"></div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าโปรโมชัน (Promo) ================= -->
+  <div id="promo-screen" class="screen">
+    <div class="top-bar"><div class="page-title">โปรโมชัน & ส่วนลด</div></div>
+    <div class="promo-list">
+      <div class="promo-ticket">
+        <div><h4>ลด 50 บาท (โค้ด: LOCAL50)</h4><p>ขั้นต่ำ 150 บาท • หมดอายุ 31 ก.ค.</p></div>
+        <button class="use-btn" onclick="showToast('เก็บโค้ดส่วนลด LOCAL50 เรียบร้อยแล้ว!')">เก็บโค้ด</button>
+      </div>
+      <div class="promo-ticket" style="border-left-color: var(--warning);">
+        <div><h4 style="color: var(--warning);">ส่งฟรี (ร้านที่ร่วมรายการ)</h4><p>ระยะทางไม่เกิน 3 กม.</p></div>
+        <button class="use-btn" style="background: var(--warning);" onclick="showToast('เก็บโค้ดส่งฟรีเรียบร้อยแล้ว!')">เก็บโค้ด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าออเดอร์ (Orders) ================= -->
+  <div id="order-screen" class="screen">
+    <div class="top-bar"><div class="page-title">ประวัติการสั่งซื้อ</div></div>
+    <div class="order-history-list">
+      <div class="history-card">
+        <div class="history-header"><span class="history-status">จัดส่งสำเร็จ</span><span class="history-date">21 ก.ค. 2026, 12:30 น.</span></div>
+        <div class="history-body"><div><h4 class="history-shop-name">ป้าแจ๋ว อาหารตามสั่ง</h4><p style="margin:0; font-size:13px; color:var(--text-light);">ข้าวกะเพราหมูสับ 1 ที่</p></div><div style="font-weight:700; font-size:16px;">฿65</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าฉัน / Profile ================= -->
+  <div id="profile-screen" class="screen">
+    <div class="top-bar"><div class="page-title" style="margin: 0;">บัญชีของฉัน</div></div>
+    <div class="profile-header">
+      <div class="avatar-placeholder"><span class="material-icons" style="font-size: 50px; color: #fff;">person</span></div>
+      <h2 style="margin: 0 0 15px; font-size: 20px;">เข้าสู่ระบบเพื่อใช้งาน</h2>
+      <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">สมัครสมาชิกหรือเข้าสู่ระบบเพื่อสะสมแต้ม</p>
+      <button class="btn-line" onclick="showToast('เชื่อมต่อกับบัญชี LINE ของคุณสำเร็จแล้ว!')">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738S0 4.935 0 10.304c0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.038 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967C23.153 14.394 24 12.458 24 10.304z"/>
+        </svg>
+        เข้าสู่ระบบด้วย LINE
+      </button>
+    </div>
+    <div class="profile-menu">
+      <div class="profile-menu-item"><span class="material-icons">location_on</span> ที่อยู่จัดส่งของฉัน</div>
+      <div class="profile-menu-item"><span class="material-icons">help_outline</span> ศูนย์ช่วยเหลือ</div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าร้านและเมนู (Menu) ================= -->
+  <div id="menu-screen" class="screen">
+    <div class="menu-header" id="menu-image">
+      <div class="back-btn-img" onclick="showScreen('home-screen')"><span class="material-icons">arrow_back</span></div>
+    </div>
+    <div class="menu-shop-info">
+      <h2 id="menu-name">ชื่อร้าน</h2>
+      <div class="res-meta" style="margin-bottom: 0;">
+        <span class="rating"><i class="material-icons" style="font-size:16px;">star</i> <span id="menu-rating">4.8</span></span>
+        <span>• 1.2 กม.</span><span>• จัดส่ง 15 นาที</span>
+      </div>
+    </div>
+    <div class="menu-list">
+      <h3 style="margin-top: 20px; font-size: 18px;">เมนูยอดฮิต</h3>
+      <div id="food-list"></div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าชำระเงิน (Payment) ================= -->
+  <div id="payment-screen" class="screen">
+    <div class="top-bar"><div class="back-btn-simple" onclick="showScreen('menu-screen')"><span class="material-icons">arrow_back</span></div><div class="page-title">ยืนยันคำสั่งซื้อ</div></div>
+    
+    <h3 style="margin: 20px 20px 0; font-size: 16px;">รายการอาหาร</h3>
+    <div class="checkout-items" id="checkout-items-list"></div>
+
+    <div class="summary-card">
+      <h3 style="margin-top: 0; font-size: 16px;">สรุปการชำระเงิน</h3>
+      <div class="summary-row"><span>ค่าอาหาร</span><span>฿<span id="pay-food-total">0</span></span></div>
+      <div class="summary-row"><span>ค่าจัดส่ง (พิเศษ)</span><span>฿15</span></div>
+      <div class="summary-total"><span>ยอดรวมทั้งหมด</span><span>฿<span id="pay-grand-total">0</span></span></div>
+    </div>
+
+    <div class="payment-methods">
+      <h3 style="margin-top: 0; font-size: 16px;">ชำระเงินผ่าน</h3>
+      <div class="method-option selected" onclick="selectPayment(this)">
+        <div class="method-icon"><span class="material-icons">qr_code_scanner</span></div>
+        <div class="method-text">สแกนจ่าย (PromptPay)</div><div class="radio-circle"></div>
+      </div>
+      <div class="method-option" onclick="selectPayment(this)">
+        <div class="method-icon"><span class="material-icons">payments</span></div>
+        <div class="method-text">เงินสด (ชำระที่ไรเดอร์)</div><div class="radio-circle"></div>
+      </div>
+    </div>
+
+    <div style="padding: 10px 20px 30px;"><button class="btn-primary" onclick="processPayment()">สั่งอาหารเลย</button></div>
+  </div>
+
+  <!-- ================= หน้ารอไรเดอร์ (Waiting) ================= -->
+  <div id="waiting-screen" class="screen">
+    <div class="radar-container" style="margin-top: 60px; margin-bottom: 20px;">
+      <div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-ring"></div>
+      <div class="motorcycle-icon"><span class="material-icons">two_wheeler</span></div>
+    </div>
+    <div class="status-text" id="status-title">กำลังค้นหาไรเดอร์</div>
+    <div class="status-subtext">ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด</div>
+    <div class="timer-display" id="countdown-timer">02:00</div>
+    <div style="padding: 0 30px;"><button class="btn-cancel" id="cancel-btn" onclick="cancelOrder()">ยกเลิกคำสั่งซื้อ</button></div>
+  </div>
+
+  <!-- ================= ตะกร้า ================= -->
+  <div id="cart-bar" onclick="goToPayment()">
+    <div class="cart-info"><div class="cart-count" id="cart-count">1</div><span>ดูตะกร้าของคุณ</span></div>
+    <div style="font-weight: 600;">฿<span id="cart-total">0</span></div>
+  </div>
+
+  <!-- ================= เมนูด้านล่าง ================= -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showScreen('home-screen')"><span class="material-icons">storefront</span><span>หน้าแรก</span></div>
+    <div class="nav-item" id="nav-promo" onclick="showScreen('promo-screen')"><span class="material-icons">local_offer</span><span>โปรโมชัน</span></div>
+    <div class="nav-item" id="nav-order" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span><span>ออเดอร์</span></div>
+    <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">person</span><span>ฉัน</span></div>
+  </div>
+
+  <!-- ================= Toast Notification ================= -->
+  <div id="custom-toast" class="toast">ข้อความแจ้งเตือน</div>
+
+  <script>
+    // 2. ตั้งค่า Firebase ตามที่คุณส่งภาพมา
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
+      authDomain: "fooddelivery-h.firebaseapp.com",
+      projectId: "fooddelivery-h",
+      storageBucket: "fooddelivery-h.firebasestorage.app",
+      messagingSenderId: "901130815996",
+      appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
+    };
+
+    // 3. เริ่มต้นการทำงานของ Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ทดสอบการเชื่อมต่อ
+    console.log("Firebase Database Connected Successfully!");
+
+    // ----------------------------------------------------
+    // ข้อมูลจำลองและฟังก์ชันของระบบสั่งอาหาร (เหมือนเดิม)
+    // ----------------------------------------------------
+    const restaurants = [
+      {
+        id: 1, name: "ป้าแจ๋ว อาหารตามสั่ง", image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80", rating: "4.8", promo: "ส่งฟรี", distance: "1.2 กม.", time: "15-20 นาที",
+        menus: [
+          { name: "ข้าวกะเพราหมูสับ", price: 50, img: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80" },
+          { name: "ข้าวผัดกุ้ง", price: 60, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80" }
+        ]
+      },
+      {
+        id: 2, name: "ก๋วยเตี๋ยวเรือ เจ๊นก", image: "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=500&q=80", rating: "4.5", promo: "ลด 10%", distance: "2.5 กม.", time: "25 นาที",
+        menus: [
+          { name: "เส้นเล็กน้ำตกหมู", price: 40, img: "https://images.unsplash.com/photo-1594998893017-361fd798fb6b?auto=format&fit=crop&w=150&q=80" },
+          { name: "เกาเหลาเนื้อตุ๋น", price: 60, img: "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=150&q=80" }
+        ]
+      }
+    ];
+
+    let cartItems = []; 
+    let timerInterval;
+
+    window.onload = function() {
+      const listContainer = document.getElementById('restaurant-list');
+      restaurants.forEach((res, index) => {
+        listContainer.innerHTML += `
+          <div class="restaurant-card" onclick="openRestaurant(${index})">
+            <div class="res-image" style="background-image: url('${res.image}')">
+              ${res.promo ? `<div class="promo-tag">${res.promo}</div>` : ''}
+            </div>
+            <div class="res-info">
+              <h3 class="res-name">${res.name}</h3>
+              <div class="res-meta">
+                <span class="rating"><i class="material-icons" style="font-size:14px">star</i> ${res.rating}</span>
+                <span>• ${res.distance}</span>
+              </div>
+            </div>
+          </div>`;
+      });
+    };
+
+    function showToast(message) {
+      const toast = document.getElementById("custom-toast");
+      toast.innerText = message;
+      toast.className = "toast show";
+      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.getElementById(screenId).style.display = 'block';
+      window.scrollTo(0, 0);
+
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      const activeNavId = screenId.replace('-screen', '');
+      if (document.getElementById('nav-' + activeNavId)) {
+        document.getElementById('nav-' + activeNavId).classList.add('active');
+      }
+
+      if((screenId === 'home-screen' || screenId === 'menu-screen') && cartItems.length > 0) {
+        document.getElementById('cart-bar').style.display = 'flex';
+      } else {
+        document.getElementById('cart-bar').style.display = 'none';
+      }
+    }
+
+    function openRestaurant(index) {
+      const res = restaurants[index];
+      document.getElementById('menu-image').style.backgroundImage = `url('${res.image}')`;
+      document.getElementById('menu-name').innerText = res.name;
+      document.getElementById('menu-rating').innerText = res.rating;
+      
+      const foodList = document.getElementById('food-list');
+      foodList.innerHTML = '';
+      res.menus.forEach((menu, i) => {
+        foodList.innerHTML += `
+          <div class="menu-item">
+            <div class="menu-item-left">
+              <div class="menu-item-img" style="background-image: url('${menu.img}')"></div>
+              <div class="menu-item-info">
+                <h4>${menu.name}</h4><p>฿${menu.price}</p>
+              </div>
+            </div>
+            <button class="add-btn" onclick="addToCart(${index}, ${i})">+ เพิ่ม</button>
+          </div>`;
+      });
+      showScreen('menu-screen');
+    }
+
+    function addToCart(resIdx, menuIdx) {
+      const item = restaurants[resIdx].menus[menuIdx];
+      cartItems.push(item);
+      updateCartUI();
+      showToast(`เพิ่ม ${item.name} ลงตะกร้าแล้ว`);
+    }
+
+    function updateCartUI() {
+      const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('cart-count').innerText = cartItems.length;
+      document.getElementById('cart-total').innerText = total;
+      document.getElementById('cart-bar').style.display = 'flex';
+    }
+
+    function goToPayment() {
+      const checkoutList = document.getElementById('checkout-items-list');
+      checkoutList.innerHTML = '';
+      
+      cartItems.forEach(item => {
+        checkoutList.innerHTML += `
+          <div class="checkout-item">
+            <div class="checkout-item-detail">
+              <div class="checkout-item-img" style="background-image: url('${item.img}')"></div>
+              <h4 class="checkout-item-name">${item.name}</h4>
+            </div>
+            <span style="font-weight: 500;">฿${item.price}</span>
+          </div>`;
+      });
+
+      const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('pay-food-total').innerText = total;
+      document.getElementById('pay-grand-total').innerText = total + 15;
+      
+      showScreen('payment-screen');
+    }
+
+    function selectPayment(element) {
+      document.querySelectorAll('.method-option').forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+
+    function processPayment() {
+      showScreen('waiting-screen');
+      
+      // 4. ตัวอย่างการเพิ่มข้อมูลลง Firebase เมื่อกดสั่งซื้อ
+      const total = cartItems.reduce((sum, item) => sum + item.price, 0) + 15; // ค่าอาหาร + ค่าส่ง
+      const orderData = {
+        customerName: "ทดสอบ ผู้ใช้",
+        total: total,
+        status: "รอไรเดอร์",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        items: cartItems.map(item => item.name)
+      };
+
+      db.collection("orders").add(orderData)
+        .then((docRef) => {
+          console.log("บันทึกออเดอร์ลง Firebase สำเร็จ! ID: ", docRef.id);
+          // หลังจากเซฟลง Firebase เสร็จ ค่อยเริ่มจับเวลาหาไรเดอร์
+          startSearchRider();
+        })
+        .catch((error) => {
+          console.error("เกิดข้อผิดพลาดในการบันทึก: ", error);
+          showToast("ไม่สามารถสร้างคำสั่งซื้อได้ โปรดลองอีกครั้ง");
+          showScreen('home-screen');
+        });
+    }
+
+    function startSearchRider() {
+      let timeLeft = 120;
+      document.getElementById('cancel-btn').style.display = 'none';
+      document.getElementById('status-title').innerText = 'กำลังค้นหาไรเดอร์';
+      document.getElementById('status-title').style.color = 'var(--text-dark)';
+      
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        let min = Math.floor(timeLeft / 60);
+        let sec = timeLeft % 60;
+        document.getElementById('countdown-timer').innerText = `0${min}:${sec < 10 ? '0'+sec : sec}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('status-title').innerText = 'ไม่พบไรเดอร์ในขณะนี้';
+          document.getElementById('status-title').style.color = 'var(--danger)';
+          document.getElementById('cancel-btn').style.display = 'block';
+        }
+      }, 1000);
+    }
+
+    function cancelOrder() {
+      showToast("ระบบได้ทำการยกเลิกและคืนเงินให้คุณเรียบร้อยแล้ว");
+      cartItems = [];
+      document.getElementById('cart-bar').style.display = 'none';
+      showScreen('home-screen');
+    }
+  </script>
+</body>
+</html>
