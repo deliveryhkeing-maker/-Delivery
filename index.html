@@ -11,10 +11,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
-  <!-- LINE LIFF SDK (ของจริง) -->
+  <!-- LINE LIFF SDK -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
   <style>
+    /* ---------------- สีหลักและโครงสร้าง ---------------- */
     :root {
       --primary-color: #00B900; --primary-dark: #009900; --primary-light: #e6f7e6;
       --bg-color: #f8f9fa; --text-dark: #212121; --text-light: #757575;
@@ -32,9 +33,10 @@
     .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,185,0,0.2); }
     .btn-primary:active { background-color: var(--primary-dark); transform: scale(0.98); }
     
-    .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); }
-    .btn-line:active { background-color: #05a546; }
-    .btn-outline { width: 100%; background-color: transparent; color: var(--text-light); border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
+    .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 8px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); transition: 0.2s; }
+    .btn-line:active { background-color: #05a546; transform: scale(0.98); }
+    .btn-outline { width: 100%; background-color: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 8px; padding: 12px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-outline:active { background-color: #fee2e2; }
 
     .header { background-color: var(--white); padding: 15px 20px 10px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
     .location-box { display: flex; align-items: center; gap: 8px; }
@@ -46,6 +48,7 @@
     .search-section { background-color: var(--white); padding: 5px 20px 15px; }
     .search-bar { background-color: var(--bg-color); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; }
     .search-bar input { border: none; background: transparent; width: 100%; font-family: 'Prompt'; outline: none; font-size: 14px; }
+    
     .banner-section { padding: 15px 20px; background: var(--white); }
     .banner { width: 100%; height: 130px; background: linear-gradient(135deg, #00B900, #4caf50); border-radius: 12px; display: flex; align-items: center; padding: 20px; color: var(--white); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,185,0,0.2); }
     .banner h3 { margin: 0 0 5px 0; font-size: 22px; z-index: 2; font-weight: 700; }
@@ -93,12 +96,26 @@
     .method-option.selected .radio-circle { border-color: var(--primary-color); }
     .method-option.selected .radio-circle::after { content: ''; width: 12px; height: 12px; background: var(--primary-color); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-    /* Profile Section */
     .profile-header { background: var(--white); padding: 40px 20px; text-align: center; border-bottom: 1px solid #eee; }
     .avatar-placeholder { width: 100px; height: 100px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
     .profile-menu { background: var(--white); margin-top: 15px; }
-    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 16px; cursor: pointer; }
+    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .profile-menu-item:active { background: #f9f9f9; }
     .profile-menu-item .material-icons { margin-right: 15px; color: var(--text-light); }
+
+    /* หน้าประวัติออเดอร์ (Order History) */
+    .order-history-list { padding: 15px; }
+    .history-card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .history-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+    .history-status { color: var(--primary-color); font-weight: 600; font-size: 14px; }
+    .history-date { color: var(--text-light); font-size: 12px; }
+    .history-body { display: flex; justify-content: space-between; align-items: center; }
+    .history-shop-name { font-weight: 600; font-size: 16px; margin: 0 0 5px 0; }
+
+    /* หน้าโปรโมชัน */
+    .promo-list { padding: 15px; }
+    .promo-ticket { background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .use-btn { background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
 
     #waiting-screen { background-color: var(--white); text-align: center; padding-top: 60px; }
     .status-text { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
@@ -118,6 +135,7 @@
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 25%; }
     .nav-item.active { color: var(--primary-color); }
+    .nav-item .material-icons { font-size: 26px; }
 
     .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, bottom 0.3s; font-family: 'Prompt', sans-serif; }
     .toast.show { visibility: visible; opacity: 1; bottom: 100px; }
@@ -159,6 +177,28 @@
     </div>
   </div>
 
+  <!-- ================= หน้าโปรโมชัน (Promo) ================= -->
+  <div id="promo-screen" class="screen">
+    <div class="top-bar"><div class="page-title">โปรโมชัน & ส่วนลด</div></div>
+    <div class="promo-list">
+      <div class="promo-ticket">
+        <div><h4 style="margin: 0 0 5px 0; color: var(--primary-color);">ลด 50 บาท (โค้ด: LOCAL50)</h4><p style="margin: 0; font-size: 13px; color: var(--text-light);">ขั้นต่ำ 150 บาท • หมดอายุ 31 ก.ค.</p></div>
+        <button class="use-btn" onclick="showToast('เก็บโค้ดส่วนลด LOCAL50 เรียบร้อยแล้ว!')">เก็บโค้ด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าออเดอร์ / ประวัติการสั่งซื้อ (Orders) ================= -->
+  <div id="order-screen" class="screen">
+    <div class="top-bar"><div class="page-title">ประวัติการสั่งซื้อ</div></div>
+    <div class="order-history-list">
+      <div class="history-card">
+        <div class="history-header"><span class="history-status">จัดส่งสำเร็จ</span><span class="history-date">วันนี้, 12:30 น.</span></div>
+        <div class="history-body"><div><h4 class="history-shop-name">ป้าแจ๋ว อาหารตามสั่ง</h4><p style="margin:0; font-size:13px; color:var(--text-light);">ข้าวกะเพราหมูสับ 1 ที่</p></div><div style="font-weight:700; font-size:16px;">฿65</div></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= หน้าฉัน / Profile ================= -->
   <div id="profile-screen" class="screen">
     <div class="top-bar"><div class="page-title" style="margin: 0;">บัญชีของฉัน</div></div>
@@ -171,9 +211,9 @@
       
       <!-- ชื่อและคำอธิบาย -->
       <h2 id="profile-name" style="margin: 0 0 15px; font-size: 20px;">เข้าสู่ระบบเพื่อใช้งาน</h2>
-      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">สมัครสมาชิกหรือเข้าสู่ระบบเพื่อสั่งอาหาร</p>
+      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">สมัครสมาชิกหรือเข้าสู่ระบบเพื่อสะสมแต้ม</p>
       
-      <!-- ปุ่ม Login (จะซ่อนเมื่อล็อกอินแล้ว) -->
+      <!-- ปุ่ม Login -->
       <button id="btn-line-login" class="btn-line" onclick="loginWithLine()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
           <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738S0 4.935 0 10.304c0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.038 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967C23.153 14.394 24 12.458 24 10.304z"/>
@@ -185,9 +225,10 @@
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
 
+    <!-- เมนูต่างๆ ในหน้าโปรไฟล์ รวมถึงประวัติการสั่งซื้อ -->
     <div class="profile-menu">
       <div class="profile-menu-item"><span class="material-icons">location_on</span> ที่อยู่จัดส่งของฉัน</div>
-      <div class="profile-menu-item"><span class="material-icons">receipt_long</span> ประวัติการสั่งซื้อ</div>
+      <div class="profile-menu-item" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span> ประวัติการสั่งซื้อ (คลิกที่นี่)</div>
       <div class="profile-menu-item"><span class="material-icons">help_outline</span> ศูนย์ช่วยเหลือ</div>
     </div>
   </div>
@@ -254,6 +295,8 @@
   <!-- ================= เมนูด้านล่าง ================= -->
   <div class="bottom-nav">
     <div class="nav-item active" id="nav-home" onclick="showScreen('home-screen')"><span class="material-icons">storefront</span><span>หน้าแรก</span></div>
+    <div class="nav-item" id="nav-promo" onclick="showScreen('promo-screen')"><span class="material-icons">local_offer</span><span>โปรโมชัน</span></div>
+    <div class="nav-item" id="nav-order" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span><span>ออเดอร์</span></div>
     <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">person</span><span>ฉัน</span></div>
   </div>
 
@@ -261,6 +304,7 @@
   <div id="custom-toast" class="toast">ข้อความแจ้งเตือน</div>
 
   <script>
+    // 1. ตั้งค่า Firebase (จากโปรเจกต์ของคุณ)
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -269,28 +313,40 @@
       messagingSenderId: "901130815996",
       appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 2. ตั้งค่า LINE LIFF
     const LIFF_ID = "2010799042-aNBObgM9"; 
-    let userProfile = null; // เก็บข้อมูลผู้ใช้
+    let userProfile = null; 
 
+    // เริ่มทำงานเมื่อเปิดเว็บ
+    window.onload = async function() {
+      // โหลดรายชื่อร้านอาหาร
+      renderRestaurants();
+      
+      // ดูว่าคราวก่อนเปิดหน้าไหนทิ้งไว้ (เช่น เพิ่งกลับมาจากหน้าล็อกอิน)
+      const savedScreen = sessionStorage.getItem('activeScreen') || 'home-screen';
+      showScreen(savedScreen);
+
+      // เรียกใช้งาน LINE LIFF
+      await initializeLiff(); 
+    };
+
+    // ฟังก์ชันเชื่อมต่อ LINE LIFF
     async function initializeLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
+        
         if (liff.isLoggedIn()) {
-          // ถ้าล็อกอินแล้ว ให้ดึงข้อมูลมาโชว์ที่หน้า Profile ทันที
+          // ถ้าล็อกอินสำเร็จแล้ว ดึงข้อมูลผู้ใช้มาโชว์
           userProfile = await liff.getProfile();
           
           document.getElementById('profile-name').innerText = userProfile.displayName;
           document.getElementById('profile-desc').innerText = "เชื่อมต่อบัญชี LINE ของคุณเรียบร้อยแล้ว";
+          document.getElementById('profile-image-container').innerHTML = `<img src="${userProfile.pictureUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
           
-          // เปลี่ยนรูปภาพ
-          document.getElementById('profile-image-container').innerHTML = 
-            `<img src="${userProfile.pictureUrl}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">`;
-          
-          // สลับปุ่ม Login เป็น Logout
+          // สลับปุ่ม
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
         }
@@ -299,60 +355,26 @@
       }
     }
 
-    // ฟังก์ชันกดปุ่มล็อกอิน
+    // กดปุ่มล็อกอิน
     function loginWithLine() {
       if (!liff.isLoggedIn()) {
-        liff.login();
+        // ให้กลับมาที่ URL ปัจจุบัน หลังจากล็อกอินเสร็จ
+        liff.login({ redirectUri: window.location.href });
       }
     }
 
-    // ฟังก์ชันกดปุ่มล็อกเอาท์
+    // กดปุ่มออกจากระบบ
     function logoutLine() {
       if (liff.isLoggedIn()) {
         liff.logout();
-        window.location.reload(); // โหลดหน้าใหม่
+        window.location.reload(); 
       }
-    }
-
-
-    const restaurants = [
-      {
-        id: 1, name: "ป้าแจ๋ว อาหารตามสั่ง", image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80", rating: "4.8", promo: "ส่งฟรี",
-        menus: [
-          { name: "ข้าวกะเพราหมูสับ", price: 50, img: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80" },
-          { name: "ข้าวผัดกุ้ง", price: 60, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80" }
-        ]
-      }
-    ];
-
-    let cartItems = []; 
-
-    window.onload = function() {
-      initializeLiff(); // เรียก LIFF ทันทีที่เปิดเว็บ
-      
-      const listContainer = document.getElementById('restaurant-list');
-      restaurants.forEach((res, index) => {
-        listContainer.innerHTML += `
-          <div class="restaurant-card" onclick="openRestaurant(${index})">
-            <div class="res-image" style="background-image: url('${res.image}')">
-              ${res.promo ? `<div class="promo-tag">${res.promo}</div>` : ''}
-            </div>
-            <div class="res-info">
-              <h3 class="res-name">${res.name}</h3>
-              <div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px">star</i> ${res.rating}</span></div>
-            </div>
-          </div>`;
-      });
-    };
-
-    function showToast(message) {
-      const toast = document.getElementById("custom-toast");
-      toast.innerText = message;
-      toast.className = "toast show";
-      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
     }
 
     function showScreen(screenId) {
+      // บันทึกหน้าปัจจุบันไว้ (แก้ปัญหากดล็อกอินแล้วเด้งกลับหน้าแรก)
+      sessionStorage.setItem('activeScreen', screenId);
+
       document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
       document.getElementById(screenId).style.display = 'block';
       window.scrollTo(0, 0);
@@ -368,6 +390,43 @@
       } else {
         document.getElementById('cart-bar').style.display = 'none';
       }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("custom-toast");
+      toast.innerText = message;
+      toast.className = "toast show";
+      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    // ข้อมูลร้านค้าจำลอง
+    const restaurants = [
+      {
+        id: 1, name: "ป้าแจ๋ว อาหารตามสั่ง", image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80", rating: "4.8", promo: "ส่งฟรี",
+        menus: [
+          { name: "ข้าวกะเพราหมูสับ", price: 50, img: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&w=150&q=80" },
+          { name: "ข้าวผัดกุ้ง", price: 60, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=150&q=80" }
+        ]
+      }
+    ];
+
+    let cartItems = []; 
+
+    function renderRestaurants() {
+      const listContainer = document.getElementById('restaurant-list');
+      listContainer.innerHTML = '';
+      restaurants.forEach((res, index) => {
+        listContainer.innerHTML += `
+          <div class="restaurant-card" onclick="openRestaurant(${index})">
+            <div class="res-image" style="background-image: url('${res.image}')">
+              ${res.promo ? `<div class="promo-tag">${res.promo}</div>` : ''}
+            </div>
+            <div class="res-info">
+              <h3 class="res-name">${res.name}</h3>
+              <div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px">star</i> ${res.rating}</span></div>
+            </div>
+          </div>`;
+      });
     }
 
     function openRestaurant(index) {
@@ -441,8 +500,6 @@
       showScreen('waiting-screen');
       
       const total = cartItems.reduce((sum, item) => sum + item.price, 0) + 15; 
-      
-      // ดึงชื่อลูกค้าจาก LINE (ถ้าล็อกอินแล้ว)
       const customerName = userProfile ? userProfile.displayName : "ลูกค้าทั่วไป";
       const lineId = userProfile ? userProfile.userId : "ไม่ระบุ";
 
@@ -455,15 +512,15 @@
         items: cartItems.map(item => item.name)
       };
 
-      // บันทึกลง Firebase Firestore
+      // บันทึกลง Firebase Firestore ทันที!
       db.collection("orders").add(orderData)
         .then((docRef) => {
-          console.log("Order saved to Firebase: ", docRef.id);
+          console.log("บันทึกออเดอร์สำเร็จ! ID: ", docRef.id);
           showToast("ส่งคำสั่งซื้อสำเร็จ! กำลังหาไรเดอร์");
         })
         .catch((error) => {
           console.error("Error saving order: ", error);
-          showToast("เกิดข้อผิดพลาด โปรดลองอีกครั้ง");
+          showToast("เกิดข้อผิดพลาดในการสั่งอาหาร โปรดลองอีกครั้ง");
           showScreen('home-screen');
         });
     }
