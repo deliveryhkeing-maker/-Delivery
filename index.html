@@ -15,8 +15,8 @@
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <!-- Leaflet CSS & JS (สำหรับแผนที่) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
   <style>
     :root {
@@ -34,13 +34,11 @@
     .back-btn-simple { display: flex; align-items: center; cursor: pointer; color: var(--text-dark); padding: 5px; }
     .page-title { flex-grow: 1; text-align: center; font-size: 18px; font-weight: 600; margin-right: 24px; }
 
-    /* Buttons */
     .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,185,0,0.2); }
     .btn-primary:active { background-color: var(--primary-dark); transform: scale(0.98); }
     .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); }
     .btn-outline { width: 100%; background-color: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 12px; padding: 12px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
 
-    /* Header สีเขียวดีไซน์ใหม่ */
     .header { background-color: var(--primary-color); padding: 20px 20px 15px; position: sticky; top: 0; z-index: 100; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 15px rgba(0,185,0,0.2); margin-bottom: 15px; }
     .location-box { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s; }
     .location-box:active { background: rgba(255,255,255,0.3); transform: scale(0.98); }
@@ -65,7 +63,7 @@
     .category-item span { font-size: 13px; font-weight: 500; }
     
     .restaurant-section { padding: 0 20px 15px; }
-    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
     
     .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }
     .restaurant-card:active { transform: scale(0.98); }
@@ -89,9 +87,12 @@
 
     .checkout-items, .summary-card, .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     
-    .profile-header { background: var(--white); padding: 40px 20px; text-align: center; border-bottom: 1px solid #eee; }
+    .profile-header { background: var(--white); padding: 40px 20px 20px; text-align: center; }
     .avatar-placeholder { width: 100px; height: 100px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 16px; cursor: pointer; }
+    .profile-menu { background: var(--white); margin-top: 15px; }
+    .profile-menu-item { padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer; color: var(--text-dark); transition: background 0.2s; }
+    .profile-menu-item:active { background-color: #f0f0f0; }
+    .profile-menu-item .material-icons { margin-right: 15px; color: var(--text-light); }
     
     #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; }
     #map-container { flex: 1; min-height: 40vh; background: #ddd; position: relative; z-index: 1; }
@@ -124,11 +125,11 @@
           <span class="material-icons">delivery_dining</span> ห้วยเกิ้ง Delivery
         </h1>
       </div>
-      <!-- กล่องพิกัด กดได้เพื่ออัปเดต GPS -->
+      <!-- กล่องพิกัด กดได้เพื่ออัปเดต GPS (บังคับหาค่าใหม่) -->
       <div class="location-box" onclick="getLocation()">
         <span class="material-icons pin">location_on</span>
         <div class="location-text">
-          <span>จัดส่งที่ (กดเพื่ออัปเดตตำแหน่ง)</span>
+          <span>พิกัดจัดส่ง (กดเพื่ออัปเดต)</span>
           <span id="current-location-text">กำลังค้นหาพิกัด...</span>
         </div>
         <span class="material-icons" style="margin-left: auto; color: white;">my_location</span>
@@ -153,7 +154,7 @@
     </div>
 
     <div class="restaurant-section">
-      <div class="section-title"><span>ร้านอาหารใกล้คุณ (ส่งเฉพาะใน 5 กม.)</span></div>
+      <div class="section-title"><span>ร้านอาหารใกล้คุณ (เฉพาะใน 5 กม.)</span></div>
       <div id="restaurant-list">
         <!-- ร้านอาหารจะถูก Render ด้วย JavaScript ที่นี่ -->
       </div>
@@ -190,19 +191,43 @@
   </div>
 
   <div id="profile-screen" class="screen">
-    <div class="top-bar"><div class="page-title" style="margin: 0;">บัญชีของฉัน</div></div>
+    <div class="header" style="border-radius: 0; margin-bottom: 0; padding-bottom: 15px;">
+      <h1 style="margin: 0; font-size: 18px; color: white; text-align: center;">บัญชีของฉัน</h1>
+    </div>
+    
     <div class="profile-header">
       <div class="avatar-placeholder" id="profile-image-container">
         <span class="material-icons" style="font-size: 50px; color: #fff;">person</span>
       </div>
-      <h2 id="profile-name" style="margin: 0 0 15px; font-size: 20px;">เข้าสู่ระบบเพื่อใช้งาน</h2>
-      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">สมัครสมาชิกหรือเข้าสู่ระบบเพื่อสะสมแต้ม</p>
+      <h2 id="profile-name" style="margin: 0 0 5px; font-size: 20px;">ลูกค้าทั่วไป</h2>
+      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 13px;">เบอร์โทร: ยังไม่ได้ระบุ</p>
       
       <button id="btn-line-login" class="btn-line" onclick="loginWithLine()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738S0 4.935 0 10.304c0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.038 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967C23.153 14.394 24 12.458 24 10.304z"/></svg>
         เข้าสู่ระบบด้วย LINE
       </button>
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
+    </div>
+
+    <!-- กระเป๋าวอเลท & พอยท์สะสม -->
+    <div style="display: flex; background: white; margin-bottom: 15px; padding: 15px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+      <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
+        <p style="margin:0; font-size: 13px; color: var(--text-light);">ห้วยเกิ้ง วอลเล็ท</p>
+        <h3 style="margin: 5px 0 0; color: var(--primary-color); font-size: 20px;">฿<span id="wallet-balance">0.00</span></h3>
+      </div>
+      <div style="flex: 1; text-align: center;">
+        <p style="margin:0; font-size: 13px; color: var(--text-light);">พอยท์สะสม</p>
+        <h3 style="margin: 5px 0 0; color: #ff9800; font-size: 20px;"><span id="reward-points">120</span> P</h3>
+      </div>
+    </div>
+
+    <!-- เมนูข้อมูลต่างๆ -->
+    <div class="profile-menu">
+      <div class="profile-menu-item" onclick="showToast('ระบบกำลังเปิดหน้าแก้ไขข้อมูล...')"><span class="material-icons">manage_accounts</span> แก้ไขข้อมูลส่วนตัว</div>
+      <div class="profile-menu-item" onclick="showToast('ระบบจัดการที่อยู่จัดส่ง')"><span class="material-icons">location_on</span> ที่อยู่จัดส่งของฉัน</div>
+      <div class="profile-menu-item" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span> ประวัติการสั่งซื้อ</div>
+      <div class="profile-menu-item" onclick="showToast('กำลังเชื่อมต่อระบบ Payment Gateway...')"><span class="material-icons">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท</div>
+      <div class="profile-menu-item"><span class="material-icons">help_outline</span> ศูนย์ช่วยเหลือ</div>
     </div>
   </div>
 
@@ -291,6 +316,9 @@
     let userLng = 102.9500;
     let leafletMap = null;
 
+    // ระบบ Wallet ของลูกค้า
+    let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
+
     // ข้อมูลร้านค้าจำลอง
     const restaurants = [
       {
@@ -317,8 +345,13 @@
     ];
 
     window.onload = async function() {
+      // โหลดข้อมูล Wallet
+      document.getElementById('wallet-balance').innerText = userWallet.toFixed(2);
+
+      // ระบบจดจำหน้าล่าสุด
       const savedScreen = sessionStorage.getItem('activeScreen') || 'home-screen';
       showScreen(savedScreen);
+      
       await initializeLiff(); 
       await getLocation();
       checkActiveOrder();
@@ -381,7 +414,7 @@
     }
 
     function getLocation() {
-      showToast("📍 กำลังอัปเดตพิกัด GPS...");
+      showToast("📍 กำลังอัปเดตพิกัดดาวเทียมล่าสุด...");
       document.getElementById('current-location-text').innerText = "กำลังค้นหาพิกัด...";
       
       return new Promise((resolve) => {
@@ -390,18 +423,19 @@
             (position) => {
               userLat = position.coords.latitude;
               userLng = position.coords.longitude;
-              document.getElementById('current-location-text').innerText = "พิกัดปัจจุบันของคุณ";
-              showToast("อัปเดตพิกัด GPS สำเร็จ!");
+              document.getElementById('current-location-text').innerText = "ตำแหน่งล่าสุด (อัปเดตแล้ว)";
+              showToast("รับพิกัดแม่นยำสูงสำเร็จ!");
               renderRestaurants();
               resolve();
             },
             (error) => {
-              showToast("ไม่สามารถดึง GPS ได้ (ใช้ตำแหน่งเริ่มต้น)");
-              document.getElementById('current-location-text').innerText = "ตำแหน่งเริ่มต้น (ห้วยเกิ้ง)";
+              showToast("ไม่สามารถดึง GPS ได้ (อาจถูกบล็อกโดยเบราว์เซอร์)");
+              document.getElementById('current-location-text').innerText = "พิกัดเริ่มต้น (ห้วยเกิ้ง)";
               renderRestaurants();
               resolve();
             },
-            { enableHighAccuracy: true, timeout: 5000 }
+            // maximumAge: 0 บังคับให้มือถือหาพิกัดใหม่เสมอ ไม่ใช้พิกัดเก่าที่ค้างในระบบ
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
         } else {
           document.getElementById('current-location-text').innerText = "เบราว์เซอร์ไม่รองรับ GPS";
@@ -429,7 +463,7 @@
         const isTooFar = distance > 5.0; // กฎ: ห้ามเกิน 5 กิโลเมตร
         
         listContainer.innerHTML += `
-          <div class="restaurant-card ${isTooFar ? 'disabled' : ''}" onclick="${isTooFar ? 'showToast(\'ร้านนี้อยู่ไกลเกิน 5 กม. อยู่นอกพื้นที่จัดส่งครับ\')' : `openRestaurant(${index}, ${distance})`}">
+          <div class="restaurant-card ${isTooFar ? 'disabled' : ''}" onclick="${isTooFar ? 'showToast(\'ร้านนี้อยู่ไกลเกิน 5 กม. ไม่สามารถจัดส่งได้ครับ\')' : `openRestaurant(${index}, ${distance})`}">
             <div class="res-image" style="background-image: url('${res.image}')">
               ${isTooFar ? `<div class="out-of-range-tag">ไกลเกิน 5 กม. (จัดส่งไม่ได้)</div>` : ''}
               <div class="distance-tag"><span class="material-icons" style="font-size:14px; color:var(--primary-color);">location_on</span> ${distance} กม.</div>
@@ -492,20 +526,27 @@
       const foodTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
       const distance = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
       const deliveryFee = 15 + Math.floor(distance * 5); 
+      const grandTotal = foodTotal + deliveryFee;
       
       document.getElementById('pay-food-total').innerText = foodTotal;
       document.getElementById('pay-delivery-fee').innerText = deliveryFee;
-      document.getElementById('pay-grand-total').innerText = foodTotal + deliveryFee;
+      document.getElementById('pay-grand-total').innerText = grandTotal;
+      
+      // เซฟราคารวมแฝงไว้ในตัวแปร เพื่อนำไปคืนเงิน ถ้ายกเลิก
+      document.getElementById('pay-grand-total').dataset.amount = grandTotal;
       
       showScreen('payment-screen');
     }
 
     function processPayment() {
+      const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
+
       const orderData = {
         resName: selectedRestaurant.name,
-        resLat: selectedRestaurant.lat,
+        resLat: selected selectedRestaurant.lat,
         resLng: selectedRestaurant.lng,
-        status: 'searching', 
+        status: 'searching',
+        totalPrice: totalAmount, // บันทึกยอดเงินไว้สำหรับการคืนเงิน
         timestamp: new Date().getTime()
       };
       
@@ -566,8 +607,19 @@
     }
 
     function cancelOrder() {
-      localStorage.removeItem('activeOrder');
-      showToast("ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว");
+      const activeData = localStorage.getItem('activeOrder');
+      if(activeData) {
+        const order = JSON.parse(activeData);
+        // คืนเงินเข้า Wallet
+        userWallet += order.totalPrice;
+        localStorage.setItem('hk_user_wallet', userWallet);
+        document.getElementById('wallet-balance').innerText = userWallet.toFixed(2);
+        
+        showToast(`ยกเลิกออเดอร์! คืนเงิน ฿${order.totalPrice} เข้าวอลเล็ทแล้ว`);
+        localStorage.removeItem('activeOrder');
+      } else {
+        showToast("ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว");
+      }
       showScreen('home-screen');
     }
   </script>
