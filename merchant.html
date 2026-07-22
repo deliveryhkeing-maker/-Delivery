@@ -29,9 +29,9 @@
 
     .screen { display: none; min-height: 100vh; flex-direction: column; }
     
+    /* ---------------- การเข้าสู่ระบบ / สมัคร ---------------- */
     .auth-screen { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 20px; min-height: 100vh; }
     .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; max-height: 90vh; overflow-y: auto; }
-    
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-dark); }
     
@@ -52,6 +52,7 @@
     .btn-outline:active { transform: scale(0.98); background: var(--primary-light); }
     .btn-text { background: none; border: none; color: var(--primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; transition: 0.2s;}
 
+    /* ---------------- หน้าจอหลัก ---------------- */
     .header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .shop-info-header { display: flex; align-items: center; gap: 10px; }
     .header-shop-img { width: 45px; height: 45px; border-radius: 50%; background: #ccc; background-size: cover; background-position: center; }
@@ -71,6 +72,7 @@
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .content-area { padding: 15px; flex-grow: 1; overflow-y: auto; }
     
+    /* ---------------- การ์ดต่างๆ ---------------- */
     .menu-item-card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border); transition: all 0.3s ease; }
     .menu-item-header { display: flex; align-items: center; justify-content: space-between; }
     .menu-item-left { display: flex; gap: 12px; align-items: center; }
@@ -81,6 +83,7 @@
     .wallet-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 16px; padding: 25px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
     .card-box { background: var(--white); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border); }
     
+    /* ---------------- ท็อปปิ้ง (Add-ons) ---------------- */
     .topping-group { background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 12px; margin-top: 15px; position: relative; }
     .topping-item-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
     
@@ -91,6 +94,7 @@
     .btn-remove { background: #fee2e2; border: none; color: var(--danger); cursor: pointer; border-radius: 8px; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: 0.2s; }
     .btn-remove:active { transform: scale(0.9); }
     
+    /* ---------------- Modal & Nav ---------------- */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
     .modal-content { background: var(--white); width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
 
@@ -311,11 +315,10 @@
       
       <div style="width: 100%; background: var(--bg-color); padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 20px;">
         <h4 style="margin: 0 0 5px;">รายการอาหาร:</h4>
-        <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
-          <li>ข้าวกะเพราหมูสับ + ไข่ดาว x1</li>
-          <li>ข้าวผัดกุ้ง x1</li>
+        <ul id="real-alert-items" style="margin: 0; padding-left: 20px; font-size: 14px;">
+          <!-- รายการอาหรเข้าตรงนี้ -->
         </ul>
-        <div style="margin-top: 10px; font-weight: bold; color: var(--primary);">ยอดรวม: ฿120</div>
+        <div style="margin-top: 10px; font-weight: bold; color: var(--primary);">ยอดรวม: ฿<span id="real-alert-total">0</span></div>
       </div>
 
       <div style="display: flex; gap: 10px; width: 100%;">
@@ -477,6 +480,9 @@
 
           renderMenus(merchantData.menus || []);
           showScreen('home-screen');
+          
+          // ดึงข้อมูลออเดอร์ใหม่ๆ
+          listenForOrders(); 
         }
       });
     }
@@ -616,19 +622,116 @@
       });
     }
 
+    let ordersListener = null;
+    let currentAlertOrderId = null;
+
+    function listenForOrders() {
+      if(ordersListener) ordersListener(); // ล้างการฟังซ้ำซ้อน
+      
+      ordersListener = db.collection("orders")
+        .where("merchantId", "==", currentMerchantId)
+        .onSnapshot((snapshot) => {
+          let newOrdersHTML = "";
+          let historyOrdersHTML = "";
+          let hasNewOrders = false;
+          let hasHistoryOrders = false;
+
+          const allOrders = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            allOrders.push(data);
+          });
+          
+          // เรียงออเดอร์ใหม่ล่าสุดขึ้นก่อน
+          allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+
+          allOrders.forEach(order => {
+            if(order.status === "กำลังค้นหาไรเดอร์" || order.status === "รอตรวจสอบสลิป" || order.status === "ร้านกำลังเตรียมอาหาร") {
+              hasNewOrders = true;
+              let btnHtml = '';
+              if(order.status === "กำลังค้นหาไรเดอร์" || order.status === "รอตรวจสอบสลิป") {
+                 btnHtml = `<button class="btn-main" style="background-color: var(--success); padding: 8px; font-size: 14px;" onclick="acceptRealOrder('${order.id}')">กดรับออเดอร์</button>`;
+              } else {
+                 btnHtml = `<span style="color: var(--warning); font-weight: 600; font-size: 14px;"><span class="material-icons" style="font-size:14px; vertical-align: middle;">soup_kitchen</span> กำลังเตรียมอาหาร...</span>`;
+              }
+              
+              let slipHtml = order.slipImage ? `<div style="margin-top:10px;"><a href="${order.slipImage}" target="_blank" style="color: var(--primary); font-size: 13px; text-decoration: underline;"><span class="material-icons" style="font-size:14px; vertical-align:middle;">receipt</span> ดูสลิปโอนเงิน</a></div>` : '';
+
+              newOrdersHTML += `
+                <div class="card-box" style="padding: 15px;">
+                  <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+                    <div><strong style="color:var(--primary);">#${order.id.substring(0,6).toUpperCase()}</strong><br><span style="font-size:12px; color:var(--text-light);">${order.customerName}</span></div>
+                    <div style="text-align:right;"><strong>฿${order.totalPrice}</strong><br><span style="font-size:12px; color:var(--text-light);">${order.paymentMethod === 'transfer' ? 'โอนเงิน (พร้อมเพย์)' : 'เงินสด'}</span></div>
+                  </div>
+                  <ul style="margin: 0 0 15px; padding-left: 20px; font-size: 14px;">
+                    ${order.items.map(item => `<li>${item}</li>`).join('')}
+                  </ul>
+                  ${slipHtml}
+                  <div style="text-align:right; margin-top:10px;">
+                    ${btnHtml}
+                  </div>
+                </div>
+              `;
+            } else {
+              hasHistoryOrders = true;
+              historyOrdersHTML += `
+                <div class="card-box" style="padding: 15px;">
+                  <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+                    <div><strong>#${order.id.substring(0,6).toUpperCase()}</strong><br><span style="font-size:12px; color:var(--text-light);">${order.customerName}</span></div>
+                    <div style="text-align:right;"><strong>฿${order.totalPrice}</strong><br><span style="font-size:12px; font-weight:600; color:var(--success);">${order.status}</span></div>
+                  </div>
+                </div>
+              `;
+            }
+          });
+
+          document.getElementById('order-list-container').innerHTML = hasNewOrders ? newOrdersHTML : '<p style="text-align: center; color: var(--text-light); margin-top: 30px;">รอออเดอร์ใหม่จากลูกค้า...</p>';
+          document.getElementById('empty-order-msg').style.display = 'none';
+          document.getElementById('order-history-container').innerHTML = hasHistoryOrders ? historyOrdersHTML : '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการขาย</p>';
+
+          // ตรวจสอบออเดอร์ใหม่เพื่อแจ้งเตือนเสียง
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const data = change.doc.data();
+              if(data.status === "กำลังค้นหาไรเดอร์" || data.status === "รอตรวจสอบสลิป") {
+                triggerRealOrderAlert(change.doc.id, data);
+              }
+            }
+          });
+        }, (err) => { console.error("Error listening to orders:", err); });
+    }
+
+    function triggerRealOrderAlert(orderId, orderData) {
+      currentAlertOrderId = orderId;
+      let itemsList = orderData.items.map(item => `<li>${item}</li>`).join('');
+      document.getElementById('real-alert-items').innerHTML = itemsList;
+      document.getElementById('real-alert-total').innerText = orderData.totalPrice;
+      
+      document.getElementById('order-alert-modal').style.display = 'flex';
+      playVoiceAlert();
+      if(orderVoiceInterval) clearInterval(orderVoiceInterval);
+      orderVoiceInterval = setInterval(playVoiceAlert, 5000);
+    }
+
     function playVoiceAlert() {
       if ('speechSynthesis' in window) {
         const msg = new SpeechSynthesisUtterance("ห้วยเกิ้งเดลิเวอรี่ มีออเดอร์ใหม่เข้าแล้วครับ");
-        msg.lang = 'th-TH'; 
+        msg.lang = 'th-TH'; // เสียงภาษาไทย
         msg.rate = 1.0;
         window.speechSynthesis.speak(msg);
       } else {
-        navigator.vibrate([500, 250, 500, 250]);
+        // กรณีเบราว์เซอร์ไม่รองรับ
+        navigator.vibrate([500, 250, 500, 250]); // สั่นแทน (ถ้าเป็นมือถือ)
       }
     }
 
     function simulateOrderAlert() {
+      // โชว์ Popup สำหรับทดสอบ
+      document.getElementById('real-alert-items').innerHTML = '<li>ข้าวกะเพราหมูสับ (ทดสอบ) x1</li>';
+      document.getElementById('real-alert-total').innerText = '50';
       document.getElementById('order-alert-modal').style.display = 'flex';
+      
       playVoiceAlert();
       if(orderVoiceInterval) clearInterval(orderVoiceInterval);
       orderVoiceInterval = setInterval(playVoiceAlert, 5000);
@@ -637,15 +740,38 @@
     function stopOrderAlert(isAccepted) {
       clearInterval(orderVoiceInterval);
       orderVoiceInterval = null;
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       document.getElementById('order-alert-modal').style.display = 'none';
-      if(isAccepted) {
-        showToast("รับออเดอร์สำเร็จ! กำลังแจ้งลูกค้าและเรียกไรเดอร์...");
+
+      if(isAccepted && currentAlertOrderId) {
+        db.collection("orders").doc(currentAlertOrderId).update({
+          status: "ร้านกำลังเตรียมอาหาร"
+        }).then(() => {
+          showToast("รับออเดอร์สำเร็จ! กรุณาเตรียมอาหาร");
+          currentAlertOrderId = null;
+        });
+      } else if (!isAccepted && currentAlertOrderId) {
+        db.collection("orders").doc(currentAlertOrderId).update({
+          status: "ร้านปฏิเสธรับออเดอร์"
+        }).then(() => {
+          showToast("คุณปฏิเสธรับออเดอร์นี้");
+          currentAlertOrderId = null;
+        });
+      } else if (isAccepted) {
+         showToast("ทดสอบ: รับออเดอร์จำลองสำเร็จ");
       } else {
-        showToast("คุณปฏิเสธรับออเดอร์นี้");
+         showToast("ทดสอบ: ปฏิเสธจำลอง");
       }
+    }
+
+    function acceptRealOrder(orderId) {
+       if(confirm('ยืนยันรับออเดอร์เพื่อเริ่มเตรียมอาหาร?')) {
+          db.collection("orders").doc(orderId).update({
+            status: "ร้านกำลังเตรียมอาหาร"
+          }).then(() => {
+            showToast("รับออเดอร์เรียบร้อย หน้าต่างออเดอร์จะเปลี่ยนสถานะ");
+          });
+       }
     }
 
     function saveGPS() {
