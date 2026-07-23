@@ -25,7 +25,6 @@
     body { font-family: 'Prompt', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark); padding-bottom: 70px; }
     .screen { display: none; min-height: 100vh; flex-direction: column; }
     
-    /* Auth & Login */
     .auth-screen { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 20px; min-height: 100vh; }
     .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; max-height: 90vh; overflow-y: auto; }
     .input-group { margin-bottom: 15px; text-align: left; }
@@ -35,7 +34,6 @@
 
     .image-upload-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
     .image-preview { width: 100px; height: 100px; border-radius: 50%; background-color: #e2e8f0; border: 2px dashed #cbd5e1; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 10px; position: relative; cursor: pointer; background-size: cover; background-position: center; transition: 0.3s; }
-    .image-preview:active { transform: scale(0.95); }
     .image-preview.square { border-radius: 12px; width: 120px; height: 120px; }
     .image-preview .material-icons { font-size: 30px; color: #94a3b8; }
     .file-input { display: none; }
@@ -46,7 +44,6 @@
     .btn-outline:active { transform: scale(0.98); background: var(--primary-light); }
     .btn-text { background: none; border: none; color: var(--primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; transition: 0.2s;}
 
-    /* Layout & Tabs */
     .header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .shop-info-header { display: flex; align-items: center; gap: 10px; }
     .header-shop-img { width: 45px; height: 45px; border-radius: 50%; background: #ccc; background-size: cover; background-position: center; }
@@ -81,9 +78,7 @@
     .topping-item-row input { margin-bottom: 0; padding: 12px; font-size: 14px; border: 1.5px solid var(--border); border-radius: 8px; outline: none; transition: all 0.3s ease; background: var(--white); }
     .topping-item-row input:focus { border-color: var(--primary); box-shadow: 0 2px 8px rgba(37,99,235,0.1); }
     .btn-remove { background: #fee2e2; border: none; color: var(--danger); cursor: pointer; border-radius: 8px; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: 0.2s; }
-    .btn-remove:active { transform: scale(0.9); }
     
-    /* Modals & Popups */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
     .modal-content { background: var(--white); width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
 
@@ -306,6 +301,7 @@
   <div id="custom-toast" class="toast">ข้อความ</div>
 
   <script>
+    /* STREAMING_CHUNK:Firebase Setup... */
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -327,6 +323,7 @@
     let currentAlertOrderId = null;
     let confirmCallback = null;
 
+    /* STREAMING_CHUNK:App Initialization... */
     window.onload = function() { 
       currentMerchantId = localStorage.getItem('hk_merchant_id');
       if(currentMerchantId) {
@@ -396,6 +393,7 @@
       });
     }
 
+    /* STREAMING_CHUNK:Loading Profile and Orders... */
     function loadMerchantProfile() {
       if(!currentMerchantId) return;
       db.collection("merchants").doc(currentMerchantId).onSnapshot((doc) => {
@@ -447,10 +445,10 @@
           allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
           allOrders.forEach(order => {
-            // เช็คสถานะเพื่อแยกลง "ออเดอร์ใหม่" หรือ "ประวัติการขาย"
             if(["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว", "ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง"].includes(order.status)) {
               hasNewOrders = true;
               let btnHtml = '';
+              let cancelBtn = '';
               let statusBadge = '';
               
               if(order.status === "กำลังค้นหาไรเดอร์" || order.status === "รอตรวจสอบสลิป") {
@@ -459,12 +457,20 @@
               } else if (order.status === "ร้านกำลังเตรียมอาหาร") {
                  btnHtml = `<button class="btn-main" style="background-color: var(--warning); padding: 8px; font-size: 14px;" onclick="markFoodReady('${order.id}')">จัดเตรียมอาหารเสร็จแล้ว</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">กำลังเตรียมอาหาร</span>`;
+              } else if (order.status === "ร้านเตรียมอาหารเสร็จแล้ว") {
+                 btnHtml = `<span style="color: var(--warning); font-weight: 600; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align: middle;">check_circle</span> เตรียมอาหารเสร็จแล้ว (รอไรเดอร์)</span>`;
+                 statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">รอไรเดอร์มารับ</span>`;
               } else {
                  btnHtml = `<span style="color: var(--primary); font-weight: 600; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align: middle;">sports_motorsports</span> ${order.status}</span>`;
-                 statusBadge = `<span class="status-badge" style="background:#e0e7ff; color:#3730a3;">รอไรเดอร์มารับ/กำลังส่ง</span>`;
+                 statusBadge = `<span class="status-badge" style="background:#e0e7ff; color:#3730a3;">ไรเดอร์กำลังมารับ/ส่ง</span>`;
+              }
+
+              // ทางออกหากไม่มีไรเดอร์รับงาน
+              if(!order.riderId) {
+                cancelBtn = `<button class="btn-outline" style="border-color:var(--danger); color:var(--danger); padding:8px; font-size:13px;" onclick="cancelOrderByMerchant('${order.id}')">ยกเลิก (ไม่มีไรเดอร์)</button>`;
               }
               
-              let riderInfo = order.riderName ? `<div style="font-size:12px; color:var(--text-light); margin-top:5px;"><span class="material-icons" style="font-size:12px;">sports_motorsports</span> ไรเดอร์: ${order.riderName}</div>` : '';
+              let riderInfo = order.riderId ? `<div style="font-size:12px; color:var(--text-light); margin-top:5px; background:#f1f5f9; padding:8px; border-radius:8px;"><span class="material-icons" style="font-size:12px; color:var(--primary);">sports_motorsports</span> ไรเดอร์รับงานแล้ว: <b>${order.riderName}</b> (${order.riderPlate}) <br>โทร: ${order.riderPhone}</div>` : `<div style="font-size:12px; color:var(--danger); margin-top:5px;">⚠️ ยังไม่มีไรเดอร์รับงาน</div>`;
               
               newOrdersHTML += `
                 <div class="card-box" style="padding: 15px;">
@@ -476,13 +482,12 @@
                     ${order.items.map(item => `<li>${item}</li>`).join('')}
                   </ul>
                   ${riderInfo}
-                  <div style="text-align:right; margin-top:15px; border-top:1px dashed #eee; padding-top:10px;">
-                    ${btnHtml}
+                  <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px; border-top:1px dashed #eee; padding-top:10px;">
+                    ${cancelBtn} ${btnHtml}
                   </div>
                 </div>
               `;
             } else {
-              // History Orders
               hasHistoryOrders = true;
               let sColor = order.status === 'จัดส่งสำเร็จ' ? 'var(--success)' : 'var(--danger)';
               historyOrdersHTML += `
@@ -500,7 +505,6 @@
           document.getElementById('empty-order-msg').style.display = hasNewOrders ? 'none' : 'block';
           document.getElementById('order-history-container').innerHTML = hasHistoryOrders ? historyOrdersHTML : '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการขาย</p>';
 
-          // ตรวจจับออเดอร์ใหม่เพื่อส่งเสียงแจ้งเตือน
           snapshot.docChanges().forEach((change) => {
             if (change.type === "added") {
               const data = change.doc.data();
@@ -510,10 +514,11 @@
             }
           });
         }, (err) => { 
-          showToast("Error listening to orders: " + err.message); 
+          alert("Error Database: " + err.message); 
         });
     }
 
+    /* STREAMING_CHUNK:Order Actions... */
     function acceptRealOrder(orderId) {
        openConfirm('ยืนยันรับออเดอร์เพื่อเริ่มเตรียมอาหาร?', () => {
           db.collection("orders").doc(orderId).update({
@@ -522,13 +527,20 @@
        });
     }
 
-    // ฟังก์ชันใหม่! อาหารเสร็จแล้ว
     function markFoodReady(orderId) {
-       openConfirm('อาหารเสร็จเรียบร้อยและพร้อมส่งให้ไรเดอร์แล้วใช่ไหม?', () => {
+       openConfirm('อาหารเสร็จเรียบร้อยและพร้อมให้ไรเดอร์รับไปส่งแล้วใช่ไหม?', () => {
           db.collection("orders").doc(orderId).update({
             status: "ร้านเตรียมอาหารเสร็จแล้ว"
-          }).then(() => showToast("อัปเดตสถานะสำเร็จ!"));
+          }).then(() => showToast("อัปเดตสถานะสำเร็จ! รอไรเดอร์มารับได้เลย"));
        });
+    }
+
+    function cancelOrderByMerchant(orderId) {
+      openConfirm('ต้องการยกเลิกออเดอร์นี้และคืนเงินให้ลูกค้า เนื่องจากไม่มีไรเดอร์รับงาน ใช่หรือไม่?', () => {
+          db.collection("orders").doc(orderId).update({
+            status: "ยกเลิกเนื่องจากไม่มีไรเดอร์"
+          }).then(() => showToast("ยกเลิกออเดอร์สำเร็จ"));
+      });
     }
 
     function triggerRealOrderAlert(orderId, orderData) {
@@ -577,6 +589,7 @@
       }
     }
 
+    /* STREAMING_CHUNK:Menu Management... */
     function addToppingGroup() {
       const container = document.getElementById('toppings-container');
       const groupId = Date.now();
@@ -657,6 +670,7 @@
       });
     }
 
+    /* STREAMING_CHUNK:Settings and Utilities... */
     function saveGPS() {
       const lat = parseFloat(document.getElementById('setting-lat').value);
       const lng = parseFloat(document.getElementById('setting-lng').value);
@@ -760,3 +774,8 @@
   </script>
 </body>
 </html>
+```eof
+
+### 3. โค้ดแอปไรเดอร์ (Rider App) - `RiderApp.html`
+(อัปเกรดแผนที่และระบบนำทาง Google Maps Navigation)
+http://googleusercontent.com/immersive_entry_chip/1

@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ห้วยเกิ้ง Delivery - สั่งอาหาร</title>
+  <title>สั่งอาหาร - Food Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
-  
-  <!-- LINE LIFF SDK -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-  <!-- Leaflet CSS & JS (สำหรับแผนที่) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
@@ -314,6 +310,20 @@
     </div>
 
     <div class="tracking-overlay">
+      <!-- บล็อกแสดงข้อมูลไรเดอร์ (จะโชว์เมื่อมีไรเดอร์รับงานแล้ว) -->
+      <div id="rider-info-panel" style="display:none; background:white; padding:15px; border-radius:16px; margin: 0 15px 15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:calc(100% - 30px); text-align:left; pointer-events:auto;">
+         <div style="display:flex; justify-content:space-between; align-items:center;">
+           <div style="display:flex; gap:12px; align-items:center;">
+             <div style="width:45px;height:45px;border-radius:50%;background:var(--primary-light); color:var(--primary-color); display:flex;justify-content:center;align-items:center;"><span class="material-icons">sports_motorsports</span></div>
+             <div>
+               <h4 style="margin:0; font-size:15px; font-weight:700;" id="track-rider-name">ชื่อไรเดอร์</h4>
+               <p style="margin:0; font-size:13px; color:var(--text-light);" id="track-rider-plate">ทะเบียนรถ</p>
+             </div>
+           </div>
+           <a href="#" id="track-rider-call" style="background:rgba(0,185,0,0.1); color:var(--success); padding:10px 15px; border-radius:12px; text-decoration:none; font-weight:600; font-size:14px; display:flex; align-items:center; gap:5px;"><span class="material-icons" style="font-size:18px;">call</span> โทร</a>
+         </div>
+      </div>
+
       <div class="tracking-status-card">
         <h3 style="font-size: 22px; font-weight: 700; margin: 0 0 8px;" id="track-status-title">กำลังค้นหาไรเดอร์</h3>
         <p style="color: var(--text-light); font-size: 14px; margin: 0 0 20px;" id="track-status-subtitle">ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด</p>
@@ -390,13 +400,12 @@
     let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
     let currentCategory = 'ทั้งหมด';
 
-    // ท็อปปิ้ง และ สลิป
     let currentToppingMenu = null;
     let currentToppingBasePrice = 0;
     let tempSlipBase64 = null;
 
-    // แผนที่ติดตาม
     let trackingMap = null;
+    let riderMarkerForTracking = null; // หมุดพิกัดของไรเดอร์
     let searchTimer = null;
     let searchTimeLeft = 120;
     let orderListenerUnsubscribe = null;
@@ -426,7 +435,7 @@
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
           
-          fetchOrderHistory(); // ดึงประวัติสั่งซื้อเมื่อล็อกอิน
+          fetchOrderHistory();
         }
       } catch (error) { console.error('LIFF Error:', error); }
     }
@@ -476,15 +485,13 @@
           
           let allOrders = [];
           snapshot.forEach(doc => allOrders.push(doc.data()));
-          
-          // เรียงจากใหม่ไปเก่า
           allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
           let html = '';
           allOrders.forEach(order => {
             const date = order.createdAt ? new Date(order.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : 'กำลังดำเนินการ';
             let statusColor = 'var(--primary-color)';
-            if(order.status === 'ร้านปฏิเสธรับออเดอร์' || order.status === 'ลูกค้ายกเลิกออเดอร์') statusColor = 'var(--danger)';
+            if(order.status === 'ร้านปฏิเสธรับออเดอร์' || order.status === 'ลูกค้ายกเลิกออเดอร์' || order.status === 'ยกเลิกเนื่องจากไม่มีไรเดอร์') statusColor = 'var(--danger)';
             else if(order.status === 'กำลังค้นหาไรเดอร์' || order.status === 'รอตรวจสอบสลิป' || order.status === 'ร้านกำลังเตรียมอาหาร') statusColor = 'var(--warning)';
 
             html += `
@@ -775,53 +782,62 @@
     }
 
     function processPayment() {
-      const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-      
-      if (paymentMethod === 'transfer' && !tempSlipBase64) {
-        showToast("กรุณาแนบรูปสลิปโอนเงินก่อนยืนยันคำสั่งซื้อ");
-        return;
+      try {
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        if (paymentMethod === 'transfer' && !tempSlipBase64) {
+          showToast("กรุณาแนบรูปสลิปโอนเงินก่อนยืนยันคำสั่งซื้อ");
+          return;
+        }
+
+        const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
+
+        const orderData = {
+          merchantId: selectedRestaurant.id, // รหัสร้านที่สำคัญมาก
+          resName: selectedRestaurant.name,
+          resLat: selectedRestaurant.lat,
+          resLng: selectedRestaurant.lng,
+          cusLat: userLat,
+          cusLng: userLng,
+          customerPhone: "0997455250", // สามารถดึงเบอร์จริงจาก User Profile ได้
+          status: paymentMethod === 'transfer' ? 'รอตรวจสอบสลิป' : 'กำลังค้นหาไรเดอร์',
+          totalPrice: totalAmount, 
+          timestamp: new Date().getTime(),
+          paymentMethod: paymentMethod
+        };
+        
+        db.collection("orders").add({
+          merchantId: selectedRestaurant.id,
+          customerName: userProfile ? userProfile.displayName : "ลูกค้าทั่วไป",
+          userId: userProfile ? userProfile.userId : "guest_" + new Date().getTime(),
+          restaurantName: selectedRestaurant.name,
+          totalPrice: totalAmount,
+          paymentMethod: paymentMethod,
+          slipImage: tempSlipBase64 || null,
+          items: cartItems.map(i => i.name),
+          status: orderData.status,
+          resLat: selectedRestaurant.lat,
+          resLng: selectedRestaurant.lng,
+          cusLat: userLat,
+          cusLng: userLng,
+          customerPhone: "0997455250",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then((docRef) => {
+          orderData.docId = docRef.id;
+          localStorage.setItem('activeOrder', JSON.stringify(orderData));
+          
+          sendLineNotification(selectedRestaurant.name, totalAmount);
+          
+          cartItems = []; 
+          showScreen('tracking-screen');
+          initTrackingMapAndTimer(); 
+          fetchOrderHistory(); 
+        }).catch((error) => {
+          alert("❌ ไม่สามารถส่งออเดอร์ได้: " + error.message);
+        });
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดก่อนส่งข้อมูล: " + err.message);
       }
-
-      const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
-
-      const orderData = {
-        merchantId: selectedRestaurant.id,
-        resName: selectedRestaurant.name,
-        resLat: selectedRestaurant.lat,
-        resLng: selectedRestaurant.lng,
-        status: paymentMethod === 'transfer' ? 'รอตรวจสอบสลิป' : 'กำลังค้นหาไรเดอร์',
-        totalPrice: totalAmount, 
-        timestamp: new Date().getTime(),
-        paymentMethod: paymentMethod
-      };
-      
-      db.collection("orders").add({
-        merchantId: selectedRestaurant.id,
-        customerName: userProfile ? userProfile.displayName : "ลูกค้าทั่วไป",
-        userId: userProfile ? userProfile.userId : "guest_" + new Date().getTime(),
-        restaurantName: selectedRestaurant.name,
-        totalPrice: totalAmount,
-        paymentMethod: paymentMethod,
-        slipImage: tempSlipBase64 || null,
-        items: cartItems.map(i => i.name),
-        status: orderData.status,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then((docRef) => {
-        console.log("บันทึก Firebase สำเร็จ ID:", docRef.id);
-        
-        // เซฟ doc.id ลง LocalStorage ไว้ใช้อัปเดตสถานะวิลายกเลิก
-        orderData.docId = docRef.id;
-        localStorage.setItem('activeOrder', JSON.stringify(orderData));
-        
-        sendLineNotification(selectedRestaurant.name, totalAmount);
-        
-        cartItems = []; 
-        showScreen('tracking-screen');
-        initTrackingMapAndTimer(); 
-        fetchOrderHistory(); // อัปเดตประวัติทันที
-      }).catch((error) => {
-        alert("❌ ไม่สามารถส่งออเดอร์ได้: " + error.message);
-      });
     }
 
     function sendLineNotification(shopName, total) {
@@ -886,7 +902,7 @@
         document.getElementById('track-status-subtitle').innerText = "ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด";
       }
 
-      // ดักฟังสถานะแบบ Real-time ถ้าร้านรับออเดอร์ให้เปลี่ยนหน้าจอทันที
+      // ดักฟังสถานะแบบ Real-time และอัปเดต GPS ไรเดอร์
       if(order.docId) {
         orderListenerUnsubscribe = db.collection("orders").doc(order.docId).onSnapshot((doc) => {
           if(doc.exists) {
@@ -898,11 +914,37 @@
             if(!["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป"].includes(data.status)) {
               btnCancel.classList.add('disabled');
               btnCancel.innerText = "อยู่ระหว่างดำเนินการ (ยกเลิกไม่ได้)";
-              clearInterval(searchTimer); // หยุดเวลานับถอยหลัง
-              document.getElementById('radar-animation').style.display = 'none'; // ปิดเรดาร์
+              clearInterval(searchTimer); 
+              document.getElementById('radar-animation').style.display = 'none'; 
             }
 
-            // จัดการเปลี่ยนคำตาม Status จาก Firebase
+            // ถ้ามีข้อมูลไรเดอร์ (รับงานแล้ว) โชว์การ์ดไรเดอร์เลย
+            if(data.riderId) {
+              document.getElementById('rider-info-panel').style.display = 'block';
+              document.getElementById('track-rider-name').innerText = data.riderName || "ไรเดอร์รับงานแล้ว";
+              document.getElementById('track-rider-plate').innerText = data.riderPlate || "กำลังเดินทาง";
+              document.getElementById('track-rider-call').href = `tel:${data.riderPhone || ""}`;
+
+              // อัปเดตพิกัดไรเดอร์ (Real-time GPS)
+              if(data.riderLat && data.riderLng && trackingMap) {
+                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 8px rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:16px; color:white;">sports_motorsports</span></div>` });
+                
+                if(riderMarkerForTracking) {
+                  riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]);
+                } else {
+                  riderMarkerForTracking = L.marker([data.riderLat, data.riderLng], {icon: riderIcon}).addTo(trackingMap);
+                }
+                
+                // เลื่อนหน้าจอแผนที่ติดตามไรเดอร์
+                if(data.status === "ไรเดอร์กำลังไปรับอาหาร" || data.status === "ไรเดอร์ถึงร้านแล้ว") {
+                  trackingMap.fitBounds([[data.riderLat, data.riderLng], [data.resLat, data.resLng]], { padding: [50, 50] });
+                } else if(data.status === "กำลังจัดส่ง") {
+                  trackingMap.fitBounds([[data.riderLat, data.riderLng], [userLat, userLng]], { padding: [50, 50] });
+                }
+              }
+            }
+
+            // จัดการเปลี่ยนคำตาม Status
             if(data.status === "ร้านกำลังเตรียมอาหาร") {
               trackTitle.innerText = "ร้านรับออเดอร์แล้ว!";
               trackTitle.style.color = "var(--text-dark)";
@@ -916,18 +958,18 @@
             }
             else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") {
               trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร";
-              trackSub.innerText = `ไรเดอร์: ${data.riderName || 'กำลังเดินทาง'}`;
+              trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่`;
               timerText.innerText = "ไรเดอร์กำลังเดินทางไปที่ร้าน 🛵";
             }
             else if(data.status === "ไรเดอร์ถึงร้านแล้ว") {
               trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว";
-              trackSub.innerText = `ไรเดอร์: ${data.riderName || 'กำลังรอรับอาหาร'}`;
+              trackSub.innerText = `กำลังรอรับอาหารเพื่อจัดส่งให้คุณ`;
               timerText.innerText = "ไรเดอร์กำลังรอรับอาหาร 🛵";
             }
             else if(data.status === "กำลังจัดส่ง") {
               trackTitle.innerText = "อาหารกำลังไปส่ง!";
               trackTitle.style.color = "var(--primary-color)";
-              trackSub.innerText = `ไรเดอร์ ${data.riderName || ''} กำลังนำอาหารไปส่งคุณ`;
+              trackSub.innerText = `ติดตามไรเดอร์บนแผนที่ได้เลยครับ`;
               timerText.innerText = "กำลังจัดส่ง... 💨";
             }
             else if (data.status === "จัดส่งสำเร็จ") {
@@ -936,7 +978,6 @@
               trackSub.innerText = "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการ";
               timerText.innerText = "ได้รับอาหารแล้ว 🎉";
               
-              // จบงาน กลับหน้าแรก
               setTimeout(() => {
                 localStorage.removeItem('activeOrder');
                 showScreen('home-screen');
@@ -944,13 +985,13 @@
                 fetchOrderHistory();
               }, 4000);
             }
-            else if (data.status === "ร้านปฏิเสธรับออเดอร์") {
-              trackTitle.innerText = "ร้านปฏิเสธรับออเดอร์";
+            else if (data.status === "ร้านปฏิเสธรับออเดอร์" || data.status === "ยกเลิกเนื่องจากไม่มีไรเดอร์") {
+              trackTitle.innerText = "ถูกยกเลิก: " + data.status;
               trackTitle.style.color = "var(--danger)";
-              trackSub.innerText = "ขออภัยครับ ทางร้านไม่สามารถรับออเดอร์ได้ในขณะนี้";
+              trackSub.innerText = "ขออภัยครับ ระบบได้ยกเลิกและคืนเงินเข้าวอลเล็ทแล้ว";
               
               btnCancel.classList.remove('disabled');
-              btnCancel.innerText = "รับทราบ (กดยกเลิกและรับเงินคืน)";
+              btnCancel.innerText = "รับทราบ (กลับหน้าแรก)";
               timerText.innerText = "กรุณาลองสั่งร้านอื่น";
             }
           }
@@ -992,14 +1033,12 @@
       if(activeData) {
         const order = JSON.parse(activeData);
         
-        // 1. แจ้งเตือนฐานข้อมูลว่ายกเลิก
         if(order.docId) {
           db.collection("orders").doc(order.docId).update({
             status: "ลูกค้ายกเลิกออเดอร์"
           }).catch(e => console.error("Cancel Error:", e));
         }
 
-        // 2. คืนเงิน "เฉพาะ" ออเดอร์ที่จ่ายแบบโอน
         if(order.paymentMethod === 'transfer') {
           userWallet += order.totalPrice;
           localStorage.setItem('hk_user_wallet', userWallet);
