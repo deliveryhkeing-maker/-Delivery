@@ -126,10 +126,13 @@
             <div><div style="font-weight: 600; font-size: 16px;" id="active-res-name">ร้านอาหาร</div><div style="font-size: 13px; color: var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</div></div>
           </div>
         </div>
+        
+        <!-- ปุ่มนำทางและโทรศัพท์ -->
         <div style="display: flex; gap:10px;">
           <a href="#" id="nav-btn" target="_blank" class="btn-nav-map"><span class="material-icons">navigation</span> นำทาง</a>
           <a href="#" id="call-cus-btn" class="btn-call"><span class="material-icons">call</span> โทรหาลูกค้า</a>
         </div>
+        
         <div style="flex-grow: 1; max-height: 120px; overflow-y:auto; margin-bottom: 15px;">
           <h3 style="margin: 0 0 10px 0; font-size: 14px;">รายการ:</h3>
           <ul id="active-items" style="padding-left: 20px; font-size: 13px; margin: 0; color:var(--text-light);"></ul>
@@ -355,21 +358,35 @@
     }
 
     function updateButtonUI() {
-      const btn = document.getElementById('action-btn'); const navBtn = document.getElementById('nav-btn');
+      const btn = document.getElementById('action-btn'); 
+      const navBtn = document.getElementById('nav-btn');
+      
       if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") { 
         btn.innerHTML = "ฉันเดินทางถึงร้านอาหารแล้ว"; btn.style.background = "var(--rider-primary)"; btn.disabled = false;
+        // นำทางไปร้าน
         if(activeOrderData.resLat && activeOrderData.resLng) {
           navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.resLat},${activeOrderData.resLng}`;
-          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปร้าน`; navBtn.style.background = "#4285F4";
+          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปร้าน`; 
+          navBtn.style.background = "#4285F4";
+          navBtn.style.display = "flex";
         }
       } 
-      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว") { btn.innerHTML = "รอร้านทำอาหาร... (รับอาหารแล้วกดที่นี่)"; btn.style.background = "#999"; btn.disabled = true; }
-      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { btn.innerHTML = "อาหารเสร็จแล้ว! (กดเพื่อเริ่มจัดส่ง)"; btn.style.background = "#2196F3"; btn.disabled = false; }
+      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว") { 
+        btn.innerHTML = "รอร้านทำอาหาร... (รับอาหารแล้วกดที่นี่)"; btn.style.background = "#999"; btn.disabled = true; 
+        navBtn.style.display = "none";
+      }
+      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { 
+        btn.innerHTML = "อาหารเสร็จแล้ว! (กดเพื่อเริ่มจัดส่ง)"; btn.style.background = "#2196F3"; btn.disabled = false; 
+        navBtn.style.display = "none";
+      }
       else if(currentOrderStatus === "กำลังจัดส่ง") { 
         btn.innerHTML = "จัดส่งสำเร็จ!"; btn.style.background = "var(--success)"; btn.disabled = false;
+        // นำทางไปลูกค้า
         if(activeOrderData.cusLat && activeOrderData.cusLng) {
           navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.cusLat},${activeOrderData.cusLng}`;
-          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปลูกค้า`; navBtn.style.background = "var(--success)";
+          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปลูกค้า`; 
+          navBtn.style.background = "var(--success)";
+          navBtn.style.display = "flex";
         }
       }
       else if(currentOrderStatus.includes("ยกเลิก") || currentOrderStatus.includes("ปฏิเสธ")) {

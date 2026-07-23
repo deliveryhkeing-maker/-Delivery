@@ -66,7 +66,6 @@
     .res-info { padding: 15px; }
     .res-name { font-size: 18px; font-weight: 600; margin: 0 0 5px; }
 
-    /* Menu & Topping */
     #menu-screen { background-color: var(--white); }
     .menu-header { position: relative; height: 220px; background-size: cover; background-position: center; }
     .back-btn-img { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;}
@@ -86,20 +85,17 @@
     .topping-group-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; background: #f8f9fa; padding: 8px 12px; border-radius: 8px; }
     .topping-option { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; cursor: pointer; }
 
-    /* Checkout & Payment */
     .checkout-items, .summary-card, .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .pay-option { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; cursor: pointer; }
     .pay-option input { width: 20px; height: 20px; accent-color: var(--primary-color); margin-right: 15px; }
     
     .transfer-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-top: 15px; display: none; }
     
-    /* Topup Screen */
     .qr-box { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 20px; }
     .qr-image { width: 200px; height: 200px; margin: 15px auto; background: #f0f0f0; border-radius: 8px; padding: 10px; }
     .amount-btn-group { display: flex; gap: 10px; padding: 0 20px; margin-bottom: 20px; }
     .amount-btn { flex: 1; padding: 10px; background: white; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-    /* Tracking Screen */
     #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; position: relative; overflow: hidden; }
     #tracking-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     .tracking-overlay { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 10; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
@@ -118,7 +114,6 @@
     /* *เคล็ดลับ* ทำให้หมุดบนแผนที่วิ่งสมูทๆ แบบเรียลไทม์ (Smooth Translation) */
     .leaflet-marker-icon { transition: transform 1.5s linear !important; }
 
-    /* Bottom Nav & Carts */
     #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; }
     #cart-bar { bottom: 85px; background-color: var(--primary-color); }
     #active-order-bar { bottom: 85px; background-color: #2196F3; }
@@ -594,11 +589,13 @@
     }
 
     function closeToppingModal() { document.getElementById('topping-modal').style.display = 'none'; currentToppingMenu = null; }
+    
     function calculateToppingPrice() {
       let total = currentToppingBasePrice;
       document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked').forEach(cb => { total += parseInt(cb.getAttribute('data-price')); });
       document.getElementById('topping-total-price').innerText = total; return total;
     }
+    
     function confirmAddWithTopping() {
       const finalPrice = calculateToppingPrice();
       let toppingsList = [];
@@ -674,7 +671,6 @@
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
         const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
         
-        // เช็คการชำระเงินด้วย Wallet
         if (paymentMethod === 'wallet') {
           if (userWallet < totalAmount) { showToast("ยอดเงินในวอลเล็ทไม่เพียงพอ กรุณาเติมเงิน"); return; }
           userWallet -= totalAmount;
@@ -718,7 +714,6 @@
     }
 
     function fetchOrderHistory() {
-      // ดึงประวัติของ User ปัจจุบัน (ทั้งล็อกอิน และ Guest)
       db.collection("orders").where("userId", "==", currentUserId).onSnapshot((snapshot) => {
           const container = document.getElementById('order-history-list');
           if(snapshot.empty) { container.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการสั่งซื้อ</p>'; return; }
@@ -771,7 +766,6 @@
       const btnCancel = document.getElementById('btn-cancel-order');
       btnCancel.classList.add('disabled'); btnCancel.style.color = "#999"; btnCancel.innerText = "ยกเลิกคำสั่งซื้อ (รอสักครู่)";
       
-      // ดักฟัง Real-time ของออเดอร์นี้
       if(order.docId) {
         orderListenerUnsubscribe = db.collection("orders").doc(order.docId).onSnapshot((doc) => {
           if(doc.exists) {
@@ -779,35 +773,29 @@
             const trackTitle = document.getElementById('track-status-title');
             const trackSub = document.getElementById('track-status-subtitle');
             
-            // ล็อกปุ่มยกเลิกถ้าร้าน/ไรเดอร์รับงานแล้ว
             if(!["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป"].includes(data.status)) {
               btnCancel.classList.add('disabled'); btnCancel.style.color = "#999"; btnCancel.innerText = "อยู่ระหว่างดำเนินการ (ยกเลิกไม่ได้)";
               clearInterval(searchTimer); document.getElementById('radar-animation').style.display = 'none'; 
             }
 
-            // แสดงข้อมูลไรเดอร์พร้อมเบอร์โทร
             if(data.riderId) {
               document.getElementById('rider-info-panel').style.display = 'block';
               document.getElementById('track-rider-name').innerText = data.riderName || "ไรเดอร์รับงานแล้ว";
               document.getElementById('track-rider-plate').innerText = data.riderPlate || "กำลังเดินทาง";
               document.getElementById('track-rider-call').href = `tel:${data.riderPhone || ""}`;
 
-              // แอนิเมชันรถวิ่งสมูทๆ บนแผนที่ (Smooth Marker)
               if(data.riderLat && data.riderLng && trackingMap) {
                 const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: all 0.5s ease;"><span class="material-icons" style="font-size:18px; color:white;">sports_motorsports</span></div>` });
                 if(riderMarkerForTracking) { 
-                  // CSS Transition บนหมุดทำให้วิ่งไหลลื่น
                   riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]); 
                 } 
                 else { riderMarkerForTracking = L.marker([data.riderLat, data.riderLng], {icon: riderIcon}).addTo(trackingMap); }
                 
-                // เลื่อนกล้องตามสถานะ
                 if(data.status === "ไรเดอร์กำลังไปรับอาหาร" || data.status === "ไรเดอร์ถึงร้านแล้ว") { trackingMap.fitBounds([[data.riderLat, data.riderLng], [data.resLat, data.resLng]], { padding: [50, 50] }); } 
                 else if(data.status === "กำลังจัดส่ง") { trackingMap.fitBounds([[data.riderLat, data.riderLng], [userLat, userLng]], { padding: [50, 50] }); }
               }
             }
 
-            // เปลี่ยนข้อความบอกลูกค้า
             if(data.status === "ร้านกำลังเตรียมอาหาร") { trackTitle.innerText = "ร้านรับออเดอร์แล้ว!"; trackTitle.style.color = "var(--text-dark)"; trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่"; } 
             else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") { trackTitle.innerText = "อาหารเสร็จแล้ว!"; trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน"; }
             else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") { trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร"; trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่`; }
@@ -821,7 +809,6 @@
               trackTitle.innerText = "ถูกยกเลิก: " + data.status; trackTitle.style.color = "var(--danger)"; trackSub.innerText = "ระบบได้คืนเงินเข้าวอลเล็ทแล้ว (หากชำระล่วงหน้า)";
               btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.innerText = "รับทราบ (กลับหน้าแรก)";
               
-              // คืนเงินถ้ายกเลิก
               if(data.paymentMethod === 'wallet' || data.paymentMethod === 'transfer') {
                  if(localStorage.getItem('refund_flag_'+data.docId) !== 'true') {
                     userWallet += data.totalPrice; localStorage.setItem('hk_user_wallet', userWallet); updateWalletUI();
@@ -834,7 +821,6 @@
         });
       }
 
-      // หลอดเวลาจับเวลา 2 นาที เพื่อกดยกเลิก
       searchTimer = setInterval(() => {
         searchTimeLeft--;
         let percent = ((120 - searchTimeLeft) / 120) * 100;
