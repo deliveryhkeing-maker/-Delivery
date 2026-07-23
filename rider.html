@@ -376,15 +376,15 @@
         navBtn.style.display = "none";
       }
       else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { 
-        btn.innerHTML = "อาหารเสร็จแล้ว! (กดเพื่อเริ่มจัดส่ง)"; btn.style.background = "#2196F3"; btn.disabled = false; 
+        btn.innerHTML = "อาหารเสร็จแล้ว! กดเพื่อยืนยันรับอาหาร"; btn.style.background = "#2196F3"; btn.disabled = false; 
         navBtn.style.display = "none";
       }
       else if(currentOrderStatus === "กำลังจัดส่ง") { 
-        btn.innerHTML = "จัดส่งสำเร็จ!"; btn.style.background = "var(--success)"; btn.disabled = false;
+        btn.innerHTML = "จัดส่งสำเร็จ! (กดเมื่อส่งให้ลูกค้าแล้ว)"; btn.style.background = "var(--success)"; btn.disabled = false;
         // นำทางไปลูกค้า
         if(activeOrderData.cusLat && activeOrderData.cusLng) {
           navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.cusLat},${activeOrderData.cusLng}`;
-          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปลูกค้า`; 
+          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปหาลูกค้า`; 
           navBtn.style.background = "var(--success)";
           navBtn.style.display = "flex";
         }

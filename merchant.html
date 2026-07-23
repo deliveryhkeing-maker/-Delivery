@@ -301,7 +301,6 @@
   <div id="custom-toast" class="toast">ข้อความ</div>
 
   <script>
-    /* STREAMING_CHUNK:Firebase Setup... */
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -323,7 +322,6 @@
     let currentAlertOrderId = null;
     let confirmCallback = null;
 
-    /* STREAMING_CHUNK:App Initialization... */
     window.onload = function() { 
       currentMerchantId = localStorage.getItem('hk_merchant_id');
       if(currentMerchantId) {
@@ -393,7 +391,6 @@
       });
     }
 
-    /* STREAMING_CHUNK:Loading Profile and Orders... */
     function loadMerchantProfile() {
       if(!currentMerchantId) return;
       db.collection("merchants").doc(currentMerchantId).onSnapshot((doc) => {
@@ -454,15 +451,19 @@
               if(order.status === "กำลังค้นหาไรเดอร์" || order.status === "รอตรวจสอบสลิป") {
                  btnHtml = `<button class="btn-main" style="background-color: var(--success); padding: 8px; font-size: 14px;" onclick="acceptRealOrder('${order.id}')">รับออเดอร์</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">ออเดอร์ใหม่</span>`;
-              } else if (order.status === "ร้านกำลังเตรียมอาหาร") {
+              } 
+              // รวมสถานะที่ร้านค้าสามารถกดทำอาหารเสร็จได้ เพื่อไม่ให้ปุ่มหายไปเวลาไรเดอร์ถึงร้านแล้ว
+              else if (order.status === "ร้านกำลังเตรียมอาหาร" || order.status === "ไรเดอร์กำลังไปรับอาหาร" || order.status === "ไรเดอร์ถึงร้านแล้ว") {
                  btnHtml = `<button class="btn-main" style="background-color: var(--warning); padding: 8px; font-size: 14px;" onclick="markFoodReady('${order.id}')">จัดเตรียมอาหารเสร็จแล้ว</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">กำลังเตรียมอาหาร</span>`;
-              } else if (order.status === "ร้านเตรียมอาหารเสร็จแล้ว") {
+              } 
+              else if (order.status === "ร้านเตรียมอาหารเสร็จแล้ว") {
                  btnHtml = `<span style="color: var(--warning); font-weight: 600; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align: middle;">check_circle</span> เตรียมอาหารเสร็จแล้ว (รอไรเดอร์)</span>`;
-                 statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">รอไรเดอร์มารับ</span>`;
-              } else {
+                 statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">รอไรเดอร์รับอาหาร</span>`;
+              } 
+              else {
                  btnHtml = `<span style="color: var(--primary); font-weight: 600; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align: middle;">sports_motorsports</span> ${order.status}</span>`;
-                 statusBadge = `<span class="status-badge" style="background:#e0e7ff; color:#3730a3;">ไรเดอร์กำลังมารับ/ส่ง</span>`;
+                 statusBadge = `<span class="status-badge" style="background:#e0e7ff; color:#3730a3;">กำลังจัดส่งให้ลูกค้า</span>`;
               }
 
               // ทางออกหากไม่มีไรเดอร์รับงาน
@@ -518,7 +519,6 @@
         });
     }
 
-    /* STREAMING_CHUNK:Order Actions... */
     function acceptRealOrder(orderId) {
        openConfirm('ยืนยันรับออเดอร์เพื่อเริ่มเตรียมอาหาร?', () => {
           db.collection("orders").doc(orderId).update({
@@ -589,7 +589,6 @@
       }
     }
 
-    /* STREAMING_CHUNK:Menu Management... */
     function addToppingGroup() {
       const container = document.getElementById('toppings-container');
       const groupId = Date.now();
@@ -670,7 +669,6 @@
       });
     }
 
-    /* STREAMING_CHUNK:Settings and Utilities... */
     function saveGPS() {
       const lat = parseFloat(document.getElementById('setting-lat').value);
       const lng = parseFloat(document.getElementById('setting-lng').value);
@@ -774,8 +772,3 @@
   </script>
 </body>
 </html>
-```eof
-
-### 3. โค้ดแอปไรเดอร์ (Rider App) - `RiderApp.html`
-(อัปเกรดแผนที่และระบบนำทาง Google Maps Navigation)
-http://googleusercontent.com/immersive_entry_chip/1
