@@ -46,11 +46,6 @@
     .search-bar { background-color: var(--white); border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
     .search-bar input { border: none; background: transparent; width: 100%; font-family: 'Prompt'; outline: none; font-size: 14px; }
     
-    .banner-section { padding: 0 20px 15px; }
-    .banner { width: 100%; height: 130px; background: linear-gradient(135deg, #00B900, #4caf50); border-radius: 16px; display: flex; align-items: center; padding: 20px; color: var(--white); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,185,0,0.2); }
-    .banner h3 { margin: 0 0 5px 0; font-size: 22px; z-index: 2; font-weight: 700; }
-    .banner p { margin: 0; font-size: 14px; z-index: 2; opacity: 0.9; }
-
     .categories { display: flex; overflow-x: auto; padding: 0 20px 15px; gap: 15px; scrollbar-width: none; }
     .categories::-webkit-scrollbar { display: none; }
     .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; }
@@ -196,8 +191,34 @@
     </div>
 
     <div style="background: var(--white); margin-top: 15px;">
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showToast('ระบบกำลังเปิดหน้าแก้ไขข้อมูล...')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว</div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showScreen('topup-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท (QR Code)</div>
+      <!-- แก้ไขลิงก์ไปหน้า Edit Profile ตรงนี้ -->
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('edit-profile-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว / ที่อยู่</div>
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('topup-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท (QR Code)</div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าแก้ไขโปรไฟล์ (Edit Profile) ================= -->
+  <div id="edit-profile-screen" class="screen">
+    <div class="top-bar">
+      <div class="back-btn-simple" onclick="showScreen('profile-screen')"><span class="material-icons">arrow_back</span></div>
+      <div class="page-title">ข้อมูลส่วนตัว & ที่อยู่</div>
+    </div>
+    <div style="padding: 20px;">
+      <div class="summary-card" style="margin: 0 0 20px 0;">
+        <p style="font-size: 13px; color: var(--text-light); margin-bottom: 20px;">ข้อมูลนี้จะถูกส่งให้ไรเดอร์ เพื่อความสะดวกในการติดต่อและจัดส่งอาหารครับ</p>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600;">เบอร์โทรศัพท์ (จำเป็น)</label>
+          <input type="tel" id="edit-phone" placeholder="08X-XXX-XXXX" style="width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Prompt'; font-size: 15px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600;">ที่อยู่ / จุดสังเกตเพิ่มเติม</label>
+          <textarea id="edit-address" rows="3" placeholder="เช่น บ้านสีฟ้า ซอย 2 หน้าปากซอยมีร้านค้า" style="width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Prompt'; font-size: 15px;"></textarea>
+        </div>
+        
+        <button class="btn-primary" onclick="saveUserProfile()">บันทึกข้อมูล</button>
+      </div>
     </div>
   </div>
 
@@ -212,7 +233,6 @@
       <h3 style="margin-top:0;">แสกน QR Code เพื่อเติมเงิน</h3>
       <p style="color:var(--text-light); font-size:13px;">พร้อมเพย์: 1410400401805 (สหภาพ เนาว์แสง)</p>
       
-      <!-- ใช้ API ของ PromptPay.io เพื่อสร้าง QR อัตโนมัติตามยอดเงิน -->
       <img id="promptpay-qr" class="qr-image" src="https://promptpay.io/1410400401805/100.png" alt="QR Code">
       
       <div style="margin-bottom: 15px;">
@@ -310,7 +330,6 @@
     </div>
 
     <div class="tracking-overlay">
-      <!-- บล็อกแสดงข้อมูลไรเดอร์ (Real-time) -->
       <div id="rider-info-panel" style="display:none; background:white; padding:15px; border-radius:16px; margin: 0 15px 15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:calc(100% - 30px); pointer-events:auto;">
          <div style="display:flex; justify-content:space-between; align-items:center;">
            <div style="display:flex; gap:12px; align-items:center;">
@@ -393,6 +412,9 @@
     if (!guestId) { guestId = "guest_" + Date.now(); localStorage.setItem('hk_guest_id', guestId); }
     let currentUserId = guestId; 
     let currentUserName = "ลูกค้าทั่วไป";
+    
+    // เพิ่มตัวแปรเก็บข้อมูลโทรศัพท์และที่อยู่
+    let userProfileData = { phone: "", address: "" };
 
     let cartItems = []; 
     let selectedRestaurant = null;
@@ -413,16 +435,25 @@
     let searchTimer = null;
     let searchTimeLeft = 120;
     let orderListenerUnsubscribe = null;
+    let historyListenerUnsubscribe = null;
 
     window.onload = async function() {
       updateWalletUI();
       const savedScreen = sessionStorage.getItem('activeScreen') || 'home-screen';
       showScreen(savedScreen);
       
+      // โหลดข้อมูลโปรไฟล์จาก Local Storage เบื้องต้น
+      const savedProfile = localStorage.getItem('hk_user_profile_data');
+      if (savedProfile) {
+        userProfileData = JSON.parse(savedProfile);
+        document.getElementById('edit-phone').value = userProfileData.phone;
+        document.getElementById('edit-address').value = userProfileData.address;
+      }
+      
       await initializeLiff(); 
       await getLocation(); 
       checkActiveOrder();
-      fetchOrderHistory(); // โหลดประวัติทันทีตอนเปิดแอป
+      fetchOrderHistory(); // ดึงประวัติทันที
     };
 
     function updateWalletUI() {
@@ -444,13 +475,59 @@
           
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
-          fetchOrderHistory(); // ดึงประวัติของบัญชีไลน์
+          
+          loadUserProfileFromDB(); // ดึงข้อมูลโปรไฟล์จาก Firebase หลังจาก Login
+          fetchOrderHistory(); // ดึงประวัติใหม่ตาม LINE ID
         }
       } catch (error) { console.error('LIFF Error:', error); }
     }
 
     function loginWithLine() { if (!liff.isLoggedIn()) liff.login({ redirectUri: window.location.href }); }
     function logoutLine() { if (liff.isLoggedIn()) { liff.logout(); window.location.reload(); } }
+
+    function loadUserProfileFromDB() {
+      if(currentUserId.startsWith('guest')) return;
+      db.collection("users").doc(currentUserId).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.phone) {
+            userProfileData.phone = data.phone;
+            document.getElementById('edit-phone').value = data.phone;
+          }
+          if (data.address) {
+            userProfileData.address = data.address;
+            document.getElementById('edit-address').value = data.address;
+          }
+          localStorage.setItem('hk_user_profile_data', JSON.stringify(userProfileData));
+        }
+      }).catch(e => console.log("Profile Load Error", e));
+    }
+
+    function saveUserProfile() {
+      const phone = document.getElementById('edit-phone').value;
+      const address = document.getElementById('edit-address').value;
+      
+      if(!phone) { showToast("กรุณากรอกเบอร์โทรศัพท์ด้วยครับ"); return; }
+      
+      userProfileData.phone = phone;
+      userProfileData.address = address;
+      localStorage.setItem('hk_user_profile_data', JSON.stringify(userProfileData));
+      
+      if(!currentUserId.startsWith('guest')) {
+        db.collection("users").doc(currentUserId).set({
+          name: currentUserName,
+          phone: phone,
+          address: address,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(() => {
+          showToast("บันทึกข้อมูลเรียบร้อยแล้ว");
+          showScreen('profile-screen');
+        });
+      } else {
+        showToast("บันทึกข้อมูลส่วนตัวในเครื่องแล้ว (แนะนำให้ล็อกอิน LINE)");
+        showScreen('profile-screen');
+      }
+    }
 
     function getLocation() {
       document.getElementById('current-location-text').innerText = "กำลังค้นหาพิกัด...";
@@ -671,6 +748,13 @@
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
         const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
         
+        // ตรวจสอบเบอร์โทรศัพท์ก่อนสั่ง (สำคัญมาก)
+        if (!userProfileData.phone) {
+           showToast("กรุณาเพิ่มเบอร์โทรศัพท์ในโปรไฟล์ก่อนสั่งอาหารครับ");
+           showScreen('edit-profile-screen');
+           return;
+        }
+
         if (paymentMethod === 'wallet') {
           if (userWallet < totalAmount) { showToast("ยอดเงินในวอลเล็ทไม่เพียงพอ กรุณาเติมเงิน"); return; }
           userWallet -= totalAmount;
@@ -692,7 +776,8 @@
           status: paymentMethod === 'transfer' ? 'รอตรวจสอบสลิป' : 'กำลังค้นหาไรเดอร์',
           resLat: selectedRestaurant.lat, resLng: selectedRestaurant.lng,
           cusLat: userLat, cusLng: userLng,
-          customerPhone: "099-XXX-XXXX", 
+          customerPhone: userProfileData.phone, // แนบเบอร์โทรจริง
+          customerAddressNote: userProfileData.address,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -708,15 +793,20 @@
           cartItems = []; 
           showScreen('tracking-screen');
           initTrackingMapAndTimer(); 
-          fetchOrderHistory(); 
+          fetchOrderHistory(); // รีเฟรชประวัติทันทีหลังจากสั่ง
         }).catch((error) => { alert("Error DB: " + error.message); });
       } catch (err) { alert("Error: " + err.message); }
     }
 
     function fetchOrderHistory() {
-      db.collection("orders").where("userId", "==", currentUserId).onSnapshot((snapshot) => {
+      // ยกเลิก Listener เก่าเพื่อป้องกันการดึงข้อมูลซ้อน
+      if (historyListenerUnsubscribe) {
+        historyListenerUnsubscribe();
+      }
+
+      historyListenerUnsubscribe = db.collection("orders").where("userId", "==", currentUserId).onSnapshot((snapshot) => {
           const container = document.getElementById('order-history-list');
-          if(snapshot.empty) { container.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการสั่งซื้อ</p>'; return; }
+          if(snapshot.empty) { container.innerHTML = '<div style="text-align: center; color: var(--text-light); margin-top: 40px;"><span class="material-icons" style="font-size: 48px; color: #ddd; margin-bottom: 10px;">receipt_long</span><p>ยังไม่มีประวัติการสั่งซื้อ</p></div>'; return; }
           
           let allOrders = []; snapshot.forEach(doc => allOrders.push(doc.data()));
           allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
@@ -726,7 +816,7 @@
             const date = order.createdAt ? new Date(order.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : 'เมื่อสักครู่';
             let statusColor = 'var(--primary-color)';
             if(order.status.includes('ยกเลิก') || order.status.includes('ปฏิเสธ')) statusColor = 'var(--danger)';
-            else if(order.status.includes('รอ') || order.status.includes('เตรียม')) statusColor = 'var(--warning)';
+            else if(order.status.includes('รอ') || order.status.includes('เตรียม') || order.status.includes('ค้นหา')) statusColor = 'var(--warning)';
 
             html += `
               <div style="background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee;">
@@ -740,6 +830,8 @@
               </div>`;
           });
           container.innerHTML = html;
+        }, (error) => {
+          console.error("Fetch History Error:", error);
         });
     }
 
