@@ -891,22 +891,66 @@
         orderListenerUnsubscribe = db.collection("orders").doc(order.docId).onSnapshot((doc) => {
           if(doc.exists) {
             const data = doc.data();
-            if(data.status === "ร้านกำลังเตรียมอาหาร") {
-              document.getElementById('track-status-title').innerText = "ร้านรับออเดอร์แล้ว!";
-              document.getElementById('track-status-subtitle').innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่";
-              document.getElementById('radar-animation').style.display = 'none';
-              clearInterval(searchTimer);
+            const trackTitle = document.getElementById('track-status-title');
+            const trackSub = document.getElementById('track-status-subtitle');
+            
+            // ล็อกปุ่มยกเลิกถ้าไม่ใช่สถานะเริ่มต้น
+            if(!["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป"].includes(data.status)) {
               btnCancel.classList.add('disabled');
-              btnCancel.innerText = "ร้านกำลังเตรียมอาหาร (ยกเลิกไม่ได้)";
-              timerText.innerText = "กำลังเตรียมอาหาร...";
-            } else if (data.status === "ร้านปฏิเสธรับออเดอร์") {
-              document.getElementById('track-status-title').innerText = "ร้านปฏิเสธรับออเดอร์";
-              document.getElementById('track-status-title').style.color = "var(--danger)";
-              document.getElementById('track-status-subtitle').innerText = "ขออภัยครับ ทางร้านไม่สามารถรับออเดอร์ได้ในขณะนี้";
-              document.getElementById('radar-animation').style.display = 'none';
-              clearInterval(searchTimer);
+              btnCancel.innerText = "อยู่ระหว่างดำเนินการ (ยกเลิกไม่ได้)";
+              clearInterval(searchTimer); // หยุดเวลานับถอยหลัง
+              document.getElementById('radar-animation').style.display = 'none'; // ปิดเรดาร์
+            }
+
+            // จัดการเปลี่ยนคำตาม Status จาก Firebase
+            if(data.status === "ร้านกำลังเตรียมอาหาร") {
+              trackTitle.innerText = "ร้านรับออเดอร์แล้ว!";
+              trackTitle.style.color = "var(--text-dark)";
+              trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่";
+              timerText.innerText = "กำลังปรุงอาหาร... 🍳";
+            } 
+            else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") {
+              trackTitle.innerText = "อาหารเสร็จแล้ว!";
+              trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน";
+              timerText.innerText = "เตรียมอาหารเสร็จแล้ว 🛍️";
+            }
+            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") {
+              trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร";
+              trackSub.innerText = `ไรเดอร์: ${data.riderName || 'กำลังเดินทาง'}`;
+              timerText.innerText = "ไรเดอร์กำลังเดินทางไปที่ร้าน 🛵";
+            }
+            else if(data.status === "ไรเดอร์ถึงร้านแล้ว") {
+              trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว";
+              trackSub.innerText = `ไรเดอร์: ${data.riderName || 'กำลังรอรับอาหาร'}`;
+              timerText.innerText = "ไรเดอร์กำลังรอรับอาหาร 🛵";
+            }
+            else if(data.status === "กำลังจัดส่ง") {
+              trackTitle.innerText = "อาหารกำลังไปส่ง!";
+              trackTitle.style.color = "var(--primary-color)";
+              trackSub.innerText = `ไรเดอร์ ${data.riderName || ''} กำลังนำอาหารไปส่งคุณ`;
+              timerText.innerText = "กำลังจัดส่ง... 💨";
+            }
+            else if (data.status === "จัดส่งสำเร็จ") {
+              trackTitle.innerText = "จัดส่งสำเร็จ!";
+              trackTitle.style.color = "var(--success)";
+              trackSub.innerText = "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการ";
+              timerText.innerText = "ได้รับอาหารแล้ว 🎉";
+              
+              // จบงาน กลับหน้าแรก
+              setTimeout(() => {
+                localStorage.removeItem('activeOrder');
+                showScreen('home-screen');
+                showToast("ออเดอร์จัดส่งสำเร็จแล้ว!");
+                fetchOrderHistory();
+              }, 4000);
+            }
+            else if (data.status === "ร้านปฏิเสธรับออเดอร์") {
+              trackTitle.innerText = "ร้านปฏิเสธรับออเดอร์";
+              trackTitle.style.color = "var(--danger)";
+              trackSub.innerText = "ขออภัยครับ ทางร้านไม่สามารถรับออเดอร์ได้ในขณะนี้";
+              
               btnCancel.classList.remove('disabled');
-              btnCancel.innerText = "รับทราบ (กดยกเลิกและคืนเงิน)";
+              btnCancel.innerText = "รับทราบ (กดยกเลิกและรับเงินคืน)";
               timerText.innerText = "กรุณาลองสั่งร้านอื่น";
             }
           }

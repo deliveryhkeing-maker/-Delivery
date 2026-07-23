@@ -777,6 +777,17 @@
        }
     }
 
+    // ฟังก์ชันใหม่สำหรับปุ่ม อาหารเสร็จแล้ว
+    function markFoodReady(orderId) {
+      if(confirm('อาหารเสร็จเรียบร้อยและพร้อมส่งให้ไรเดอร์แล้วใช่ไหม?')) {
+          db.collection("orders").doc(orderId).update({
+            status: "ร้านเตรียมอาหารเสร็จแล้ว"
+          }).then(() => {
+            showToast("อัปเดตสถานะสำเร็จ ไรเดอร์และลูกค้าจะได้รับการแจ้งเตือน");
+          });
+       }
+    }
+
     function saveGPS() {
       const lat = parseFloat(document.getElementById('setting-lat').value);
       const lng = parseFloat(document.getElementById('setting-lng').value);
