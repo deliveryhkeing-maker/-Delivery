@@ -7,9 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
@@ -22,18 +24,20 @@
 
     .screen { display: none; min-height: 100vh; flex-direction: column; }
     
-    /* Login Screen */
+    /* Auth & Login */
     .auth-screen { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); padding: 20px; }
     .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
     .input-group input { width: 100%; padding: 14px; border: 1.5px solid #ddd; border-radius: 12px; font-family: 'Prompt'; font-size: 15px; outline: none; }
+    .input-group input:focus { border-color: var(--rider-primary); }
     
-    .btn-main { width: 100%; background-color: var(--rider-primary); color: white; border: none; border-radius: 12px; padding: 18px; font-family: 'Prompt'; font-weight: 700; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,115,0,0.3); transition: 0.2s; }
-    .btn-main:active { transform: scale(0.98); }
-    
-    /* Map Screen */
-    .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .btn-main { width: 100%; background-color: var(--rider-primary); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,115,0,0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+    .btn-main:active { transform: scale(0.98); background-color: var(--rider-dark); }
+    .btn-text { background: none; border: none; color: var(--rider-primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; }
+
+    /* Map Header */
+    .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 400; }
     .rider-profile { display: flex; align-items: center; gap: 12px; }
     .profile-img { width: 40px; height: 40px; border-radius: 50%; background-color: #eee; display: flex; justify-content: center; align-items: center; }
     .status-toggle { display: flex; align-items: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -41,11 +45,11 @@
     .status-toggle.offline { background: rgba(244,67,54,0.1); color: var(--danger); }
     .status-toggle.offline .status-dot { background-color: var(--danger); box-shadow: 0 0 8px rgba(244,67,54,0.5); }
 
-    .map-container { flex-grow: 1; background-color: #e0e0e0; position: relative; display: flex; justify-content: center; align-items: center; background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center; }
-    .rider-pin { width: 50px; height: 50px; background: var(--white); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; z-index: 2; border: 3px solid var(--rider-primary); }
+    .map-container { flex-grow: 1; position: relative; background: #e0e0e0; }
+    #rider-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     
     /* Order Alert */
-    .order-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: flex-end; }
+    .order-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; justify-content: center; align-items: flex-end; }
     .order-alert-content { background: var(--white); width: 100%; border-radius: 24px 24px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     
@@ -53,43 +57,57 @@
     .location-row { display: flex; margin-bottom: 15px; position: relative; }
     .loc-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 15px; z-index: 2; flex-shrink: 0; color: white; }
     
-    /* Active Order */
-    .order-panel { background: var(--white); border-radius: 24px 24px 0 0; padding: 25px; margin-top: -20px; position: relative; z-index: 10; flex-grow: 1; display: flex; flex-direction: column; }
-    .total-collect { background: var(--primary-light); border: 1px solid var(--success); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    /* Active Order Panel */
+    .order-panel { background: var(--white); border-radius: 24px 24px 0 0; padding: 25px; position: absolute; bottom: 70px; left: 0; width: 100%; z-index: 10; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
+    .order-panel.collapsed { transform: translateY(80%); }
+    .drag-handle { width: 40px; height: 5px; background: #ccc; border-radius: 5px; margin: 0 auto 15px; cursor: pointer; }
+    .total-collect { background: var(--bg-color); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-left: 5px solid var(--rider-primary); }
+
+    .btn-call { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 10px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-bottom: 15px; }
 
     /* Bottom Nav */
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 400; border-top: 1px solid #eee; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 33.33%; }
     .nav-item.active { color: var(--rider-primary); }
     
     .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 90px; font-size: 15px; opacity: 0; transition: 0.3s; }
     .toast.show { visibility: visible; opacity: 1; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 600; justify-content: center; align-items: center; }
+    .modal-content { background: var(--white); width: 90%; max-width: 320px; border-radius: 16px; padding: 25px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- ================= หน้าล็อกอิน (Login) ================= -->
   <div id="login-screen" class="screen auth-screen" style="display: flex;">
     <div class="auth-card">
       <div style="font-size: 48px; color: var(--rider-primary); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">sports_motorsports</span></div>
       <h2 style="margin: 0 0 5px;">Rider App</h2>
-      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">ระบบสำหรับคนขับ ห้วยเกิ้ง Delivery</p>
-      
-      <div class="input-group"><label>เบอร์โทรศัพท์ (ID ไรเดอร์)</label><input type="tel" id="rider-phone" placeholder="08X-XXX-XXXX"></div>
-      <div class="input-group"><label>ชื่อ - นามสกุล (สำหรับสมัครใหม่)</label><input type="text" id="rider-name" placeholder="ชื่อ นามสกุล"></div>
-      
+      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">เข้าสู่ระบบคนขับ</p>
+      <div class="input-group"><label>เบอร์โทรศัพท์</label><input type="tel" id="login-phone" placeholder="08X-XXX-XXXX"></div>
       <button class="btn-main" onclick="riderLogin()">เข้าสู่ระบบ / รับงาน</button>
+      <button class="btn-text" onclick="showAuthScreen('register-screen')">สมัครเป็นคนขับ</button>
     </div>
   </div>
 
-  <!-- ================= หน้าหลัก / แผนที่รอรับงาน ================= -->
+  <div id="register-screen" class="screen auth-screen">
+    <div class="auth-card">
+      <h2 style="margin: 0 0 20px;">สมัครคนขับใหม่</h2>
+      <div class="input-group"><label>ชื่อ - นามสกุล</label><input type="text" id="reg-name" placeholder="ชื่อ นามสกุล"></div>
+      <div class="input-group"><label>เบอร์โทรศัพท์ (ใช้เข้าระบบ)</label><input type="tel" id="reg-phone" placeholder="08X-XXX-XXXX"></div>
+      <div class="input-group"><label>ทะเบียนรถ</label><input type="text" id="reg-plate" placeholder="เช่น 1กข 1234 อด"></div>
+      <button class="btn-main" onclick="riderRegister()">สร้างบัญชีคนขับ</button>
+      <button class="btn-text" style="color: var(--text-light);" onclick="showAuthScreen('login-screen')">กลับไปเข้าสู่ระบบ</button>
+    </div>
+  </div>
+
   <div id="map-screen" class="screen">
     <div class="rider-header">
       <div class="rider-profile">
         <div class="profile-img"><span class="material-icons" style="color: #999;">person</span></div>
         <div>
-          <div style="font-weight: 600; font-size: 15px;" id="display-rider-name">ชื่อไรเดอร์</div>
-          <div style="font-size: 12px; color: var(--text-light);" id="display-rider-phone">เบอร์โทร</div>
+          <div style="font-weight: 600; font-size: 15px;" id="display-rider-name">กำลังโหลด...</div>
+          <div style="font-size: 12px; color: var(--text-light);" id="display-rider-plate">ทะเบียน</div>
         </div>
       </div>
       <div class="status-toggle" id="status-btn" onclick="toggleOnlineStatus()">
@@ -98,18 +116,45 @@
     </div>
 
     <div class="map-container">
-      <div class="rider-pin"><span class="material-icons">sports_motorsports</span></div>
-      <div style="position: absolute; bottom: 20px; background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 20px; font-weight: 600; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">กำลังรอออเดอร์ใหม่...</div>
+      <div id="rider-map"></div>
+      
+      <!-- Panel ออเดอร์ที่รับอยู่ -->
+      <div class="order-panel collapsed" id="active-order-panel" style="display:none;">
+        <div class="drag-handle" onclick="togglePanel()"></div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="profile-img" style="background:var(--rider-primary); color:white;"><span class="material-icons">receipt</span></div>
+            <div>
+              <div style="font-weight: 600; font-size: 16px;" id="active-res-name">ร้านอาหาร</div>
+              <div style="font-size: 13px; color: var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</div>
+            </div>
+          </div>
+        </div>
+        
+        <a href="#" id="call-cus-btn" class="btn-call"><span class="material-icons">call</span> โทรหาลูกค้า</a>
+
+        <div style="flex-grow: 1; max-height: 120px; overflow-y:auto;">
+          <h3 style="margin: 0 0 10px 0; font-size: 14px;">รายการ:</h3>
+          <ul id="active-items" style="padding-left: 20px; font-size: 13px; margin-bottom: 10px; color:var(--text-light);"></ul>
+        </div>
+
+        <div class="total-collect">
+          <div>
+            <p style="margin: 0; color: var(--text-dark); font-weight: 600;">ยอดที่ต้องเก็บลูกค้า</p>
+            <span style="font-size: 12px; color: var(--text-light);" id="active-pay-method">(เงินสด)</span>
+          </div>
+          <h2 style="margin: 0; color: var(--rider-primary); font-size: 20px;">฿<span id="active-total">0</span></h2>
+        </div>
+
+        <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
+      </div>
     </div>
   </div>
 
-  <!-- ================= ป๊อปอัปเตือนมีงานเข้า ================= -->
+  <!-- ป๊อปอัปเตือนมีงานเข้า -->
   <div class="order-alert-overlay" id="order-alert">
     <div class="order-alert-content">
-      <div class="alert-header">
-        <h3 style="font-size: 22px; font-weight: 700; color: var(--rider-primary); margin: 0; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
-      </div>
-      
+      <h3 style="font-size: 20px; font-weight: 700; color: var(--rider-primary); margin: 0 0 15px; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
       <div class="job-details">
         <div class="location-row">
           <div class="loc-icon" style="background: var(--rider-primary);"><span class="material-icons">storefront</span></div>
@@ -119,12 +164,11 @@
           <div class="loc-icon" style="background: var(--success);"><span class="material-icons">person</span></div>
           <div><h4 style="margin:0;" id="alert-cus-name">ลูกค้า</h4><p style="margin:0; font-size:12px; color:#777;">จุดจัดส่ง</p></div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 1px dashed #ccc; font-size: 16px; font-weight: 700;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 1px dashed #ccc; font-weight: 700;">
           <span>ยอดจัดเก็บรวม</span>
-          <span style="color: var(--rider-primary); font-size: 22px;">฿<span id="alert-total">0</span></span>
+          <span style="color: var(--rider-primary); font-size: 20px;">฿<span id="alert-total">0</span></span>
         </div>
       </div>
-
       <button class="btn-main" onclick="acceptJob()">กดเพื่อรับงานนี้</button>
       <div style="text-align: center; margin-top: 15px;">
         <span style="color: var(--text-light); font-size: 14px; cursor: pointer;" onclick="document.getElementById('order-alert').style.display = 'none';">ปิดหน้าต่าง</span>
@@ -132,47 +176,26 @@
     </div>
   </div>
 
-  <!-- ================= หน้ากำลังจัดส่ง (Active Order) ================= -->
-  <div id="active-order-screen" class="screen">
-    <div style="height: 35vh; background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center; position: relative;"></div>
-
-    <div class="order-panel">
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <div class="profile-img"><span class="material-icons" style="color: #999;">receipt</span></div>
-          <div>
-            <div style="font-weight: 600; font-size: 16px;" id="active-res-name">ร้านอาหาร</div>
-            <div style="font-size: 13px; color: var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</div>
-          </div>
-        </div>
+  <!-- Custom Confirm -->
+  <div class="modal-overlay" id="custom-confirm-modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0;">โปรดยืนยัน</h3>
+      <p id="confirm-message" style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">แน่ใจหรือไม่?</p>
+      <div style="display: flex; gap: 10px;">
+        <button style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeConfirmModal()">ยกเลิก</button>
+        <button id="confirm-yes-btn" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';">ตกลง</button>
       </div>
-
-      <div style="flex-grow: 1;">
-        <h3 style="margin: 0 0 10px 0; font-size: 16px;">รายการอาหาร</h3>
-        <ul id="active-items" style="padding-left: 20px; font-size: 14px; margin-bottom: 20px;"></ul>
-      </div>
-
-      <div class="total-collect">
-        <div>
-          <p style="margin: 0; color: var(--success); font-weight: 600;">ยอดที่ต้องเก็บลูกค้า</p>
-          <span style="font-size: 12px; color: #555;" id="active-pay-method">(เงินสด)</span>
-        </div>
-        <h2 style="margin: 0; color: var(--success); font-size: 22px;">฿<span id="active-total">0</span></h2>
-      </div>
-
-      <!-- ปุ่มอัปเดตสถานะ -->
-      <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
     </div>
   </div>
 
-  <!-- ================= เมนูด้านล่าง ================= -->
+  <!-- Bottom Nav -->
   <div class="bottom-nav">
-    <div class="nav-item active" id="nav-map" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
-    <div class="nav-item"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
-    <div class="nav-item" onclick="logout()"><span class="material-icons">logout</span><span>ออกระบบ</span></div>
+    <div class="nav-item active" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
+    <div class="nav-item" onclick="showToast('ระบบกระเป๋าเงินกำลังพัฒนา')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
+    <div class="nav-item" onclick="promptLogout()"><span class="material-icons">logout</span><span>ออกระบบ</span></div>
   </div>
 
-  <div id="custom-toast" class="toast">ข้อความแจ้งเตือน</div>
+  <div id="custom-toast" class="toast">ข้อความ</div>
 
   <script>
     const firebaseConfig = {
@@ -187,64 +210,115 @@
     const db = firebase.firestore();
 
     let currentRiderId = null;
-    let riderName = "";
+    let riderData = null;
     let isOnline = true;
     let incomingOrderId = null;
     let activeOrderId = null;
     let currentOrderStatus = "";
-    
     let findJobListener = null;
     let activeJobListener = null;
-    let voiceInterval = null;
+    let confirmCallback = null;
+    
+    // Map variables
+    let riderMap = null;
+    let riderMarker = null;
+    let resMarker = null;
+    let cusMarker = null;
+    let routeLine = null;
+    let watchId = null;
 
     window.onload = function() {
       currentRiderId = localStorage.getItem('hk_rider_id');
-      riderName = localStorage.getItem('hk_rider_name');
-      
       if(currentRiderId) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('display-rider-name').innerText = riderName;
-        document.getElementById('display-rider-phone').innerText = currentRiderId;
-        checkActiveJob();
+        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+        loadRiderProfile();
       }
     };
 
-    function riderLogin() {
-      const phone = document.getElementById('rider-phone').value;
-      const name = document.getElementById('rider-name').value || "ไรเดอร์ทั่วไป";
-      if(!phone) { showToast("กรุณากรอกเบอร์โทรศัพท์"); return; }
-      
-      localStorage.setItem('hk_rider_id', phone);
-      localStorage.setItem('hk_rider_name', name);
-      currentRiderId = phone;
-      riderName = name;
-      
-      document.getElementById('display-rider-name').innerText = name;
-      document.getElementById('display-rider-phone').innerText = phone;
-      document.getElementById('login-screen').style.display = 'none';
-      showScreen('map-screen');
-      startFindingJobs();
+    function showAuthScreen(id) {
+      document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'flex';
     }
 
-    function logout() {
-      localStorage.removeItem('hk_rider_id');
-      localStorage.removeItem('hk_rider_name');
-      location.reload();
+    function riderRegister() {
+      const phone = document.getElementById('reg-phone').value;
+      const name = document.getElementById('reg-name').value;
+      const plate = document.getElementById('reg-plate').value;
+      if(!phone || !name) { showToast("กรุณากรอกข้อมูลให้ครบ"); return; }
+      
+      db.collection("riders").doc(phone).set({
+        name: name, phone: phone, plate: plate, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        showToast("สมัครสำเร็จ");
+        localStorage.setItem('hk_rider_id', phone);
+        currentRiderId = phone;
+        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+        loadRiderProfile();
+      }).catch(err => showToast("Error: " + err.message));
+    }
+
+    function riderLogin() {
+      const phone = document.getElementById('login-phone').value;
+      if(!phone) { showToast("กรุณากรอกเบอร์โทร"); return; }
+      
+      db.collection("riders").doc(phone).get().then(doc => {
+        if(doc.exists) {
+          localStorage.setItem('hk_rider_id', phone);
+          currentRiderId = phone;
+          document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
+          loadRiderProfile();
+        } else {
+          showToast("ไม่พบเบอร์โทรนี้ในระบบ กรุณาสมัครสมาชิก");
+        }
+      }).catch(err => showToast("Error: " + err.message));
+    }
+
+    function promptLogout() {
+      openConfirm("ต้องการออกจากระบบหรือไม่?", () => {
+        localStorage.removeItem('hk_rider_id');
+        location.reload();
+      });
+    }
+
+    function loadRiderProfile() {
+      db.collection("riders").doc(currentRiderId).get().then(doc => {
+        if(doc.exists) {
+          riderData = doc.data();
+          document.getElementById('display-rider-name').innerText = riderData.name;
+          document.getElementById('display-rider-plate').innerText = riderData.plate || "ไม่มีข้อมูลรถ";
+          showScreen('map-screen');
+          initMap();
+          checkActiveJob();
+        }
+      });
+    }
+
+    function initMap() {
+      if(riderMap !== null) return;
+      riderMap = L.map('rider-map', {zoomControl: false}).setView([17.15, 102.95], 15);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(riderMap);
+      
+      const rIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--rider-primary); width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>`});
+      riderMarker = L.marker([17.15, 102.95], {icon: rIcon}).addTo(riderMap);
+
+      if(navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(pos => {
+          const lat = pos.coords.latitude; const lng = pos.coords.longitude;
+          riderMarker.setLatLng([lat, lng]);
+          if(!activeOrderId) riderMap.setView([lat, lng]); // Center map only if no active job
+        }, err => console.log(err), {enableHighAccuracy: true});
+      }
     }
 
     function toggleOnlineStatus() {
       isOnline = !isOnline;
       const btn = document.getElementById('status-btn');
       const text = document.getElementById('status-text');
-      
       if(isOnline) {
-        btn.classList.remove('offline');
-        text.innerText = "ออนไลน์";
-        startFindingJobs();
-        showToast("คุณเปิดรับงานแล้ว");
+        btn.classList.remove('offline'); text.innerText = "ออนไลน์";
+        startFindingJobs(); showToast("คุณเปิดรับงานแล้ว");
       } else {
-        btn.classList.add('offline');
-        text.innerText = "ออฟไลน์";
+        btn.classList.add('offline'); text.innerText = "ออฟไลน์";
         if(findJobListener) { findJobListener(); findJobListener = null; }
         showToast("คุณหยุดรับงานชั่วคราว");
       }
@@ -252,18 +326,13 @@
 
     function startFindingJobs() {
       if(findJobListener) findJobListener();
-      
-      // ค้นหาออเดอร์ที่ยังไม่มีไรเดอร์รับ
       findJobListener = db.collection("orders")
-        .where("status", "in", ["กำลังค้นหาไรเดอร์", "ร้านกำลังเตรียมอาหาร"])
+        .where("status", "in", ["กำลังค้นหาไรเดอร์", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว"])
         .onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {
             if (change.type === "added") {
               const orderData = change.doc.data();
-              // ตรวจสอบว่าออเดอร์นี้ยังไม่มีไรเดอร์ (null หรือ ไม่มีฟิลด์)
-              if(!orderData.riderId && isOnline && !activeOrderId) {
-                triggerJobAlert(change.doc.id, orderData);
-              }
+              if(!orderData.riderId && isOnline && !activeOrderId) triggerJobAlert(change.doc.id, orderData);
             }
           });
         });
@@ -274,55 +343,39 @@
       document.getElementById('alert-res-name').innerText = data.restaurantName;
       document.getElementById('alert-cus-name').innerText = "ลูกค้า: " + data.customerName;
       document.getElementById('alert-total').innerText = data.totalPrice;
-      
       document.getElementById('order-alert').style.display = 'flex';
-      
-      if ('speechSynthesis' in window) {
-        const msg = new SpeechSynthesisUtterance("มีงานใหม่เข้าครับ");
-        msg.lang = 'th-TH'; window.speechSynthesis.speak(msg);
-      }
+      if ('speechSynthesis' in window) { const msg = new SpeechSynthesisUtterance("มีงานใหม่เข้าครับ"); msg.lang = 'th-TH'; window.speechSynthesis.speak(msg); }
     }
 
     function acceptJob() {
       if(!incomingOrderId) return;
-      
       document.getElementById('order-alert').style.display = 'none';
-      showToast("กำลังยืนยันการรับงาน...");
+      showToast("กำลังรับงาน...");
       
-      // อัปเดตฐานข้อมูลว่าไรเดอร์คนนี้รับงานแล้ว
       db.collection("orders").doc(incomingOrderId).update({
-        riderId: currentRiderId,
-        riderName: riderName,
-        status: "ไรเดอร์กำลังไปรับอาหาร"
+        riderId: currentRiderId, riderName: riderData.name, status: "ไรเดอร์กำลังไปรับอาหาร"
       }).then(() => {
-        activeOrderId = incomingOrderId;
-        incomingOrderId = null;
-        if(findJobListener) { findJobListener(); findJobListener = null; } // หยุดหาออเดอร์อื่น
+        activeOrderId = incomingOrderId; incomingOrderId = null;
+        if(findJobListener) { findJobListener(); findJobListener = null; } 
         listenToActiveJob();
       }).catch(err => showToast("ไม่สามารถรับงานได้: " + err.message));
     }
 
     function checkActiveJob() {
-      // เช็คว่าไรเดอร์มีงานค้างอยู่ไหมตอนเปิดแอป
-      db.collection("orders")
-        .where("riderId", "==", currentRiderId)
-        .where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง", "ร้านเตรียมอาหารเสร็จแล้ว"])
-        .get().then(snapshot => {
-          if(!snapshot.empty) {
-            activeOrderId = snapshot.docs[0].id;
-            listenToActiveJob();
-          } else {
-            startFindingJobs();
-            showScreen('map-screen');
-          }
+      db.collection("orders").where("riderId", "==", currentRiderId)
+        .where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง", "ร้านเตรียมอาหารเสร็จแล้ว"]).get().then(snapshot => {
+          if(!snapshot.empty) { activeOrderId = snapshot.docs[0].id; listenToActiveJob(); }
+          else { startFindingJobs(); }
         });
     }
 
     function listenToActiveJob() {
       if(!activeOrderId) return;
-      
       if(activeJobListener) activeJobListener();
       
+      document.getElementById('active-order-panel').style.display = 'block';
+      setTimeout(() => document.getElementById('active-order-panel').classList.remove('collapsed'), 100);
+
       activeJobListener = db.collection("orders").doc(activeOrderId).onSnapshot(doc => {
         if(doc.exists) {
           const data = doc.data();
@@ -334,81 +387,96 @@
           
           let pMethodText = data.paymentMethod === 'transfer' ? "(โอนแล้ว ไม่ต้องเก็บเงิน)" : "(เก็บเงินสด)";
           document.getElementById('active-pay-method').innerText = pMethodText;
-          if(data.paymentMethod === 'transfer') document.getElementById('active-total').style.color = "#777";
           
-          const ul = document.getElementById('active-items');
-          ul.innerHTML = '';
+          // ปุ่มโทร
+          let phoneToCall = data.customerPhone || "0800000000"; // Fallback phone
+          document.getElementById('call-cus-btn').href = "tel:" + phoneToCall;
+          document.getElementById('call-cus-btn').innerHTML = `<span class="material-icons">call</span> โทรหาคุณ ${data.customerName.split(' ')[0]}`;
+          
+          const ul = document.getElementById('active-items'); ul.innerHTML = '';
           data.items.forEach(item => { ul.innerHTML += `<li>${item}</li>`; });
           
           updateButtonUI();
-          showScreen('active-order-screen');
+          drawRouteOnMap(data);
         }
       });
     }
 
+    function drawRouteOnMap(data) {
+      if(resMarker) riderMap.removeLayer(resMarker);
+      if(cusMarker) riderMap.removeLayer(cusMarker);
+      if(routeLine) riderMap.removeLayer(routeLine);
+      
+      const sIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--danger); width:20px; height:20px; border-radius:50%; border:3px solid white; display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">storefront</span></div>`});
+      const cIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--success); width:20px; height:20px; border-radius:50%; border:3px solid white; display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">person</span></div>`});
+      
+      let latlngs = [];
+      if(riderMarker) latlngs.push(riderMarker.getLatLng());
+      if(data.resLat && data.resLng) { resMarker = L.marker([data.resLat, data.resLng], {icon: sIcon}).addTo(riderMap); latlngs.push([data.resLat, data.resLng]); }
+      if(data.cusLat && data.cusLng) { cusMarker = L.marker([data.cusLat, data.cusLng], {icon: cIcon}).addTo(riderMap); latlngs.push([data.cusLat, data.cusLng]); }
+      
+      if(latlngs.length > 1) {
+        routeLine = L.polyline(latlngs, {color: 'var(--rider-primary)', weight: 4, dashArray: '5, 10'}).addTo(riderMap);
+        riderMap.fitBounds(latlngs, {padding: [50, 50]});
+      }
+    }
+
     function updateButtonUI() {
       const btn = document.getElementById('action-btn');
-      
-      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") {
-        btn.innerText = "ฉันเดินทางถึงร้านอาหารแล้ว";
-        btn.style.backgroundColor = "var(--rider-primary)";
-      } 
-      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว" || currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") {
-        btn.innerText = "รับอาหารแล้ว (เริ่มจัดส่ง)";
-        btn.style.backgroundColor = "#2196F3"; // สีฟ้า
-      }
-      else if(currentOrderStatus === "กำลังจัดส่ง") {
-        btn.innerText = "จัดส่งสำเร็จ!";
-        btn.style.backgroundColor = "var(--success)"; // สีเขียว
-      }
-      else if(currentOrderStatus === "ลูกค้ายกเลิกออเดอร์" || currentOrderStatus === "ร้านปฏิเสธรับออเดอร์") {
-        alert("ออเดอร์นี้ถูกยกเลิกแล้ว");
-        activeOrderId = null;
-        if(activeJobListener) activeJobListener();
-        startFindingJobs();
-        showScreen('map-screen');
+      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") { btn.innerHTML = "ฉันเดินทางถึงร้านอาหารแล้ว"; btn.style.background = "var(--rider-primary)"; } 
+      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว") { btn.innerHTML = "รอร้านทำอาหาร... (รับอาหารแล้วกดที่นี่)"; btn.style.background = "#2196F3"; }
+      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { btn.innerHTML = "อาหารเสร็จแล้ว! (กดเพื่อเริ่มจัดส่ง)"; btn.style.background = "#2196F3"; }
+      else if(currentOrderStatus === "กำลังจัดส่ง") { btn.innerHTML = "จัดส่งสำเร็จ!"; btn.style.background = "var(--success)"; }
+      else if(["ลูกค้ายกเลิกออเดอร์", "ร้านปฏิเสธรับออเดอร์"].includes(currentOrderStatus)) {
+        showToast("ออเดอร์นี้ถูกยกเลิกแล้ว");
+        finishJobLocally();
       }
     }
 
     function updateOrderStatus() {
       if(!activeOrderId) return;
-      
       let nextStatus = "";
       if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") nextStatus = "ไรเดอร์ถึงร้านแล้ว";
       else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว" || currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") nextStatus = "กำลังจัดส่ง";
       else if(currentOrderStatus === "กำลังจัดส่ง") nextStatus = "จัดส่งสำเร็จ";
       
-      if(nextStatus !== "") {
-        db.collection("orders").doc(activeOrderId).update({ status: nextStatus })
-          .then(() => {
-            showToast("อัปเดตสถานะ: " + nextStatus);
-            if(nextStatus === "จัดส่งสำเร็จ") {
-              setTimeout(() => {
-                activeOrderId = null;
-                if(activeJobListener) activeJobListener();
-                startFindingJobs();
-                showScreen('map-screen');
-                showToast("จบงานสำเร็จ! รอรับงานต่อไป");
-              }, 2000);
-            }
-          }).catch(err => showToast("Error: " + err.message));
+      if(nextStatus) {
+        openConfirm(`ยืนยันเปลี่ยนสถานะเป็น: ${nextStatus} ?`, () => {
+          db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
+            showToast("อัปเดตสถานะสำเร็จ!");
+            if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
+          });
+        });
       }
     }
+
+    function finishJobLocally() {
+      activeOrderId = null;
+      if(activeJobListener) activeJobListener();
+      document.getElementById('active-order-panel').classList.add('collapsed');
+      setTimeout(() => document.getElementById('active-order-panel').style.display='none', 300);
+      if(resMarker) riderMap.removeLayer(resMarker);
+      if(cusMarker) riderMap.removeLayer(cusMarker);
+      if(routeLine) riderMap.removeLayer(routeLine);
+      startFindingJobs();
+    }
+
+    function togglePanel() { document.getElementById('active-order-panel').classList.toggle('collapsed'); }
 
     function showScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
       document.getElementById(screenId).style.display = 'flex';
-      
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      const activeNavId = screenId.replace('-screen', '');
-      if (document.getElementById('nav-' + activeNavId)) document.getElementById('nav-' + activeNavId).classList.add('active');
+      if(screenId === 'map-screen' && riderMap) setTimeout(() => riderMap.invalidateSize(), 300);
     }
-
+    
     function showToast(message) {
-      const toast = document.getElementById("custom-toast");
-      toast.innerText = message; toast.classList.add('show');
+      const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+    
+    function openConfirm(message, callback) { document.getElementById('confirm-message').innerText = message; confirmCallback = callback; document.getElementById('custom-confirm-modal').style.display = 'flex'; }
+    function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
+    document.getElementById('confirm-yes-btn').addEventListener('click', () => { if (confirmCallback) confirmCallback(); closeConfirmModal(); });
   </script>
 </body>
 </html>
