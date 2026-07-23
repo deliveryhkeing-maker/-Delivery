@@ -35,12 +35,9 @@
     .btn-primary:disabled { background-color: #cccccc; box-shadow: none; cursor: not-allowed; transform: none; }
     .btn-line { width: 100%; background-color: var(--line-color); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(6,199,85,0.2); }
     .btn-outline { width: 100%; background-color: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 12px; padding: 12px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-outline.disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; }
 
     .header { background-color: var(--primary-color); padding: 20px 20px 15px; position: sticky; top: 0; z-index: 100; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 15px rgba(0,185,0,0.2); margin-bottom: 15px; }
-    .location-box { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s; }
-    .location-box:active { background: rgba(255,255,255,0.3); transform: scale(0.98); }
-    .location-box .pin { color: white; font-size: 24px; }
+    .location-box { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px); }
     .location-text { display: flex; flex-direction: column; flex-grow: 1; }
     .location-text span:first-child { font-size: 12px; color: #e6f7e6; }
     .location-text span:last-child { font-size: 14px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
@@ -56,24 +53,20 @@
 
     .categories { display: flex; overflow-x: auto; padding: 0 20px 15px; gap: 15px; scrollbar-width: none; }
     .categories::-webkit-scrollbar { display: none; }
-    .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; transition: transform 0.2s; opacity: 1; }
-    .category-item:active { transform: scale(0.95); }
+    .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; }
     .category-icon { width: 60px; height: 60px; background-color: var(--white); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .category-item span { font-size: 13px; font-weight: 500; }
     
     .restaurant-section { padding: 0 20px 15px; }
     .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
     
-    .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }
-    .restaurant-card:active { transform: scale(0.98); }
-    .restaurant-card.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(50%); }
-    .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; position: relative; background-color: #f0f0f0; }
-    .distance-tag { position: absolute; bottom: 12px; right: 12px; background-color: rgba(255,255,255,0.9); color: var(--text-dark); padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 12px; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .out-of-range-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 10; white-space: nowrap; }
+    .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; position: relative; }
+    .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; background-color: #f0f0f0; }
+    .distance-tag { position: absolute; bottom: 12px; right: 12px; background-color: rgba(255,255,255,0.9); padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
     .res-info { padding: 15px; }
     .res-name { font-size: 18px; font-weight: 600; margin: 0 0 5px; }
-    .res-meta { display: flex; align-items: center; font-size: 13px; color: var(--text-light); gap: 12px; margin-bottom: 8px; }
 
+    /* Menu & Topping */
     #menu-screen { background-color: var(--white); }
     .menu-header { position: relative; height: 220px; background-size: cover; background-position: center; }
     .back-btn-img { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;}
@@ -92,33 +85,42 @@
     .topping-group-box { margin-bottom: 20px; }
     .topping-group-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; background: #f8f9fa; padding: 8px 12px; border-radius: 8px; }
     .topping-option { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; cursor: pointer; }
-    .topping-option input { width: 18px; height: 18px; accent-color: var(--primary-color); margin-right: 10px; }
 
+    /* Checkout & Payment */
     .checkout-items, .summary-card, .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .pay-option { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; cursor: pointer; }
-    .pay-option:last-child { border-bottom: none; padding-bottom: 0; }
     .pay-option input { width: 20px; height: 20px; accent-color: var(--primary-color); margin-right: 15px; }
     
     .transfer-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-top: 15px; display: none; }
-    .slip-upload-btn { display: inline-block; background: var(--primary-light); color: var(--primary-color); padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-top: 10px; cursor: pointer; }
     
+    /* Topup Screen */
+    .qr-box { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 20px; }
+    .qr-image { width: 200px; height: 200px; margin: 15px auto; background: #f0f0f0; border-radius: 8px; padding: 10px; }
+    .amount-btn-group { display: flex; gap: 10px; padding: 0 20px; margin-bottom: 20px; }
+    .amount-btn { flex: 1; padding: 10px; background: white; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+    /* Tracking Screen */
     #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; position: relative; overflow: hidden; }
     #tracking-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     .tracking-overlay { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 10; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
     
+    /* เรดาร์ตรงกลางจอ */
     .radar-center { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; }
     .radar-ring { width: 150px; height: 150px; border-radius: 50%; background: rgba(0, 185, 0, 0.15); border: 2px solid rgba(0, 185, 0, 0.5); animation: radarPulse 2s infinite ease-out; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .radar-ring:nth-child(2) { animation-delay: 0.6s; }
-    .radar-ring:nth-child(3) { animation-delay: 1.2s; }
     @keyframes radarPulse { 0% { width: 50px; height: 50px; opacity: 1; } 100% { width: 300px; height: 300px; opacity: 0; } }
     
     .tracking-status-card { background: var(--white); border-radius: 24px 24px 0 0; padding: 30px 25px 25px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; }
     
+    /* หลอดเวลา */
     .progress-container { width: 100%; height: 8px; background: #e0e0e0; border-radius: 10px; margin: 25px 0 15px; position: relative; }
     .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 10px; width: 0%; transition: width 1s linear; }
-    .progress-moto { position: absolute; top: -20px; left: 0%; transform: translateX(-50%); font-size: 24px; transition: left 1s linear; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-    .timer-text { font-size: 14px; font-weight: 600; color: var(--text-light); margin-bottom: 20px; }
+    .progress-moto { position: absolute; top: -20px; left: 0%; transform: translateX(-50%); font-size: 24px; transition: left 1s linear; }
+    
+    /* *เคล็ดลับ* ทำให้หมุดบนแผนที่วิ่งสมูทๆ แบบเรียลไทม์ (Smooth Translation) */
+    .leaflet-marker-icon { transition: transform 1.5s linear !important; }
 
+    /* Bottom Nav & Carts */
     #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; }
     #cart-bar { bottom: 85px; background-color: var(--primary-color); }
     #active-order-bar { bottom: 85px; background-color: #2196F3; }
@@ -126,15 +128,14 @@
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 25%; }
     .nav-item.active { color: var(--primary-color); }
-    .nav-item .material-icons { font-size: 26px; }
 
-    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; opacity: 0; transition: opacity 0.3s, bottom 0.3s; }
+    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; opacity: 0; transition: 0.3s; }
     .toast.show { visibility: visible; opacity: 1; bottom: 150px; }
   </style>
 </head>
 <body>
 
-  <!-- ================= หน้าหลัก (Home) ================= -->
+  <!-- ================= หน้าแรก (Home) ================= -->
   <div id="home-screen" class="screen">
     <div class="header">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
@@ -148,7 +149,6 @@
           <span>พิกัดจัดส่ง (กดเพื่ออัปเดต)</span>
           <span id="current-location-text">กำลังค้นหาพิกัด...</span>
         </div>
-        <span class="material-icons" style="margin-left: auto; color: white;">my_location</span>
       </div>
     </div>
 
@@ -159,44 +159,18 @@
       </div>
     </div>
 
-    <div class="banner-section">
-      <div class="banner">
-        <div style="z-index: 2;"><h3>โค้ดลดชุมชน</h3><p>ใส่โค้ด LOCAL50 ลดทันที 50.-</p></div>
-      </div>
-    </div>
-
     <div class="categories">
       <div class="category-item" data-cat="ทั้งหมด" onclick="filterCategory('ทั้งหมด')"><div class="category-icon">🏠</div><span>ทั้งหมด</span></div>
       <div class="category-item" data-cat="ตามสั่ง" onclick="filterCategory('ตามสั่ง')"><div class="category-icon">🍛</div><span>ตามสั่ง</span></div>
       <div class="category-item" data-cat="ก๋วยเตี๋ยว" onclick="filterCategory('ก๋วยเตี๋ยว')"><div class="category-icon">🍜</div><span>ก๋วยเตี๋ยว</span></div>
       <div class="category-item" data-cat="เครื่องดื่ม" onclick="filterCategory('เครื่องดื่ม')"><div class="category-icon">☕</div><span>เครื่องดื่ม</span></div>
-      <div class="category-item" data-cat="ของหวาน" onclick="filterCategory('ของหวาน')"><div class="category-icon">🍰</div><span>ของหวาน</span></div>
     </div>
 
     <div class="restaurant-section">
-      <div class="section-title"><span>ร้านอาหาร (รัศมี 5 กม.)</span></div>
+      <div class="section-title"><span>ร้านอาหารที่เปิดอยู่ (รัศมี 5 กม.)</span></div>
       <div id="restaurant-list">
         <p style="text-align: center; color: #999; padding: 20px;">กำลังโหลดข้อมูลร้านค้า...</p>
       </div>
-    </div>
-  </div>
-
-  <!-- ================= หน้าโปรโมชัน ================= -->
-  <div id="promo-screen" class="screen">
-    <div class="top-bar"><div class="page-title" style="margin: 0;">โปรโมชัน & ส่วนลด</div></div>
-    <div style="padding: 15px;">
-      <div style="background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 6px solid var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h4 style="margin: 0 0 5px 0; color: var(--primary-color); font-size: 16px;">ลด 50 บาท (โค้ด: LOCAL50)</h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-light);">ขั้นต่ำ 150 บาท • หมดอายุ 31 ก.ค.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= หน้าออเดอร์ ================= -->
-  <div id="order-screen" class="screen">
-    <div class="top-bar"><div class="page-title" style="margin: 0;">ประวัติการสั่งซื้อ</div></div>
-    <div style="padding: 15px;" id="order-history-list">
-      <p style="text-align: center; color: var(--text-light); margin-top: 20px;">กำลังโหลดประวัติ...</p>
     </div>
   </div>
 
@@ -211,13 +185,12 @@
         <span class="material-icons" style="font-size: 50px; color: #fff;">person</span>
       </div>
       <h2 id="profile-name" style="margin: 0 0 5px; font-size: 20px;">ลูกค้าทั่วไป</h2>
-      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 13px;">เบอร์โทร: ยังไม่ได้ระบุ</p>
+      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 13px;">สะสมพอยท์เพื่อแลกส่วนลด</p>
       
       <button id="btn-line-login" class="btn-line" onclick="loginWithLine()">เข้าสู่ระบบด้วย LINE</button>
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
 
-    <!-- กระเป๋าวอเลท & พอยท์สะสม -->
     <div style="display: flex; background: white; margin-bottom: 15px; padding: 15px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
       <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
         <p style="margin:0; font-size: 13px; color: var(--text-light);">ห้วยเกิ้ง วอลเล็ท</p>
@@ -231,9 +204,44 @@
 
     <div style="background: var(--white); margin-top: 15px;">
       <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showToast('ระบบกำลังเปิดหน้าแก้ไขข้อมูล...')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว</div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showScreen('order-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">receipt_long</span> ประวัติการสั่งซื้อ</div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showToast('ระบบจัดการที่อยู่จัดส่ง')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">location_on</span> ที่อยู่จัดส่งของฉัน</div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showToast('กำลังเชื่อมต่อระบบ Payment Gateway...')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท</div>
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px;" onclick="showScreen('topup-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท (QR Code)</div>
+    </div>
+  </div>
+
+  <!-- ================= หน้าเติมเงิน (Wallet Top-up) ================= -->
+  <div id="topup-screen" class="screen">
+    <div class="top-bar">
+      <div class="back-btn-simple" onclick="showScreen('profile-screen')"><span class="material-icons">arrow_back</span></div>
+      <div class="page-title">เติมเงินเข้าวอลเล็ท</div>
+    </div>
+    
+    <div class="qr-box">
+      <h3 style="margin-top:0;">แสกน QR Code เพื่อเติมเงิน</h3>
+      <p style="color:var(--text-light); font-size:13px;">พร้อมเพย์: 1410400401805 (สหภาพ เนาว์แสง)</p>
+      
+      <!-- ใช้ API ของ PromptPay.io เพื่อสร้าง QR อัตโนมัติตามยอดเงิน -->
+      <img id="promptpay-qr" class="qr-image" src="https://promptpay.io/1410400401805/100.png" alt="QR Code">
+      
+      <div style="margin-bottom: 15px;">
+        <label style="font-size: 14px; font-weight: 600;">ระบุจำนวนเงินที่ต้องการเติม:</label>
+        <input type="number" id="topup-amount" value="100" onkeyup="updateQRCode()" onchange="updateQRCode()" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Prompt'; font-size: 16px; margin-top: 8px; text-align: center;">
+      </div>
+      
+      <div class="amount-btn-group">
+        <button class="amount-btn" onclick="setTopupAmount(100)">100</button>
+        <button class="amount-btn" onclick="setTopupAmount(200)">200</button>
+        <button class="amount-btn" onclick="setTopupAmount(500)">500</button>
+      </div>
+      
+      <button class="btn-primary" onclick="simulateTopupSuccess()" style="margin-top: 15px;"><span class="material-icons" style="vertical-align: middle;">upload_file</span> อัปโหลดสลิปยืนยัน</button>
+    </div>
+  </div>
+
+  <!-- ================= หน้าประวัติออเดอร์ (Order) ================= -->
+  <div id="order-screen" class="screen">
+    <div class="top-bar"><div class="page-title" style="margin: 0;">ประวัติการสั่งซื้อ</div></div>
+    <div style="padding: 15px;" id="order-history-list">
+      <p style="text-align: center; color: var(--text-light); margin-top: 20px;">กำลังโหลดประวัติ...</p>
     </div>
   </div>
 
@@ -245,7 +253,7 @@
     <div class="menu-shop-info">
       <h2 id="menu-name">ชื่อร้าน</h2>
       <div class="res-meta" style="margin-bottom: 0;">
-        <span class="rating"><i class="material-icons" style="font-size:16px;">star</i> <span id="menu-rating">5.0</span></span>
+        <span class="rating"><i class="material-icons" style="font-size:16px; color:#ff9800;">star</i> 5.0</span>
         <span>• <span id="menu-distance">1.2 กม.</span></span>
       </div>
     </div>
@@ -258,37 +266,36 @@
   <!-- ================= หน้าชำระเงิน (Payment) ================= -->
   <div id="payment-screen" class="screen">
     <div class="top-bar"><div class="back-btn-simple" onclick="showScreen('menu-screen')"><span class="material-icons">arrow_back</span></div><div class="page-title">ยืนยันคำสั่งซื้อ</div></div>
-    <h3 style="margin: 20px 20px 0; font-size: 16px;">รายการอาหาร</h3>
     <div class="checkout-items" id="checkout-items-list"></div>
     <div class="summary-card">
-      <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;"><span>ค่าอาหาร</span><span>฿<span id="pay-food-total">0</span></span></div>
-      <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;"><span>ค่าจัดส่ง (เริ่มต้น 15บ.)</span><span>฿<span id="pay-delivery-fee">15</span></span></div>
-      <div class="summary-total" style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; font-size: 18px; font-weight: 700; color: var(--primary-color);"><span>ยอดรวมทั้งหมด</span><span>฿<span id="pay-grand-total">0</span></span></div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;"><span>ค่าอาหาร</span><span>฿<span id="pay-food-total">0</span></span></div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;"><span>ค่าจัดส่ง</span><span>฿<span id="pay-delivery-fee">15</span></span></div>
+      <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; font-size: 18px; font-weight: 700; color: var(--primary-color);"><span>ยอดรวมทั้งหมด</span><span>฿<span id="pay-grand-total">0</span></span></div>
     </div>
 
-    <!-- ตัวเลือกการชำระเงิน -->
     <h3 style="margin: 20px 20px 0; font-size: 16px;">ช่องทางการชำระเงิน</h3>
     <div class="payment-methods">
       <label class="pay-option">
-        <input type="radio" name="payment_method" value="cod" checked onchange="toggleTransferBox(false)">
-        <span style="font-weight: 500;">เงินสด (ชำระปลายทาง)</span>
+        <input type="radio" name="payment_method" value="wallet" checked onchange="toggleTransferBox(false)">
+        <span style="font-weight: 500;">จ่ายด้วย ห้วยเกิ้งวอลเล็ท <span id="checkout-wallet-text" style="color: var(--primary-color);">(฿0.00)</span></span>
+      </label>
+      <label class="pay-option">
+        <input type="radio" name="payment_method" value="cod" onchange="toggleTransferBox(false)">
+        <span style="font-weight: 500;">เงินสด (ชำระที่ไรเดอร์)</span>
       </label>
       <label class="pay-option">
         <input type="radio" name="payment_method" value="transfer" onchange="toggleTransferBox(true)">
-        <span style="font-weight: 500;">โอนเงิน (พร้อมเพย์)</span>
+        <span style="font-weight: 500;">โอนเงิน (แนบสลิป)</span>
       </label>
       
       <!-- กล่องอัปโหลดสลิป -->
       <div id="transfer-box" class="transfer-box">
         <div style="font-size: 14px; margin-bottom: 10px;">
-          <strong>ธนาคาร:</strong> พร้อมเพย์ (PromptPay)<br>
-          <strong>เลขบัญชี:</strong> <span style="font-size: 18px; color: var(--primary-color); font-weight: 700;">1410400401805</span><br>
+          <strong>พร้อมเพย์:</strong> <span style="font-size: 18px; color: var(--primary-color); font-weight: 700;">1410400401805</span><br>
           <strong>ชื่อบัญชี:</strong> สหภาพ เนาว์แสง
         </div>
-        <div style="font-size: 12px; color: var(--danger); margin-bottom: 10px;">* กรุณาโอนเงินตามยอดรวมทั้งหมด และแนบสลิปด้านล่าง (แอดมินจะตรวจสอบสลิปของท่าน)</div>
-        <label class="slip-upload-btn">
-          <span class="material-icons" style="font-size: 16px; vertical-align: text-bottom;">upload_file</span> อัปโหลดรูปสลิปโอนเงิน
-          <input type="file" id="slip-input" accept="image/*" style="display: none;" onchange="handleSlipUpload(event)">
+        <label style="display: inline-block; background: var(--primary-light); color: var(--primary-color); padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+          อัปโหลดรูปสลิป <input type="file" style="display: none;" onchange="handleSlipUpload(event)">
         </label>
         <div id="slip-preview-name" style="font-size: 12px; color: var(--success); margin-top: 5px;"></div>
       </div>
@@ -306,12 +313,12 @@
     <div id="tracking-map"></div>
 
     <div class="radar-center" id="radar-animation">
-      <div class="radar-ring"></div><div class="radar-ring"></div><div class="radar-ring"></div>
+      <div class="radar-ring"></div><div class="radar-ring"></div>
     </div>
 
     <div class="tracking-overlay">
-      <!-- บล็อกแสดงข้อมูลไรเดอร์ (จะโชว์เมื่อมีไรเดอร์รับงานแล้ว) -->
-      <div id="rider-info-panel" style="display:none; background:white; padding:15px; border-radius:16px; margin: 0 15px 15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:calc(100% - 30px); text-align:left; pointer-events:auto;">
+      <!-- บล็อกแสดงข้อมูลไรเดอร์ (Real-time) -->
+      <div id="rider-info-panel" style="display:none; background:white; padding:15px; border-radius:16px; margin: 0 15px 15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:calc(100% - 30px); pointer-events:auto;">
          <div style="display:flex; justify-content:space-between; align-items:center;">
            <div style="display:flex; gap:12px; align-items:center;">
              <div style="width:45px;height:45px;border-radius:50%;background:var(--primary-light); color:var(--primary-color); display:flex;justify-content:center;align-items:center;"><span class="material-icons">sports_motorsports</span></div>
@@ -326,15 +333,14 @@
 
       <div class="tracking-status-card">
         <h3 style="font-size: 22px; font-weight: 700; margin: 0 0 8px;" id="track-status-title">กำลังค้นหาไรเดอร์</h3>
-        <p style="color: var(--text-light); font-size: 14px; margin: 0 0 20px;" id="track-status-subtitle">ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด</p>
+        <p style="color: var(--text-light); font-size: 14px; margin: 0 0 20px;" id="track-status-subtitle">รอสักครู่ ระบบกำลังจับคู่กับไรเดอร์ที่ใกล้ที่สุด</p>
         
         <div class="progress-container">
           <div class="progress-bar-fill" id="search-progress-bar"></div>
           <div class="progress-moto" id="search-moto">🛵</div>
         </div>
-        <div class="timer-text" id="search-timer-text">เหลือเวลา 02:00 นาที</div>
-
-        <button class="btn-outline disabled" id="btn-cancel-order" onclick="cancelOrder()">ยกเลิกคำสั่งซื้อ (รอ 2 นาที)</button>
+        
+        <button class="btn-outline disabled" style="color:#999; border-color:#999;" id="btn-cancel-order" onclick="cancelOrder()">ยกเลิกคำสั่งซื้อ (รอสักครู่)</button>
       </div>
     </div>
   </div>
@@ -349,14 +355,12 @@
         </div>
         <span class="material-icons" style="cursor:pointer;" onclick="closeToppingModal()">close</span>
       </div>
-      <div class="topping-content" id="topping-options-container">
-        <!-- ตัวเลือกท็อปปิ้งจะถูกเรนเดอร์ที่นี่ -->
-      </div>
+      <div class="topping-content" id="topping-options-container"></div>
       <button class="btn-primary" onclick="confirmAddWithTopping()">เพิ่มลงตะกร้า - ฿<span id="topping-total-price">0</span></button>
     </div>
   </div>
 
-  <!-- ================= แถบตะกร้าลอยตัว & เมนูด้านล่าง ================= -->
+  <!-- แถบตะกร้าลอยตัว & เมนูด้านล่าง -->
   <div id="cart-bar" onclick="goToPayment()">
     <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;"><div class="cart-count" id="cart-count" style="background: white; color: var(--primary-color); width: 26px; height: 26px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">1</div><span>ดูตะกร้าของคุณ</span></div>
     <div style="font-weight: 600;">฿<span id="cart-total">0</span></div>
@@ -371,8 +375,7 @@
 
   <div class="bottom-nav">
     <div class="nav-item active" id="nav-home" onclick="showScreen('home-screen')"><span class="material-icons">storefront</span><span>หน้าแรก</span></div>
-    <div class="nav-item" id="nav-promo" onclick="showScreen('promo-screen')"><span class="material-icons">local_offer</span><span>โปรโมชัน</span></div>
-    <div class="nav-item" id="nav-order" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span><span>ออเดอร์</span></div>
+    <div class="nav-item" id="nav-order" onclick="showScreen('order-screen')"><span class="material-icons">receipt_long</span><span>ประวัติ</span></div>
     <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">person</span><span>ฉัน</span></div>
   </div>
 
@@ -391,51 +394,65 @@
     const db = firebase.firestore();
 
     const LIFF_ID = "2010799042-aNBObgM9"; 
+    
+    // จัดการระบบผู้ใช้ (แยกไอดีแบบล็อกอิน กับ แขกทั่วไป)
     let userProfile = null; 
+    let guestId = localStorage.getItem('hk_guest_id');
+    if (!guestId) { guestId = "guest_" + Date.now(); localStorage.setItem('hk_guest_id', guestId); }
+    let currentUserId = guestId; 
+    let currentUserName = "ลูกค้าทั่วไป";
+
     let cartItems = []; 
     let selectedRestaurant = null;
     let userLat = 17.1500;
     let userLng = 102.9500;
     let restaurants = [];
-    let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
     let currentCategory = 'ทั้งหมด';
+
+    // โหลดกระเป๋าเงินจาก Local
+    let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
 
     let currentToppingMenu = null;
     let currentToppingBasePrice = 0;
     let tempSlipBase64 = null;
 
     let trackingMap = null;
-    let riderMarkerForTracking = null; // หมุดพิกัดของไรเดอร์
+    let riderMarkerForTracking = null; 
     let searchTimer = null;
     let searchTimeLeft = 120;
     let orderListenerUnsubscribe = null;
 
     window.onload = async function() {
-      document.getElementById('wallet-balance').innerText = userWallet.toFixed(2);
+      updateWalletUI();
       const savedScreen = sessionStorage.getItem('activeScreen') || 'home-screen';
       showScreen(savedScreen);
       
       await initializeLiff(); 
       await getLocation(); 
       checkActiveOrder();
+      fetchOrderHistory(); 
     };
+
+    function updateWalletUI() {
+      document.getElementById('wallet-balance').innerText = userWallet.toFixed(2);
+      document.getElementById('checkout-wallet-text').innerText = `(฿${userWallet.toFixed(2)})`;
+    }
 
     async function initializeLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
         if (liff.isLoggedIn()) {
           userProfile = await liff.getProfile();
-          document.getElementById('profile-name').innerText = userProfile.displayName;
-          document.getElementById('profile-desc').innerText = "เชื่อมต่อบัญชี LINE ของคุณสำเร็จแล้ว";
+          currentUserId = userProfile.userId;
+          currentUserName = userProfile.displayName;
           
-          if(userProfile.pictureUrl) {
-            document.getElementById('profile-image-container').innerHTML = `<img src="${userProfile.pictureUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
-          }
+          document.getElementById('profile-name').innerText = currentUserName;
+          document.getElementById('profile-desc').innerText = "เชื่อมต่อบัญชี LINE สำเร็จแล้ว";
+          if(userProfile.pictureUrl) document.getElementById('profile-image-container').innerHTML = `<img src="${userProfile.pictureUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
           
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
-          
-          fetchOrderHistory();
+          fetchOrderHistory(); // โหลดใหม่เมื่อมี ID จริง
         }
       } catch (error) { console.error('LIFF Error:', error); }
     }
@@ -443,115 +460,47 @@
     function loginWithLine() { if (!liff.isLoggedIn()) liff.login({ redirectUri: window.location.href }); }
     function logoutLine() { if (liff.isLoggedIn()) { liff.logout(); window.location.reload(); } }
 
-    async function fetchRestaurants() {
-      try {
-        const snapshot = await db.collection("merchants").where("isOpen", "==", true).get();
-        restaurants = [];
-        
-        snapshot.forEach(doc => {
-          let data = doc.data();
-          restaurants.push({
-            id: doc.id, 
-            name: data.storeName,
-            category: data.category,
-            image: data.image || "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80",
-            rating: "5.0", 
-            lat: data.lat,
-            lng: data.lng,
-            menus: data.menus || []
-          });
-        });
-        renderRestaurants();
-      } catch (error) {
-        console.error("Firebase Error: ", error);
-        showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า");
-      }
-    }
-
-    function fetchOrderHistory() {
-      let queryUserId = userProfile ? userProfile.userId : null;
-      if (!queryUserId) {
-         document.getElementById('order-history-list').innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">กรุณาเข้าสู่ระบบเพื่อดูประวัติการสั่งซื้อ</p>';
-         return;
-      }
-
-      db.collection("orders").where("userId", "==", queryUserId)
-        .onSnapshot((snapshot) => {
-          const container = document.getElementById('order-history-list');
-          if(snapshot.empty) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการสั่งซื้อ</p>';
-            return;
-          }
-          
-          let allOrders = [];
-          snapshot.forEach(doc => allOrders.push(doc.data()));
-          allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-
-          let html = '';
-          allOrders.forEach(order => {
-            const date = order.createdAt ? new Date(order.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : 'กำลังดำเนินการ';
-            let statusColor = 'var(--primary-color)';
-            if(order.status === 'ร้านปฏิเสธรับออเดอร์' || order.status === 'ลูกค้ายกเลิกออเดอร์' || order.status === 'ยกเลิกเนื่องจากไม่มีไรเดอร์') statusColor = 'var(--danger)';
-            else if(order.status === 'กำลังค้นหาไรเดอร์' || order.status === 'รอตรวจสอบสลิป' || order.status === 'ร้านกำลังเตรียมอาหาร') statusColor = 'var(--warning)';
-
-            html += `
-              <div style="background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                  <span style="color: ${statusColor}; font-weight: 600; font-size: 14px;">${order.status}</span>
-                  <span style="color: var(--text-light); font-size: 12px;">${date}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <h4 style="font-weight: 600; font-size: 16px; margin: 0 0 5px 0;">${order.restaurantName}</h4>
-                    <p style="margin:0; font-size:13px; color:var(--text-light);">${order.items.length} รายการ</p>
-                  </div>
-                  <div style="font-weight:700; font-size:16px;">฿${order.totalPrice}</div>
-                </div>
-              </div>
-            `;
-          });
-          container.innerHTML = html;
-        }, (err) => { console.log("Error fetching history:", err); });
-    }
-
     function getLocation() {
-      showToast("📍 กำลังอัปเดตพิกัดดาวเทียมล่าสุด...");
       document.getElementById('current-location-text').innerText = "กำลังค้นหาพิกัด...";
-      
       return new Promise((resolve) => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
-              userLat = position.coords.latitude;
-              userLng = position.coords.longitude;
-              document.getElementById('current-location-text').innerText = "ตำแหน่งล่าสุด (อัปเดตแล้ว)";
-              showToast("รับพิกัดแม่นยำสูงสำเร็จ!");
-              fetchRestaurants();
-              resolve();
+              userLat = position.coords.latitude; userLng = position.coords.longitude;
+              document.getElementById('current-location-text').innerText = "พิกัดดาวเทียมล่าสุด";
+              fetchRestaurants(); resolve();
             },
             (error) => {
-              showToast("ไม่สามารถดึง GPS ได้ ระบบจะใช้พิกัดเริ่มต้น");
               document.getElementById('current-location-text').innerText = "พิกัดเริ่มต้น (ห้วยเกิ้ง)";
-              fetchRestaurants();
-              resolve();
+              fetchRestaurants(); resolve();
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
           );
-        } else {
-          document.getElementById('current-location-text').innerText = "เบราว์เซอร์ไม่รองรับ GPS";
-          fetchRestaurants();
-          resolve();
-        }
+        } else { fetchRestaurants(); resolve(); }
       });
     }
 
     function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; 
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return (R * c).toFixed(1);
+    }
+
+    async function fetchRestaurants() {
+      try {
+        const snapshot = await db.collection("merchants").where("isOpen", "==", true).get();
+        restaurants = [];
+        snapshot.forEach(doc => {
+          let data = doc.data();
+          restaurants.push({
+            id: doc.id, name: data.storeName, category: data.category,
+            image: data.image || "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=500&q=80",
+            rating: "5.0", lat: data.lat, lng: data.lng, menus: data.menus || []
+          });
+        });
+        renderRestaurants();
+      } catch (error) { showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า"); }
     }
 
     function filterCategory(cat) {
@@ -565,7 +514,6 @@
     function renderRestaurants() {
       const listContainer = document.getElementById('restaurant-list');
       listContainer.innerHTML = '';
-      
       const searchTerm = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
       
       const filtered = restaurants.filter(res => {
@@ -574,25 +522,19 @@
          return matchCat && matchSearch;
       });
       
-      if(filtered.length === 0) {
-        listContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">ไม่พบร้านอาหารที่ค้นหา</p>';
-        return;
-      }
+      if(filtered.length === 0) { listContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">ไม่พบร้านอาหารที่ค้นหา</p>'; return; }
 
       filtered.forEach((res, index) => {
         const distance = getDistance(userLat, userLng, res.lat, res.lng);
         const isTooFar = distance > 5.0; 
         
         listContainer.innerHTML += `
-          <div class="restaurant-card ${isTooFar ? 'disabled' : ''}" onclick="${isTooFar ? 'showToast(\'ร้านนี้อยู่ไกลเกิน 5 กม. ไม่สามารถจัดส่งได้ครับ\')' : `openRestaurant('${res.id}', ${distance})`}">
+          <div class="restaurant-card" onclick="${isTooFar ? 'showToast(\'ร้านนี้อยู่ไกลเกิน 5 กม.\')' : `openRestaurant('${res.id}', ${distance})`}" style="${isTooFar ? 'opacity:0.6;' : ''}">
             <div class="res-image" style="background-image: url('${res.image}')">
-              ${isTooFar ? `<div class="out-of-range-tag">ไกลเกิน 5 กม. (จัดส่งไม่ได้)</div>` : ''}
+              ${isTooFar ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:white; padding:10px; border-radius:20px;">ไกลเกินระยะส่ง</div>` : ''}
               <div class="distance-tag"><span class="material-icons" style="font-size:14px; color:var(--primary-color);">location_on</span> ${distance} กม.</div>
             </div>
-            <div class="res-info">
-              <h3 class="res-name">${res.name}</h3>
-              <div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px; color: #ff9800;">star</i> ${res.rating}</span></div>
-            </div>
+            <div class="res-info"><h3 class="res-name">${res.name}</h3><div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px; color: #ff9800;">star</i> ${res.rating}</span></div></div>
           </div>`;
       });
     }
@@ -608,15 +550,12 @@
       foodList.innerHTML = '';
       
       const availableMenus = res.menus.filter(m => m.isAvailable !== false);
-      
       if(availableMenus.length === 0) {
         foodList.innerHTML = '<p style="text-align:center; padding: 20px; color:#999;">ร้านค้านี้ยังไม่มีเมนูอาหาร</p>';
       } else {
         res.menus.forEach((menu, i) => {
           if (menu.isAvailable === false) return; 
-          
-          let addonBadge = (menu.addons && menu.addons.length > 0) ? `<span style="font-size:12px; color:var(--primary-color); display:block; margin-top:3px;">+ มีตัวเลือกเสริม</span>` : '';
-
+          let addonBadge = (menu.addons && menu.addons.length > 0) ? `<span style="font-size:12px; color:var(--primary-color); display:block; margin-top:3px;">+ มีตัวเลือกท็อปปิ้ง</span>` : '';
           foodList.innerHTML += `
             <div class="menu-item">
               <div class="menu-item-left">
@@ -632,91 +571,44 @@
 
     function handleMenuClick(menuIdx) {
       const menu = selectedRestaurant.menus[menuIdx];
-      
-      if (menu.addons && menu.addons.length > 0) {
-        openToppingModal(menu);
-      } else {
-        cartItems.push({
-          name: menu.name,
-          price: menu.price,
-          originalPrice: menu.price,
-          toppingsText: ""
-        });
-        updateCartTotal();
-        showToast(`เพิ่ม ${menu.name} ลงตะกร้าแล้ว`);
+      if (menu.addons && menu.addons.length > 0) { openToppingModal(menu); } 
+      else {
+        cartItems.push({ name: menu.name, price: menu.price });
+        updateCartTotal(); showToast(`เพิ่ม ${menu.name} ลงตะกร้าแล้ว`);
       }
     }
 
     function openToppingModal(menu) {
-      currentToppingMenu = menu;
-      currentToppingBasePrice = menu.price;
-      
+      currentToppingMenu = menu; currentToppingBasePrice = menu.price;
       document.getElementById('topping-menu-name').innerText = menu.name;
       document.getElementById('topping-base-price').innerText = menu.price;
       document.getElementById('topping-total-price').innerText = menu.price;
       
-      const container = document.getElementById('topping-options-container');
-      container.innerHTML = '';
-      
+      const container = document.getElementById('topping-options-container'); container.innerHTML = '';
       menu.addons.forEach((group, gIdx) => {
         let groupHtml = `<div class="topping-group-box"><div class="topping-group-title">${group.groupName}</div>`;
         group.choices.forEach((choice, cIdx) => {
           let priceText = choice.price > 0 ? `+฿${choice.price}` : 'ฟรี';
-          groupHtml += `
-            <label class="topping-option">
-              <div>
-                <input type="checkbox" onchange="calculateToppingPrice()" data-name="${choice.name}" data-price="${choice.price}">
-                <span>${choice.name}</span>
-              </div>
-              <span style="color:var(--text-light); font-size:14px;">${priceText}</span>
-            </label>
-          `;
+          groupHtml += `<label class="topping-option"><div><input type="checkbox" onchange="calculateToppingPrice()" data-name="${choice.name}" data-price="${choice.price}"><span>${choice.name}</span></div><span style="color:var(--text-light); font-size:14px;">${priceText}</span></label>`;
         });
-        groupHtml += `</div>`;
-        container.innerHTML += groupHtml;
+        groupHtml += `</div>`; container.innerHTML += groupHtml;
       });
-
       document.getElementById('topping-modal').style.display = 'flex';
     }
 
-    function closeToppingModal() {
-      document.getElementById('topping-modal').style.display = 'none';
-      currentToppingMenu = null;
-    }
-
+    function closeToppingModal() { document.getElementById('topping-modal').style.display = 'none'; currentToppingMenu = null; }
     function calculateToppingPrice() {
       let total = currentToppingBasePrice;
-      const checkboxes = document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked');
-      
-      checkboxes.forEach(cb => {
-        total += parseInt(cb.getAttribute('data-price'));
-      });
-      
-      document.getElementById('topping-total-price').innerText = total;
-      return total;
+      document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked').forEach(cb => { total += parseInt(cb.getAttribute('data-price')); });
+      document.getElementById('topping-total-price').innerText = total; return total;
     }
-
     function confirmAddWithTopping() {
       const finalPrice = calculateToppingPrice();
-      const checkboxes = document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked');
-      
       let toppingsList = [];
-      checkboxes.forEach(cb => {
-        toppingsList.push(cb.getAttribute('data-name'));
-      });
-      
+      document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked').forEach(cb => { toppingsList.push(cb.getAttribute('data-name')); });
       let toppingsText = toppingsList.length > 0 ? ` (+${toppingsList.join(', ')})` : '';
-
-      cartItems.push({
-        name: currentToppingMenu.name + toppingsText,
-        price: finalPrice,
-        originalPrice: currentToppingMenu.price,
-        toppingsText: toppingsText
-      });
-
-      updateCartTotal();
-      closeToppingModal();
-      showToast(`เพิ่มลงตะกร้าแล้ว`);
+      cartItems.push({ name: currentToppingMenu.name + toppingsText, price: finalPrice });
+      updateCartTotal(); closeToppingModal(); showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
     function updateCartTotal() {
@@ -726,20 +618,30 @@
       updateFloatingBars(sessionStorage.getItem('activeScreen'));
     }
 
-    function goToPayment() {
-      if (!liff.isLoggedIn()) {
-        sessionStorage.setItem('activeScreen', 'profile-screen');
-        showToast("กรุณาเข้าสู่ระบบด้วย LINE ก่อนสั่งอาหารครับ");
+    function setTopupAmount(amt) {
+      document.getElementById('topup-amount').value = amt;
+      updateQRCode();
+    }
+    function updateQRCode() {
+      const amt = document.getElementById('topup-amount').value;
+      // ใช้ PromptPay API สร้างรูป QR อัตโนมัติ
+      document.getElementById('promptpay-qr').src = `https://promptpay.io/1410400401805/${amt}.png`;
+    }
+    function simulateTopupSuccess() {
+      const amt = parseFloat(document.getElementById('topup-amount').value);
+      if(amt > 0) {
+        userWallet += amt;
+        localStorage.setItem('hk_user_wallet', userWallet);
+        updateWalletUI();
+        showToast(`เติมเงินสำเร็จ ฿${amt} เข้าสู่กระเป๋าเงินแล้ว!`);
         showScreen('profile-screen');
-        return;
       }
-      
-      const checkoutList = document.getElementById('checkout-items-list');
-      checkoutList.innerHTML = '';
-      cartItems.forEach(item => {
-        checkoutList.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px;"><span>${item.name}</span><span>฿${item.price}</span></div>`;
-      });
+    }
 
+    function goToPayment() {
+      const checkoutList = document.getElementById('checkout-items-list'); checkoutList.innerHTML = '';
+      cartItems.forEach(item => { checkoutList.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px;"><span>${item.name}</span><span>฿${item.price}</span></div>`; });
+      
       const foodTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
       const distance = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
       const deliveryFee = 15 + Math.floor(distance * 5); 
@@ -748,161 +650,131 @@
       document.getElementById('pay-food-total').innerText = foodTotal;
       document.getElementById('pay-delivery-fee').innerText = deliveryFee;
       document.getElementById('pay-grand-total').innerText = grandTotal;
-      
       document.getElementById('pay-grand-total').dataset.amount = grandTotal;
       
       showScreen('payment-screen');
     }
 
-    function toggleTransferBox(show) {
-      document.getElementById('transfer-box').style.display = show ? 'block' : 'none';
-      tempSlipBase64 = null;
-      document.getElementById('slip-preview-name').innerText = "";
-    }
-
+    function toggleTransferBox(show) { document.getElementById('transfer-box').style.display = show ? 'block' : 'none'; tempSlipBase64 = null; document.getElementById('slip-preview-name').innerText = ""; }
     function handleSlipUpload(event) {
       const file = event.target.files[0];
       if (file) {
         document.getElementById('slip-preview-name').innerText = "แนบสลิปแล้ว: " + file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX = 600; let w = img.width; let h = img.height;
+          const img = new Image(); img.onload = function() {
+            const canvas = document.createElement('canvas'); const MAX = 600; let w = img.width; let h = img.height;
             if (w > h && w > MAX) { h *= MAX / w; w = MAX; } else if (h > MAX) { w *= MAX / h; h = MAX; }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
             tempSlipBase64 = canvas.toDataURL('image/jpeg', 0.6);
-          }
-          img.src = e.target.result;
-        }
-        reader.readAsDataURL(file);
+          }; img.src = e.target.result;
+        }; reader.readAsDataURL(file);
       }
     }
 
     function processPayment() {
       try {
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
         
-        if (paymentMethod === 'transfer' && !tempSlipBase64) {
-          showToast("กรุณาแนบรูปสลิปโอนเงินก่อนยืนยันคำสั่งซื้อ");
-          return;
+        // เช็คกระเป๋าเงิน
+        if (paymentMethod === 'wallet') {
+          if (userWallet < totalAmount) { showToast("ยอดเงินในวอลเล็ทไม่เพียงพอ กรุณาเติมเงินหรือเลือกช่องทางอื่น"); return; }
+          // ตัดเงิน
+          userWallet -= totalAmount;
+          localStorage.setItem('hk_user_wallet', userWallet);
+          updateWalletUI();
+        } else if (paymentMethod === 'transfer' && !tempSlipBase64) {
+          showToast("กรุณาแนบรูปสลิปโอนเงินก่อนยืนยัน"); return;
         }
 
-        const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
-
         const orderData = {
-          merchantId: selectedRestaurant.id, // รหัสร้านที่สำคัญมาก
-          resName: selectedRestaurant.name,
-          resLat: selectedRestaurant.lat,
-          resLng: selectedRestaurant.lng,
-          cusLat: userLat,
-          cusLng: userLng,
-          customerPhone: "0997455250", // สามารถดึงเบอร์จริงจาก User Profile ได้
-          status: paymentMethod === 'transfer' ? 'รอตรวจสอบสลิป' : 'กำลังค้นหาไรเดอร์',
-          totalPrice: totalAmount, 
-          timestamp: new Date().getTime(),
-          paymentMethod: paymentMethod
-        };
-        
-        db.collection("orders").add({
-          merchantId: selectedRestaurant.id,
-          customerName: userProfile ? userProfile.displayName : "ลูกค้าทั่วไป",
-          userId: userProfile ? userProfile.userId : "guest_" + new Date().getTime(),
+          merchantId: selectedRestaurant.id, 
+          customerName: currentUserName,
+          userId: currentUserId,
           restaurantName: selectedRestaurant.name,
           totalPrice: totalAmount,
           paymentMethod: paymentMethod,
           slipImage: tempSlipBase64 || null,
           items: cartItems.map(i => i.name),
-          status: orderData.status,
-          resLat: selectedRestaurant.lat,
-          resLng: selectedRestaurant.lng,
-          cusLat: userLat,
-          cusLng: userLng,
-          customerPhone: "0997455250",
+          status: paymentMethod === 'transfer' ? 'รอตรวจสอบสลิป' : 'กำลังค้นหาไรเดอร์',
+          resLat: selectedRestaurant.lat, resLng: selectedRestaurant.lng,
+          cusLat: userLat, cusLng: userLng,
+          customerPhone: "099-XXX-XXXX", 
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then((docRef) => {
+        };
+        
+        db.collection("orders").add(orderData).then((docRef) => {
           orderData.docId = docRef.id;
           localStorage.setItem('activeOrder', JSON.stringify(orderData));
           
-          sendLineNotification(selectedRestaurant.name, totalAmount);
+          if (liff.isLoggedIn()) {
+            liff.sendMessages([{ type: "text", text: `[ห้วยเกิ้ง Delivery]\nรับออเดอร์เรียบร้อยแล้ว! 🍽️\nร้าน: ${selectedRestaurant.name}\nยอดรวม: ฿${totalAmount}\n\nระบบกำลังค้นหาไรเดอร์ให้คุณครับ 🛵💨` }])
+            .catch(err => console.error("LINE MSG ERR:", err));
+          }
           
           cartItems = []; 
           showScreen('tracking-screen');
           initTrackingMapAndTimer(); 
           fetchOrderHistory(); 
-        }).catch((error) => {
-          alert("❌ ไม่สามารถส่งออเดอร์ได้: " + error.message);
+        }).catch((error) => { alert("Error DB: " + error.message); });
+      } catch (err) { alert("Error: " + err.message); }
+    }
+
+    function fetchOrderHistory() {
+      db.collection("orders").where("userId", "==", currentUserId).onSnapshot((snapshot) => {
+          const container = document.getElementById('order-history-list');
+          if(snapshot.empty) { container.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติการสั่งซื้อ</p>'; return; }
+          
+          let allOrders = []; snapshot.forEach(doc => allOrders.push(doc.data()));
+          allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+
+          let html = '';
+          allOrders.forEach(order => {
+            const date = order.createdAt ? new Date(order.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : 'เมื่อสักครู่';
+            let statusColor = 'var(--primary-color)';
+            if(order.status.includes('ยกเลิก') || order.status.includes('ปฏิเสธ')) statusColor = 'var(--danger)';
+            else if(order.status.includes('รอ') || order.status.includes('เตรียม')) statusColor = 'var(--warning)';
+
+            html += `
+              <div style="background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                  <span style="color: ${statusColor}; font-weight: 600; font-size: 14px;">${order.status}</span><span style="color: var(--text-light); font-size: 12px;">${date}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div><h4 style="font-weight: 600; font-size: 16px; margin: 0 0 5px 0;">${order.restaurantName}</h4><p style="margin:0; font-size:13px; color:var(--text-light);">${order.items.length} รายการ</p></div>
+                  <div style="font-weight:700; font-size:16px;">฿${order.totalPrice}</div>
+                </div>
+              </div>`;
+          });
+          container.innerHTML = html;
         });
-      } catch (err) {
-        alert("เกิดข้อผิดพลาดก่อนส่งข้อมูล: " + err.message);
-      }
     }
 
-    function sendLineNotification(shopName, total) {
-      if (liff.isLoggedIn() && liff.isInClient()) {
-        liff.sendMessages([
-          {
-            type: "text",
-            text: `[ห้วยเกิ้ง Delivery]\nรับออเดอร์เรียบร้อยแล้ว! 🍽️\nร้าน: ${shopName}\nยอดรวม: ฿${total}\n\nระบบกำลังค้นหาไรเดอร์ให้คุณครับ 🛵💨`
-          }
-        ]).then(() => {
-          console.log("ส่งข้อความเข้า LINE แชทสำเร็จ");
-        }).catch(err => console.error("ไม่สามารถส่ง LINE Message ได้:", err));
-      }
-    }
-
-    function checkActiveOrder() {
-      const activeData = localStorage.getItem('activeOrder');
-      if(activeData) {
-        updateFloatingBars(sessionStorage.getItem('activeScreen'));
-        selectedRestaurant = JSON.parse(activeData); 
-      }
-    }
+    function checkActiveOrder() { const activeData = localStorage.getItem('activeOrder'); if(activeData) { updateFloatingBars(sessionStorage.getItem('activeScreen')); selectedRestaurant = JSON.parse(activeData); } }
 
     function initTrackingMapAndTimer() {
-      const order = JSON.parse(localStorage.getItem('activeOrder'));
-      if(!order) return;
+      const order = JSON.parse(localStorage.getItem('activeOrder')); if(!order) return;
 
       if (trackingMap !== null) { trackingMap.remove(); }
-      const centerLat = (userLat + order.resLat) / 2;
-      const centerLng = (userLng + order.resLng) / 2;
-      
+      const centerLat = (userLat + order.resLat) / 2; const centerLng = (userLng + order.resLng) / 2;
       trackingMap = L.map('tracking-map', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([centerLat, centerLng], 14);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { opacity: 0.6 }).addTo(trackingMap);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { opacity: 0.8 }).addTo(trackingMap);
 
       const userIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--danger); width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>` });
       const storeIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--primary-color); width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">storefront</span></div>` });
-
+      
       L.marker([userLat, userLng], {icon: userIcon}).addTo(trackingMap);
       L.marker([order.resLat, order.resLng], {icon: storeIcon}).addTo(trackingMap);
+      L.polyline([ [userLat, userLng], [order.resLat, order.resLng] ], {color: 'rgba(0,185,0,0.5)', weight: 4, dashArray: '5, 10'}).addTo(trackingMap);
+      trackingMap.fitBounds([ [userLat, userLng], [order.resLat, order.resLng] ], { padding: [100, 100] });
 
-      const latlngs = [ [userLat, userLng], [order.resLat, order.resLng] ];
-      L.polyline(latlngs, {color: 'rgba(0,185,0,0.5)', weight: 4, dashArray: '5, 10'}).addTo(trackingMap);
-      trackingMap.fitBounds(latlngs, { padding: [100, 100] });
-
-      searchTimeLeft = 120; 
-      clearInterval(searchTimer);
-      if(orderListenerUnsubscribe) orderListenerUnsubscribe();
+      searchTimeLeft = 120; clearInterval(searchTimer); if(orderListenerUnsubscribe) orderListenerUnsubscribe();
       
       const btnCancel = document.getElementById('btn-cancel-order');
-      const progressBar = document.getElementById('search-progress-bar');
-      const progressMoto = document.getElementById('search-moto');
-      const timerText = document.getElementById('search-timer-text');
+      btnCancel.classList.add('disabled'); btnCancel.style.color = "#999"; btnCancel.innerText = "ยกเลิกคำสั่งซื้อ (รอสักครู่)";
       
-      btnCancel.classList.add('disabled');
-      btnCancel.innerText = "ยกเลิกคำสั่งซื้อ (รอ 2 นาที)";
-      
-      if(order.paymentMethod === 'transfer') {
-        document.getElementById('track-status-title').innerText = "รอตรวจสอบสลิป";
-        document.getElementById('track-status-subtitle').innerText = "กรุณารอสักครู่ แอดมินกำลังตรวจสอบความถูกต้อง";
-      } else {
-        document.getElementById('track-status-title').innerText = "กำลังค้นหาไรเดอร์";
-        document.getElementById('track-status-subtitle').innerText = "ระบบกำลังส่งคำสั่งซื้อของคุณไปยังไรเดอร์ที่ใกล้ที่สุด";
-      }
-
-      // ดักฟังสถานะแบบ Real-time และอัปเดต GPS ไรเดอร์
+      // ดักฟัง Real-time
       if(order.docId) {
         orderListenerUnsubscribe = db.collection("orders").doc(order.docId).onSnapshot((doc) => {
           if(doc.exists) {
@@ -910,89 +782,53 @@
             const trackTitle = document.getElementById('track-status-title');
             const trackSub = document.getElementById('track-status-subtitle');
             
-            // ล็อกปุ่มยกเลิกถ้าไม่ใช่สถานะเริ่มต้น
+            // ล็อกปุ่มยกเลิก
             if(!["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป"].includes(data.status)) {
-              btnCancel.classList.add('disabled');
-              btnCancel.innerText = "อยู่ระหว่างดำเนินการ (ยกเลิกไม่ได้)";
-              clearInterval(searchTimer); 
-              document.getElementById('radar-animation').style.display = 'none'; 
+              btnCancel.classList.add('disabled'); btnCancel.style.color = "#999"; btnCancel.innerText = "อยู่ระหว่างดำเนินการ (ยกเลิกไม่ได้)";
+              clearInterval(searchTimer); document.getElementById('radar-animation').style.display = 'none'; 
             }
 
-            // ถ้ามีข้อมูลไรเดอร์ (รับงานแล้ว) โชว์การ์ดไรเดอร์เลย
+            // โชว์ไรเดอร์
             if(data.riderId) {
               document.getElementById('rider-info-panel').style.display = 'block';
               document.getElementById('track-rider-name').innerText = data.riderName || "ไรเดอร์รับงานแล้ว";
               document.getElementById('track-rider-plate').innerText = data.riderPlate || "กำลังเดินทาง";
               document.getElementById('track-rider-call').href = `tel:${data.riderPhone || ""}`;
 
-              // อัปเดตพิกัดไรเดอร์ (Real-time GPS)
+              // แอนิเมชันรถวิ่งสมูทๆ
               if(data.riderLat && data.riderLng && trackingMap) {
-                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 8px rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:16px; color:white;">sports_motorsports</span></div>` });
+                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: all 0.5s ease;"><span class="material-icons" style="font-size:18px; color:white;">sports_motorsports</span></div>` });
+                if(riderMarkerForTracking) { riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]); } 
+                else { riderMarkerForTracking = L.marker([data.riderLat, data.riderLng], {icon: riderIcon}).addTo(trackingMap); }
                 
-                if(riderMarkerForTracking) {
-                  riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]);
-                } else {
-                  riderMarkerForTracking = L.marker([data.riderLat, data.riderLng], {icon: riderIcon}).addTo(trackingMap);
-                }
-                
-                // เลื่อนหน้าจอแผนที่ติดตามไรเดอร์
-                if(data.status === "ไรเดอร์กำลังไปรับอาหาร" || data.status === "ไรเดอร์ถึงร้านแล้ว") {
-                  trackingMap.fitBounds([[data.riderLat, data.riderLng], [data.resLat, data.resLng]], { padding: [50, 50] });
-                } else if(data.status === "กำลังจัดส่ง") {
-                  trackingMap.fitBounds([[data.riderLat, data.riderLng], [userLat, userLng]], { padding: [50, 50] });
-                }
+                // เลื่อนกล้องตามสถานะ
+                if(data.status === "ไรเดอร์กำลังไปรับอาหาร" || data.status === "ไรเดอร์ถึงร้านแล้ว") { trackingMap.fitBounds([[data.riderLat, data.riderLng], [data.resLat, data.resLng]], { padding: [50, 50] }); } 
+                else if(data.status === "กำลังจัดส่ง") { trackingMap.fitBounds([[data.riderLat, data.riderLng], [userLat, userLng]], { padding: [50, 50] }); }
               }
             }
 
-            // จัดการเปลี่ยนคำตาม Status
-            if(data.status === "ร้านกำลังเตรียมอาหาร") {
-              trackTitle.innerText = "ร้านรับออเดอร์แล้ว!";
-              trackTitle.style.color = "var(--text-dark)";
-              trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่";
-              timerText.innerText = "กำลังปรุงอาหาร... 🍳";
-            } 
-            else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") {
-              trackTitle.innerText = "อาหารเสร็จแล้ว!";
-              trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน";
-              timerText.innerText = "เตรียมอาหารเสร็จแล้ว 🛍️";
-            }
-            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") {
-              trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร";
-              trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่`;
-              timerText.innerText = "ไรเดอร์กำลังเดินทางไปที่ร้าน 🛵";
-            }
-            else if(data.status === "ไรเดอร์ถึงร้านแล้ว") {
-              trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว";
-              trackSub.innerText = `กำลังรอรับอาหารเพื่อจัดส่งให้คุณ`;
-              timerText.innerText = "ไรเดอร์กำลังรอรับอาหาร 🛵";
-            }
-            else if(data.status === "กำลังจัดส่ง") {
-              trackTitle.innerText = "อาหารกำลังไปส่ง!";
-              trackTitle.style.color = "var(--primary-color)";
-              trackSub.innerText = `ติดตามไรเดอร์บนแผนที่ได้เลยครับ`;
-              timerText.innerText = "กำลังจัดส่ง... 💨";
-            }
+            // เปลี่ยนข้อความ
+            if(data.status === "ร้านกำลังเตรียมอาหาร") { trackTitle.innerText = "ร้านรับออเดอร์แล้ว!"; trackTitle.style.color = "var(--text-dark)"; trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่"; } 
+            else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") { trackTitle.innerText = "อาหารเสร็จแล้ว!"; trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน"; }
+            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") { trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร"; trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่`; }
+            else if(data.status === "ไรเดอร์ถึงร้านแล้ว") { trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว"; trackSub.innerText = `กำลังรอรับอาหารเพื่อจัดส่งให้คุณ`; }
+            else if(data.status === "กำลังจัดส่ง") { trackTitle.innerText = "อาหารกำลังไปส่ง!"; trackTitle.style.color = "var(--primary-color)"; trackSub.innerText = `ติดตามไรเดอร์บนแผนที่ได้เลยครับ`; }
             else if (data.status === "จัดส่งสำเร็จ") {
-              trackTitle.innerText = "จัดส่งสำเร็จ!";
-              trackTitle.style.color = "var(--success)";
-              trackSub.innerText = "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการ";
-              timerText.innerText = "ได้รับอาหารแล้ว 🎉";
-              
-              setTimeout(() => {
-                localStorage.removeItem('activeOrder');
-                showScreen('home-screen');
-                showToast("ออเดอร์จัดส่งสำเร็จแล้ว!");
-                fetchOrderHistory();
-              }, 4000);
+              trackTitle.innerText = "จัดส่งสำเร็จ!"; trackTitle.style.color = "var(--success)"; trackSub.innerText = "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการ";
+              setTimeout(() => { localStorage.removeItem('activeOrder'); showScreen('home-screen'); showToast("ออเดอร์จัดส่งสำเร็จแล้ว!"); fetchOrderHistory(); }, 4000);
             }
-            else if (data.status === "ร้านปฏิเสธรับออเดอร์" || data.status === "ยกเลิกเนื่องจากไม่มีไรเดอร์") {
-              trackTitle.innerText = "ถูกยกเลิก: " + data.status;
-              trackTitle.style.color = "var(--danger)";
-              trackSub.innerText = "ขออภัยครับ ระบบได้ยกเลิกและคืนเงินเข้าวอลเล็ทแล้ว";
+            else if (data.status.includes("ยกเลิก") || data.status.includes("ปฏิเสธ")) {
+              trackTitle.innerText = "ถูกยกเลิก: " + data.status; trackTitle.style.color = "var(--danger)"; trackSub.innerText = "ระบบได้คืนเงินเข้าวอลเล็ทแล้ว";
+              btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.innerText = "รับทราบ (กลับหน้าแรก)";
               
-              btnCancel.classList.remove('disabled');
-              btnCancel.innerText = "รับทราบ (กลับหน้าแรก)";
-              timerText.innerText = "กรุณาลองสั่งร้านอื่น";
+              // คืนเงินถ้ายกเลิก
+              if(data.paymentMethod === 'wallet' || data.paymentMethod === 'transfer') {
+                 if(localStorage.getItem('refund_flag_'+data.docId) !== 'true') {
+                    userWallet += data.totalPrice; localStorage.setItem('hk_user_wallet', userWallet); updateWalletUI();
+                    showToast(`คืนเงิน ฿${data.totalPrice} เข้าวอลเล็ทแล้ว`);
+                    localStorage.setItem('refund_flag_'+data.docId, 'true'); // กันคืนซ้ำ
+                 }
+              }
             }
           }
         });
@@ -1000,60 +836,29 @@
 
       searchTimer = setInterval(() => {
         searchTimeLeft--;
-        
         let percent = ((120 - searchTimeLeft) / 120) * 100;
-        progressBar.style.width = percent + "%";
-        progressMoto.style.left = percent + "%";
-        
-        let min = Math.floor(searchTimeLeft / 60);
-        let sec = searchTimeLeft % 60;
-        timerText.innerText = `เหลือเวลา 0${min}:${sec < 10 ? '0'+sec : sec} นาที`;
+        document.getElementById('search-progress-bar').style.width = percent + "%";
+        document.getElementById('search-moto').style.left = percent + "%";
 
         if (searchTimeLeft <= 0) {
-          clearInterval(searchTimer);
-          document.getElementById('radar-animation').style.display = 'none';
-          document.getElementById('track-status-title').innerText = "ไม่พบไรเดอร์ในขณะนี้";
-          document.getElementById('track-status-title').style.color = "var(--danger)";
-          timerText.innerText = "กรุณาลองใหม่อีกครั้ง หรือยกเลิกออเดอร์";
-          
-          btnCancel.classList.remove('disabled');
-          btnCancel.innerText = "ยกเลิกคำสั่งซื้อ";
+          clearInterval(searchTimer); document.getElementById('radar-animation').style.display = 'none';
+          document.getElementById('track-status-title').innerText = "รอนานผิดปกติ"; document.getElementById('track-status-subtitle').innerText = "คุณสามารถกดยกเลิกออเดอร์ได้แล้ว";
+          btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.style.borderColor = "var(--danger)"; btnCancel.innerText = "ยกเลิกคำสั่งซื้อ";
         }
       }, 1000);
     }
 
     function cancelOrder() {
       const btnCancel = document.getElementById('btn-cancel-order');
-      if(btnCancel.classList.contains('disabled')) {
-        showToast("โปรดรอให้ครบ 2 นาทีก่อนยกเลิกออเดอร์ครับ");
-        return;
-      }
+      if(btnCancel.classList.contains('disabled')) { showToast("โปรดรอให้ระบบประมวลผลก่อนครับ"); return; }
 
       const activeData = localStorage.getItem('activeOrder');
       if(activeData) {
         const order = JSON.parse(activeData);
-        
-        if(order.docId) {
-          db.collection("orders").doc(order.docId).update({
-            status: "ลูกค้ายกเลิกออเดอร์"
-          }).catch(e => console.error("Cancel Error:", e));
-        }
-
-        if(order.paymentMethod === 'transfer') {
-          userWallet += order.totalPrice;
-          localStorage.setItem('hk_user_wallet', userWallet);
-          document.getElementById('wallet-balance').innerText = userWallet.toFixed(2);
-          showToast(`ยกเลิกออเดอร์สำเร็จ! คืนเงิน ฿${order.totalPrice} เข้าวอลเล็ทแล้ว`);
-        } else {
-          showToast("ยกเลิกคำสั่งซื้อ (ชำระปลายทาง) เรียบร้อยแล้ว");
-        }
-        
+        if(order.docId) { db.collection("orders").doc(order.docId).update({ status: "ลูกค้ายกเลิกออเดอร์" }).catch(e => console.error("Cancel Error:", e)); }
         localStorage.removeItem('activeOrder');
       }
-      
-      clearInterval(searchTimer);
-      if(orderListenerUnsubscribe) orderListenerUnsubscribe();
-      showScreen('home-screen');
+      clearInterval(searchTimer); if(orderListenerUnsubscribe) orderListenerUnsubscribe(); showScreen('home-screen');
     }
 
     function showScreen(screenId) {
@@ -1061,40 +866,20 @@
       document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
       document.getElementById(screenId).style.display = screenId === 'tracking-screen' ? 'flex' : 'block';
       window.scrollTo(0, 0);
-
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
       const activeNavId = 'nav-' + screenId.replace('-screen', '');
-      if (document.getElementById(activeNavId)) {
-        document.getElementById(activeNavId).classList.add('active');
-      }
-
+      if (document.getElementById(activeNavId)) document.getElementById(activeNavId).classList.add('active');
       updateFloatingBars(screenId);
-
-      if(screenId === 'tracking-screen' && trackingMap) {
-        setTimeout(() => { trackingMap.invalidateSize(); }, 300);
-      }
+      if(screenId === 'tracking-screen' && trackingMap) setTimeout(() => { trackingMap.invalidateSize(); }, 300);
     }
 
     function updateFloatingBars(currentScreen) {
       const hasOrder = localStorage.getItem('activeOrder') !== null;
-      if (hasOrder && currentScreen !== 'tracking-screen') {
-        document.getElementById('active-order-bar').style.display = 'flex';
-        document.getElementById('cart-bar').style.display = 'none';
-      } else if (!hasOrder && (currentScreen === 'home-screen' || currentScreen === 'menu-screen') && cartItems.length > 0) {
-        document.getElementById('active-order-bar').style.display = 'none';
-        document.getElementById('cart-bar').style.display = 'flex';
-      } else {
-        document.getElementById('active-order-bar').style.display = 'none';
-        document.getElementById('cart-bar').style.display = 'none';
-      }
+      if (hasOrder && currentScreen !== 'tracking-screen') { document.getElementById('active-order-bar').style.display = 'flex'; document.getElementById('cart-bar').style.display = 'none'; } 
+      else if (!hasOrder && (currentScreen === 'home-screen' || currentScreen === 'menu-screen') && cartItems.length > 0) { document.getElementById('active-order-bar').style.display = 'none'; document.getElementById('cart-bar').style.display = 'flex'; } 
+      else { document.getElementById('active-order-bar').style.display = 'none'; document.getElementById('cart-bar').style.display = 'none'; }
     }
-
-    function showToast(message) {
-      const toast = document.getElementById("custom-toast");
-      toast.innerText = message;
-      toast.className = "toast show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-    }
+    function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
   </script>
 </body>
 </html>

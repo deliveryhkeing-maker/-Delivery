@@ -24,31 +24,30 @@
 
     .screen { display: none; min-height: 100vh; flex-direction: column; }
     
-    /* Auth & Login */
     .auth-screen { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); padding: 20px; }
     .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
     .input-group input { width: 100%; padding: 14px; border: 1.5px solid #ddd; border-radius: 12px; font-family: 'Prompt'; font-size: 15px; outline: none; }
-    .input-group input:focus { border-color: var(--rider-primary); }
     
-    .btn-main { width: 100%; background-color: var(--rider-primary); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,115,0,0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
-    .btn-main:active { transform: scale(0.98); background-color: var(--rider-dark); }
+    .btn-main { width: 100%; background-color: var(--rider-primary); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,115,0,0.3); transition: 0.2s;}
     .btn-text { background: none; border: none; color: var(--rider-primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; }
 
-    /* Map Header */
     .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 400; }
     .rider-profile { display: flex; align-items: center; gap: 12px; }
     .profile-img { width: 40px; height: 40px; border-radius: 50%; background-color: #eee; display: flex; justify-content: center; align-items: center; }
     .status-toggle { display: flex; align-items: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
     .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 8px rgba(0,185,0,0.5); }
     .status-toggle.offline { background: rgba(244,67,54,0.1); color: var(--danger); }
-    .status-toggle.offline .status-dot { background-color: var(--danger); box-shadow: 0 0 8px rgba(244,67,54,0.5); }
+    .status-toggle.offline .status-dot { background-color: var(--danger); }
 
     .map-container { flex-grow: 1; position: relative; background: #e0e0e0; }
     #rider-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     
-    /* Order Alert */
+    /* ปุ่ม GPS Follow Me */
+    .gps-follow-btn { position: absolute; bottom: 100px; right: 20px; width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 50; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+    .gps-follow-btn.active { border-color: #4285F4; color: #4285F4; }
+    
     .order-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; justify-content: center; align-items: flex-end; }
     .order-alert-content { background: var(--white); width: 100%; border-radius: 24px 24px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -57,15 +56,14 @@
     .location-row { display: flex; margin-bottom: 15px; position: relative; }
     .loc-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 15px; z-index: 2; flex-shrink: 0; color: white; }
     
-    /* Active Order Panel */
-    .order-panel { background: var(--white); border-radius: 24px 24px 0 0; padding: 25px; position: absolute; bottom: 70px; left: 0; width: 100%; z-index: 10; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
-    .order-panel.collapsed { transform: translateY(80%); }
+    .order-panel { background: var(--white); border-radius: 24px 24px 0 0; padding: 25px; position: absolute; bottom: 0px; left: 0; width: 100%; z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
+    .order-panel.collapsed { transform: translateY(85%); }
     .drag-handle { width: 40px; height: 5px; background: #ccc; border-radius: 5px; margin: 0 auto 15px; cursor: pointer; }
     .total-collect { background: var(--bg-color); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-left: 5px solid var(--rider-primary); }
 
-    .btn-call { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 10px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-bottom: 15px; }
+    .btn-nav-map { display: flex; align-items: center; justify-content: center; gap: 8px; background: #4285F4; color: white; padding: 12px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-bottom: 10px; width: 100%; border: none; font-family: 'Prompt'; font-size: 15px; }
+    .btn-call { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 12px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-bottom: 15px; width: 100%; border: none; font-family: 'Prompt'; font-size: 15px;}
 
-    /* Bottom Nav */
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 400; border-top: 1px solid #eee; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 33.33%; }
     .nav-item.active { color: var(--rider-primary); }
@@ -105,10 +103,7 @@
     <div class="rider-header">
       <div class="rider-profile">
         <div class="profile-img"><span class="material-icons" style="color: #999;">person</span></div>
-        <div>
-          <div style="font-weight: 600; font-size: 15px;" id="display-rider-name">กำลังโหลด...</div>
-          <div style="font-size: 12px; color: var(--text-light);" id="display-rider-plate">ทะเบียน</div>
-        </div>
+        <div><div style="font-weight: 600; font-size: 15px;" id="display-rider-name">กำลังโหลด...</div><div style="font-size: 12px; color: var(--text-light);" id="display-rider-plate">ทะเบียน</div></div>
       </div>
       <div class="status-toggle" id="status-btn" onclick="toggleOnlineStatus()">
         <div class="status-dot"></div> <span id="status-text">ออนไลน์</span>
@@ -118,65 +113,49 @@
     <div class="map-container">
       <div id="rider-map"></div>
       
-      <!-- Panel ออเดอร์ที่รับอยู่ -->
+      <!-- ปุ่ม Follow GPS -->
+      <div class="gps-follow-btn active" id="gps-follow-btn" onclick="toggleGPSFollow()">
+        <span class="material-icons">my_location</span>
+      </div>
+      
       <div class="order-panel collapsed" id="active-order-panel" style="display:none;">
         <div class="drag-handle" onclick="togglePanel()"></div>
         <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
           <div style="display: flex; align-items: center; gap: 15px;">
             <div class="profile-img" style="background:var(--rider-primary); color:white;"><span class="material-icons">receipt</span></div>
-            <div>
-              <div style="font-weight: 600; font-size: 16px;" id="active-res-name">ร้านอาหาร</div>
-              <div style="font-size: 13px; color: var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</div>
-            </div>
+            <div><div style="font-weight: 600; font-size: 16px;" id="active-res-name">ร้านอาหาร</div><div style="font-size: 13px; color: var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</div></div>
           </div>
         </div>
-        
-        <a href="#" id="call-cus-btn" class="btn-call"><span class="material-icons">call</span> โทรหาลูกค้า</a>
-
-        <div style="flex-grow: 1; max-height: 120px; overflow-y:auto;">
+        <div style="display: flex; gap:10px;">
+          <a href="#" id="nav-btn" target="_blank" class="btn-nav-map"><span class="material-icons">navigation</span> นำทาง</a>
+          <a href="#" id="call-cus-btn" class="btn-call"><span class="material-icons">call</span> โทรหาลูกค้า</a>
+        </div>
+        <div style="flex-grow: 1; max-height: 120px; overflow-y:auto; margin-bottom: 15px;">
           <h3 style="margin: 0 0 10px 0; font-size: 14px;">รายการ:</h3>
-          <ul id="active-items" style="padding-left: 20px; font-size: 13px; margin-bottom: 10px; color:var(--text-light);"></ul>
+          <ul id="active-items" style="padding-left: 20px; font-size: 13px; margin: 0; color:var(--text-light);"></ul>
         </div>
-
         <div class="total-collect">
-          <div>
-            <p style="margin: 0; color: var(--text-dark); font-weight: 600;">ยอดที่ต้องเก็บลูกค้า</p>
-            <span style="font-size: 12px; color: var(--text-light);" id="active-pay-method">(เงินสด)</span>
-          </div>
+          <div><p style="margin: 0; color: var(--text-dark); font-weight: 600;">ยอดที่ต้องเก็บลูกค้า</p><span style="font-size: 12px; color: var(--text-light);" id="active-pay-method">(เงินสด)</span></div>
           <h2 style="margin: 0; color: var(--rider-primary); font-size: 20px;">฿<span id="active-total">0</span></h2>
         </div>
-
         <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
       </div>
     </div>
   </div>
 
-  <!-- ป๊อปอัปเตือนมีงานเข้า -->
   <div class="order-alert-overlay" id="order-alert">
     <div class="order-alert-content">
       <h3 style="font-size: 20px; font-weight: 700; color: var(--rider-primary); margin: 0 0 15px; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
       <div class="job-details">
-        <div class="location-row">
-          <div class="loc-icon" style="background: var(--rider-primary);"><span class="material-icons">storefront</span></div>
-          <div><h4 style="margin:0;" id="alert-res-name">ร้านอาหาร</h4><p style="margin:0; font-size:12px; color:#777;">รับอาหารที่นี่</p></div>
-        </div>
-        <div class="location-row" style="margin-top: 10px;">
-          <div class="loc-icon" style="background: var(--success);"><span class="material-icons">person</span></div>
-          <div><h4 style="margin:0;" id="alert-cus-name">ลูกค้า</h4><p style="margin:0; font-size:12px; color:#777;">จุดจัดส่ง</p></div>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 1px dashed #ccc; font-weight: 700;">
-          <span>ยอดจัดเก็บรวม</span>
-          <span style="color: var(--rider-primary); font-size: 20px;">฿<span id="alert-total">0</span></span>
-        </div>
+        <div class="location-row"><div class="loc-icon" style="background: var(--rider-primary);"><span class="material-icons" style="font-size:14px;">storefront</span></div><div><h4 style="margin:0;" id="alert-res-name">ร้านอาหาร</h4><p style="margin:0; font-size:12px; color:#777;">รับอาหารที่นี่</p></div></div>
+        <div class="location-row" style="margin-top: 10px;"><div class="loc-icon" style="background: var(--success);"><span class="material-icons" style="font-size:14px;">person</span></div><div><h4 style="margin:0;" id="alert-cus-name">ลูกค้า</h4><p style="margin:0; font-size:12px; color:#777;">จุดจัดส่ง</p></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 1px dashed #ccc; font-weight: 700;"><span>ยอดจัดเก็บรวม</span><span style="color: var(--rider-primary); font-size: 20px;">฿<span id="alert-total">0</span></span></div>
       </div>
       <button class="btn-main" onclick="acceptJob()">กดเพื่อรับงานนี้</button>
-      <div style="text-align: center; margin-top: 15px;">
-        <span style="color: var(--text-light); font-size: 14px; cursor: pointer;" onclick="document.getElementById('order-alert').style.display = 'none';">ปิดหน้าต่าง</span>
-      </div>
+      <div style="text-align: center; margin-top: 15px;"><span style="color: var(--text-light); font-size: 14px; cursor: pointer;" onclick="document.getElementById('order-alert').style.display = 'none';">ปิดหน้าต่าง</span></div>
     </div>
   </div>
 
-  <!-- Custom Confirm -->
   <div class="modal-overlay" id="custom-confirm-modal">
     <div class="modal-content">
       <h3 style="margin-top: 0;">โปรดยืนยัน</h3>
@@ -188,7 +167,6 @@
     </div>
   </div>
 
-  <!-- Bottom Nav -->
   <div class="bottom-nav">
     <div class="nav-item active" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
     <div class="nav-item" onclick="showToast('ระบบกระเป๋าเงินกำลังพัฒนา')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
@@ -212,123 +190,99 @@
     let currentRiderId = null;
     let riderData = null;
     let isOnline = true;
+    let isFollowingGPS = true; // ตัวแปรล็อกเป้า GPS
     let incomingOrderId = null;
     let activeOrderId = null;
     let currentOrderStatus = "";
     let findJobListener = null;
     let activeJobListener = null;
     let confirmCallback = null;
+    let activeOrderData = null;
     
-    // Map variables
-    let riderMap = null;
-    let riderMarker = null;
-    let resMarker = null;
-    let cusMarker = null;
-    let routeLine = null;
-    let watchId = null;
+    let riderMap = null; let riderMarker = null; let resMarker = null; let cusMarker = null; let routeLine = null; let watchId = null;
 
     window.onload = function() {
       currentRiderId = localStorage.getItem('hk_rider_id');
-      if(currentRiderId) {
-        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
-        loadRiderProfile();
-      }
+      if(currentRiderId) { document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile(); }
     };
 
-    function showAuthScreen(id) {
-      document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
-      document.getElementById(id).style.display = 'flex';
-    }
+    function showAuthScreen(id) { document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
 
     function riderRegister() {
-      const phone = document.getElementById('reg-phone').value;
-      const name = document.getElementById('reg-name').value;
-      const plate = document.getElementById('reg-plate').value;
+      const phone = document.getElementById('reg-phone').value; const name = document.getElementById('reg-name').value; const plate = document.getElementById('reg-plate').value;
       if(!phone || !name) { showToast("กรุณากรอกข้อมูลให้ครบ"); return; }
-      
-      db.collection("riders").doc(phone).set({
-        name: name, phone: phone, plate: plate, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        showToast("สมัครสำเร็จ");
-        localStorage.setItem('hk_rider_id', phone);
-        currentRiderId = phone;
-        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
-        loadRiderProfile();
+      db.collection("riders").doc(phone).set({ name: name, phone: phone, plate: plate, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
+        showToast("สมัครสำเร็จ"); localStorage.setItem('hk_rider_id', phone); currentRiderId = phone;
+        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile();
       }).catch(err => showToast("Error: " + err.message));
     }
 
     function riderLogin() {
-      const phone = document.getElementById('login-phone').value;
-      if(!phone) { showToast("กรุณากรอกเบอร์โทร"); return; }
-      
+      const phone = document.getElementById('login-phone').value; if(!phone) { showToast("กรุณากรอกเบอร์โทร"); return; }
       db.collection("riders").doc(phone).get().then(doc => {
-        if(doc.exists) {
-          localStorage.setItem('hk_rider_id', phone);
-          currentRiderId = phone;
-          document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none');
-          loadRiderProfile();
-        } else {
-          showToast("ไม่พบเบอร์โทรนี้ในระบบ กรุณาสมัครสมาชิก");
-        }
-      }).catch(err => showToast("Error: " + err.message));
-    }
-
-    function promptLogout() {
-      openConfirm("ต้องการออกจากระบบหรือไม่?", () => {
-        localStorage.removeItem('hk_rider_id');
-        location.reload();
+        if(doc.exists) { localStorage.setItem('hk_rider_id', phone); currentRiderId = phone; document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile(); } 
+        else { showToast("ไม่พบเบอร์โทรนี้ในระบบ กรุณาสมัครสมาชิก"); }
       });
     }
+
+    function promptLogout() { openConfirm("ต้องการออกจากระบบหรือไม่?", () => { localStorage.removeItem('hk_rider_id'); location.reload(); }); }
 
     function loadRiderProfile() {
       db.collection("riders").doc(currentRiderId).get().then(doc => {
         if(doc.exists) {
-          riderData = doc.data();
-          document.getElementById('display-rider-name').innerText = riderData.name;
-          document.getElementById('display-rider-plate').innerText = riderData.plate || "ไม่มีข้อมูลรถ";
-          showScreen('map-screen');
-          initMap();
-          checkActiveJob();
+          riderData = doc.data(); if(!riderData.phone) riderData.phone = currentRiderId;
+          document.getElementById('display-rider-name').innerText = riderData.name; document.getElementById('display-rider-plate').innerText = riderData.plate || "ไม่มีข้อมูลรถ";
+          showScreen('map-screen'); initMap(); checkActiveJob();
         }
       });
     }
 
     function initMap() {
       if(riderMap !== null) return;
-      riderMap = L.map('rider-map', {zoomControl: false}).setView([17.15, 102.95], 15);
+      riderMap = L.map('rider-map', {zoomControl: false}).setView([17.15, 102.95], 16);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(riderMap);
       
-      const rIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--rider-primary); width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>`});
+      const rIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--rider-primary); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 8px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: transform 0.5s linear;"><span class="material-icons" style="font-size:14px; color:white;">navigation</span></div>`});
       riderMarker = L.marker([17.15, 102.95], {icon: rIcon}).addTo(riderMap);
 
       if(navigator.geolocation) {
         watchId = navigator.geolocation.watchPosition(pos => {
           const lat = pos.coords.latitude; const lng = pos.coords.longitude;
           riderMarker.setLatLng([lat, lng]);
-          if(!activeOrderId) riderMap.setView([lat, lng]); // Center map only if no active job
-        }, err => console.log(err), {enableHighAccuracy: true});
+          
+          if(isFollowingGPS) riderMap.setView([lat, lng]); // ถ้าล็อกเป้าหมาย ให้แผนที่วิ่งตาม
+          
+          if(activeOrderId) {
+            // ยิงพิกัดขึ้น Firebase ตลอดเวลาที่วิ่ง
+            db.collection("orders").doc(activeOrderId).update({ riderLat: lat, riderLng: lng }).catch(e => console.log("GPS Sync Error:", e));
+          }
+        }, err => console.log(err), {enableHighAccuracy: true, timeout: 5000, maximumAge: 0});
       }
+
+      // ปลดล็อกเป้าหมายถ้าผู้ใช้ใช้นิ้วเลื่อนแผนที่เอง
+      riderMap.on('dragstart', function() {
+         isFollowingGPS = false;
+         document.getElementById('gps-follow-btn').classList.remove('active');
+      });
+    }
+
+    function toggleGPSFollow() {
+      isFollowingGPS = true;
+      document.getElementById('gps-follow-btn').classList.add('active');
+      const pos = riderMarker.getLatLng();
+      riderMap.setView([pos.lat, pos.lng], 16);
+      showToast('ล็อกเป้าหมาย GPS แล้ว');
     }
 
     function toggleOnlineStatus() {
-      isOnline = !isOnline;
-      const btn = document.getElementById('status-btn');
-      const text = document.getElementById('status-text');
-      if(isOnline) {
-        btn.classList.remove('offline'); text.innerText = "ออนไลน์";
-        startFindingJobs(); showToast("คุณเปิดรับงานแล้ว");
-      } else {
-        btn.classList.add('offline'); text.innerText = "ออฟไลน์";
-        if(findJobListener) { findJobListener(); findJobListener = null; }
-        showToast("คุณหยุดรับงานชั่วคราว");
-      }
+      isOnline = !isOnline; const btn = document.getElementById('status-btn'); const text = document.getElementById('status-text');
+      if(isOnline) { btn.classList.remove('offline'); text.innerText = "ออนไลน์"; startFindingJobs(); showToast("คุณเปิดรับงานแล้ว"); } 
+      else { btn.classList.add('offline'); text.innerText = "ออฟไลน์"; if(findJobListener) { findJobListener(); findJobListener = null; } showToast("คุณหยุดรับงานชั่วคราว"); }
     }
 
     function startFindingJobs() {
       if(findJobListener) findJobListener();
-      findJobListener = db.collection("orders")
-        .where("status", "in", ["กำลังค้นหาไรเดอร์", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว"])
-        .onSnapshot((snapshot) => {
+      findJobListener = db.collection("orders").where("status", "in", ["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว"]).onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {
             if (change.type === "added") {
               const orderData = change.doc.data();
@@ -348,94 +302,83 @@
     }
 
     function acceptJob() {
-      if(!incomingOrderId) return;
-      document.getElementById('order-alert').style.display = 'none';
-      showToast("กำลังรับงาน...");
-      
-      db.collection("orders").doc(incomingOrderId).update({
-        riderId: currentRiderId, riderName: riderData.name, status: "ไรเดอร์กำลังไปรับอาหาร"
-      }).then(() => {
-        activeOrderId = incomingOrderId; incomingOrderId = null;
-        if(findJobListener) { findJobListener(); findJobListener = null; } 
-        listenToActiveJob();
+      if(!incomingOrderId) return; document.getElementById('order-alert').style.display = 'none'; showToast("กำลังรับงาน...");
+      db.collection("orders").doc(incomingOrderId).update({ riderId: currentRiderId, riderName: riderData.name, riderPhone: riderData.phone, riderPlate: riderData.plate, status: "ไรเดอร์กำลังไปรับอาหาร" }).then(() => {
+        activeOrderId = incomingOrderId; incomingOrderId = null; if(findJobListener) { findJobListener(); findJobListener = null; } listenToActiveJob();
       }).catch(err => showToast("ไม่สามารถรับงานได้: " + err.message));
     }
 
     function checkActiveJob() {
-      db.collection("orders").where("riderId", "==", currentRiderId)
-        .where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง", "ร้านเตรียมอาหารเสร็จแล้ว"]).get().then(snapshot => {
-          if(!snapshot.empty) { activeOrderId = snapshot.docs[0].id; listenToActiveJob(); }
-          else { startFindingJobs(); }
+      db.collection("orders").where("riderId", "==", currentRiderId).where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง", "ร้านเตรียมอาหารเสร็จแล้ว"]).get().then(snapshot => {
+          if(!snapshot.empty) { activeOrderId = snapshot.docs[0].id; listenToActiveJob(); } else { startFindingJobs(); }
         });
     }
 
     function listenToActiveJob() {
-      if(!activeOrderId) return;
-      if(activeJobListener) activeJobListener();
-      
-      document.getElementById('active-order-panel').style.display = 'block';
-      setTimeout(() => document.getElementById('active-order-panel').classList.remove('collapsed'), 100);
+      if(!activeOrderId) return; if(activeJobListener) activeJobListener();
+      document.getElementById('active-order-panel').style.display = 'block'; setTimeout(() => document.getElementById('active-order-panel').classList.remove('collapsed'), 100);
 
       activeJobListener = db.collection("orders").doc(activeOrderId).onSnapshot(doc => {
         if(doc.exists) {
-          const data = doc.data();
-          currentOrderStatus = data.status;
+          activeOrderData = doc.data(); currentOrderStatus = activeOrderData.status;
+          document.getElementById('active-res-name').innerText = "ร้าน: " + activeOrderData.restaurantName;
+          document.getElementById('active-cus-name').innerText = "ส่งให้: " + activeOrderData.customerName;
+          document.getElementById('active-total').innerText = activeOrderData.totalPrice;
           
-          document.getElementById('active-res-name').innerText = "ร้าน: " + data.restaurantName;
-          document.getElementById('active-cus-name').innerText = "ส่งให้: " + data.customerName;
-          document.getElementById('active-total').innerText = data.totalPrice;
-          
-          let pMethodText = data.paymentMethod === 'transfer' ? "(โอนแล้ว ไม่ต้องเก็บเงิน)" : "(เก็บเงินสด)";
+          let pMethodText = activeOrderData.paymentMethod === 'wallet' || activeOrderData.paymentMethod === 'transfer' ? "(โอนแล้ว ไม่ต้องเก็บเงิน)" : "(เก็บเงินสด)";
           document.getElementById('active-pay-method').innerText = pMethodText;
           
-          // ปุ่มโทร
-          let phoneToCall = data.customerPhone || "0800000000"; // Fallback phone
+          let phoneToCall = activeOrderData.customerPhone || "0800000000"; 
           document.getElementById('call-cus-btn').href = "tel:" + phoneToCall;
-          document.getElementById('call-cus-btn').innerHTML = `<span class="material-icons">call</span> โทรหาคุณ ${data.customerName.split(' ')[0]}`;
+          document.getElementById('call-cus-btn').innerHTML = `<span class="material-icons">call</span> โทรหาคุณ ${activeOrderData.customerName.split(' ')[0]}`;
           
           const ul = document.getElementById('active-items'); ul.innerHTML = '';
-          data.items.forEach(item => { ul.innerHTML += `<li>${item}</li>`; });
+          activeOrderData.items.forEach(item => { ul.innerHTML += `<li>${item}</li>`; });
           
-          updateButtonUI();
-          drawRouteOnMap(data);
+          updateButtonUI(); drawRouteOnMap(activeOrderData);
         }
       });
     }
 
     function drawRouteOnMap(data) {
-      if(resMarker) riderMap.removeLayer(resMarker);
-      if(cusMarker) riderMap.removeLayer(cusMarker);
-      if(routeLine) riderMap.removeLayer(routeLine);
-      
+      if(resMarker) riderMap.removeLayer(resMarker); if(cusMarker) riderMap.removeLayer(cusMarker); if(routeLine) riderMap.removeLayer(routeLine);
       const sIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--danger); width:20px; height:20px; border-radius:50%; border:3px solid white; display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">storefront</span></div>`});
       const cIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--success); width:20px; height:20px; border-radius:50%; border:3px solid white; display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">person</span></div>`});
       
-      let latlngs = [];
-      if(riderMarker) latlngs.push(riderMarker.getLatLng());
+      let latlngs = []; if(riderMarker) latlngs.push(riderMarker.getLatLng());
       if(data.resLat && data.resLng) { resMarker = L.marker([data.resLat, data.resLng], {icon: sIcon}).addTo(riderMap); latlngs.push([data.resLat, data.resLng]); }
       if(data.cusLat && data.cusLng) { cusMarker = L.marker([data.cusLat, data.cusLng], {icon: cIcon}).addTo(riderMap); latlngs.push([data.cusLat, data.cusLng]); }
       
       if(latlngs.length > 1) {
         routeLine = L.polyline(latlngs, {color: 'var(--rider-primary)', weight: 4, dashArray: '5, 10'}).addTo(riderMap);
-        riderMap.fitBounds(latlngs, {padding: [50, 50]});
       }
     }
 
     function updateButtonUI() {
-      const btn = document.getElementById('action-btn');
-      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") { btn.innerHTML = "ฉันเดินทางถึงร้านอาหารแล้ว"; btn.style.background = "var(--rider-primary)"; } 
-      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว") { btn.innerHTML = "รอร้านทำอาหาร... (รับอาหารแล้วกดที่นี่)"; btn.style.background = "#2196F3"; }
-      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { btn.innerHTML = "อาหารเสร็จแล้ว! (กดเพื่อเริ่มจัดส่ง)"; btn.style.background = "#2196F3"; }
-      else if(currentOrderStatus === "กำลังจัดส่ง") { btn.innerHTML = "จัดส่งสำเร็จ!"; btn.style.background = "var(--success)"; }
-      else if(["ลูกค้ายกเลิกออเดอร์", "ร้านปฏิเสธรับออเดอร์"].includes(currentOrderStatus)) {
-        showToast("ออเดอร์นี้ถูกยกเลิกแล้ว");
-        finishJobLocally();
+      const btn = document.getElementById('action-btn'); const navBtn = document.getElementById('nav-btn');
+      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") { 
+        btn.innerHTML = "ฉันเดินทางถึงร้านอาหารแล้ว"; btn.style.background = "var(--rider-primary)"; btn.disabled = false;
+        if(activeOrderData.resLat && activeOrderData.resLng) {
+          navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.resLat},${activeOrderData.resLng}`;
+          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปร้าน`; navBtn.style.background = "#4285F4";
+        }
+      } 
+      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว") { btn.innerHTML = "รอร้านทำอาหาร... (รับอาหารแล้วกดที่นี่)"; btn.style.background = "#999"; btn.disabled = true; }
+      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { btn.innerHTML = "อาหารเสร็จแล้ว! (กดเพื่อเริ่มจัดส่ง)"; btn.style.background = "#2196F3"; btn.disabled = false; }
+      else if(currentOrderStatus === "กำลังจัดส่ง") { 
+        btn.innerHTML = "จัดส่งสำเร็จ!"; btn.style.background = "var(--success)"; btn.disabled = false;
+        if(activeOrderData.cusLat && activeOrderData.cusLng) {
+          navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.cusLat},${activeOrderData.cusLng}`;
+          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปลูกค้า`; navBtn.style.background = "var(--success)";
+        }
+      }
+      else if(currentOrderStatus.includes("ยกเลิก") || currentOrderStatus.includes("ปฏิเสธ")) {
+        showToast("ออเดอร์นี้ถูกยกเลิกแล้ว"); finishJobLocally();
       }
     }
 
     function updateOrderStatus() {
-      if(!activeOrderId) return;
-      let nextStatus = "";
+      if(!activeOrderId) return; let nextStatus = "";
       if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") nextStatus = "ไรเดอร์ถึงร้านแล้ว";
       else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว" || currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") nextStatus = "กำลังจัดส่ง";
       else if(currentOrderStatus === "กำลังจัดส่ง") nextStatus = "จัดส่งสำเร็จ";
@@ -443,37 +386,22 @@
       if(nextStatus) {
         openConfirm(`ยืนยันเปลี่ยนสถานะเป็น: ${nextStatus} ?`, () => {
           db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
-            showToast("อัปเดตสถานะสำเร็จ!");
-            if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
+            showToast("อัปเดตสถานะสำเร็จ!"); if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
           });
         });
       }
     }
 
     function finishJobLocally() {
-      activeOrderId = null;
-      if(activeJobListener) activeJobListener();
-      document.getElementById('active-order-panel').classList.add('collapsed');
-      setTimeout(() => document.getElementById('active-order-panel').style.display='none', 300);
-      if(resMarker) riderMap.removeLayer(resMarker);
-      if(cusMarker) riderMap.removeLayer(cusMarker);
-      if(routeLine) riderMap.removeLayer(routeLine);
+      activeOrderId = null; if(activeJobListener) activeJobListener();
+      document.getElementById('active-order-panel').classList.add('collapsed'); setTimeout(() => document.getElementById('active-order-panel').style.display='none', 300);
+      if(resMarker) riderMap.removeLayer(resMarker); if(cusMarker) riderMap.removeLayer(cusMarker); if(routeLine) riderMap.removeLayer(routeLine);
       startFindingJobs();
     }
 
     function togglePanel() { document.getElementById('active-order-panel').classList.toggle('collapsed'); }
-
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-      document.getElementById(screenId).style.display = 'flex';
-      if(screenId === 'map-screen' && riderMap) setTimeout(() => riderMap.invalidateSize(), 300);
-    }
-    
-    function showToast(message) {
-      const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    
+    function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); document.getElementById(screenId).style.display = 'flex'; if(screenId === 'map-screen' && riderMap) setTimeout(() => riderMap.invalidateSize(), 300); }
+    function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
     function openConfirm(message, callback) { document.getElementById('confirm-message').innerText = message; confirmCallback = callback; document.getElementById('custom-confirm-modal').style.display = 'flex'; }
     function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
     document.getElementById('confirm-yes-btn').addEventListener('click', () => { if (confirmCallback) confirmCallback(); closeConfirmModal(); });
