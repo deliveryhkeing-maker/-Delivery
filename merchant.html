@@ -44,8 +44,8 @@
     .btn-outline:active { transform: scale(0.98); background: var(--primary-light); }
     .btn-text { background: none; border: none; color: var(--primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; transition: 0.2s;}
 
-    .header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .shop-info-header { display: flex; align-items: center; gap: 10px; }
+    .header { background: var(--white); padding: 15px 20px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .shop-info-header { display: flex; align-items: center; gap: 10px; width: 100%; justify-content: space-between; }
     .header-shop-img { width: 45px; height: 45px; border-radius: 50%; background: #ccc; background-size: cover; background-position: center; }
     .shop-info h2 { margin: 0; font-size: 16px; font-weight: 600; }
     .shop-info p { margin: 0; font-size: 12px; color: var(--text-light); }
@@ -144,12 +144,19 @@
   <div id="home-screen" class="screen">
     <div class="header">
       <div class="shop-info-header">
-        <div class="header-shop-img" id="display-shop-img"></div>
-        <div class="shop-info"><h2 id="display-shop-name">กำลังโหลด...</h2><p id="display-shop-cat">หมวดหมู่</p></div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="header-shop-img" id="display-shop-img"></div>
+            <div class="shop-info"><h2 id="display-shop-name">กำลังโหลด...</h2><p id="display-shop-cat">หมวดหมู่</p></div>
+        </div>
+        <div class="toggle-container">
+          <label class="switch"><input type="checkbox" id="store-status" checked onchange="toggleStoreStatus()"><span class="slider"></span></label>
+          <span class="status-text" id="status-label" style="color: var(--success);">เปิดร้าน</span>
+        </div>
       </div>
-      <div class="toggle-container">
-        <label class="switch"><input type="checkbox" id="store-status" checked onchange="toggleStoreStatus()"><span class="slider"></span></label>
-        <span class="status-text" id="status-label" style="color: var(--success);">เปิดร้าน</span>
+      <div style="margin-top: 15px; width: 100%;">
+          <button class="btn-outline" style="border-color: var(--warning); color: var(--warning); padding: 8px;" onclick="pauseStore()">
+              <span class="material-icons" style="font-size: 16px;">pause_circle</span> พักเบรก 30 นาที (ปิดรับออเดอร์)
+          </button>
       </div>
     </div>
 
@@ -159,9 +166,6 @@
     </div>
 
     <div class="content-area" id="new-orders">
-      <button class="btn-outline" style="width: 100%; margin-bottom: 20px; border-color: var(--warning); color: var(--warning);" onclick="simulateOrderAlert()">
-        <span class="material-icons">notifications_active</span> ทดสอบเสียงออเดอร์เข้า
-      </button>
       <p id="empty-order-msg" style="text-align: center; color: var(--text-light); margin-top: 30px;">รอออเดอร์ใหม่จากลูกค้า...</p>
       <div id="order-list-container"></div>
     </div>
@@ -176,7 +180,7 @@
 
   <!-- หน้าจอจัดการเมนู (Menu) -->
   <div id="menu-screen" class="screen">
-    <div class="header">
+    <div class="header" style="flex-direction: row;">
       <div class="shop-info"><h2>จัดการเมนูอาหาร</h2><p>ระบบซิงค์กับฝั่งลูกค้าอัตโนมัติ</p></div>
       <button class="btn-outline" style="width: auto; padding: 8px 15px;" onclick="openModal('add-menu-modal')">+ เพิ่มเมนู</button>
     </div>
@@ -187,7 +191,7 @@
 
   <!-- หน้าจอการเงิน (Wallet) -->
   <div id="wallet-screen" class="screen">
-    <div class="header"><div class="shop-info"><h2>กระเป๋าเงิน (Wallet)</h2></div></div>
+    <div class="header" style="flex-direction: row;"><div class="shop-info"><h2>กระเป๋าเงิน (Wallet)</h2></div></div>
     <div class="content-area">
       <div class="wallet-card">
         <h3>ยอดเงินสุทธิที่ถอนได้</h3>
@@ -205,7 +209,7 @@
 
   <!-- หน้าการตั้งค่า (Settings) -->
   <div id="settings-screen" class="screen">
-    <div class="header"><div class="shop-info"><h2>ตั้งค่าร้านค้า & บัญชี</h2></div></div>
+    <div class="header" style="flex-direction: row;"><div class="shop-info"><h2>ตั้งค่าร้านค้า & บัญชี</h2></div></div>
     <div class="content-area">
       <div class="card-box">
         <h3 style="margin: 0 0 15px; font-size: 16px;">พิกัด GPS ร้านค้า (สำคัญมาก)</h3>
@@ -321,6 +325,7 @@
     let ordersListener = null;
     let currentAlertOrderId = null;
     let confirmCallback = null;
+    let pauseTimer = null;
 
     window.onload = function() { 
       currentMerchantId = localStorage.getItem('hk_merchant_id');
@@ -452,7 +457,6 @@
                  btnHtml = `<button class="btn-main" style="background-color: var(--success); padding: 8px; font-size: 14px;" onclick="acceptRealOrder('${order.id}')">รับออเดอร์</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">ออเดอร์ใหม่</span>`;
               } 
-              // รวมสถานะที่ร้านค้าสามารถกดทำอาหารเสร็จได้ เพื่อไม่ให้ปุ่มหายไปเวลาไรเดอร์ถึงร้านแล้ว
               else if (order.status === "ร้านกำลังเตรียมอาหาร" || order.status === "ไรเดอร์กำลังไปรับอาหาร" || order.status === "ไรเดอร์ถึงร้านแล้ว") {
                  btnHtml = `<button class="btn-main" style="background-color: var(--warning); padding: 8px; font-size: 14px;" onclick="markFoodReady('${order.id}')">จัดเตรียมอาหารเสร็จแล้ว</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">กำลังเตรียมอาหาร</span>`;
@@ -466,7 +470,6 @@
                  statusBadge = `<span class="status-badge" style="background:#e0e7ff; color:#3730a3;">กำลังจัดส่งให้ลูกค้า</span>`;
               }
 
-              // ทางออกหากไม่มีไรเดอร์รับงาน
               if(!order.riderId) {
                 cancelBtn = `<button class="btn-outline" style="border-color:var(--danger); color:var(--danger); padding:8px; font-size:13px;" onclick="cancelOrderByMerchant('${order.id}')">ยกเลิก (ไม่มีไรเดอร์)</button>`;
               }
@@ -541,6 +544,24 @@
             status: "ยกเลิกเนื่องจากไม่มีไรเดอร์"
           }).then(() => showToast("ยกเลิกออเดอร์สำเร็จ"));
       });
+    }
+
+    // ระบบพักเบรก 30 นาที
+    function pauseStore() {
+        openConfirm('คุณต้องการปิดรับออเดอร์ชั่วคราวเป็นเวลา 30 นาทีใช่หรือไม่?', () => {
+            db.collection("merchants").doc(currentMerchantId).update({ isOpen: false });
+            document.getElementById('store-status').checked = false;
+            updateStatusLabel(false);
+            showToast("ปิดร้านชั่วคราวแล้ว ระบบจะเปิดใหม่อีก 30 นาที");
+            
+            if(pauseTimer) clearTimeout(pauseTimer);
+            pauseTimer = setTimeout(() => {
+                db.collection("merchants").doc(currentMerchantId).update({ isOpen: true });
+                document.getElementById('store-status').checked = true;
+                updateStatusLabel(true);
+                showToast("ระบบเปิดรับออเดอร์ตามปกติแล้ว!");
+            }, 30 * 60 * 1000); // 30 นาที
+        });
     }
 
     function triggerRealOrderAlert(orderId, orderData) {
@@ -686,6 +707,7 @@
     function toggleStoreStatus() {
       const isChecked = document.getElementById('store-status').checked;
       db.collection("merchants").doc(currentMerchantId).update({ isOpen: isChecked }).then(() => showToast(isChecked ? 'เปิดร้านแล้ว' : 'ปิดร้านชั่วคราว'));
+      if(isChecked && pauseTimer) clearTimeout(pauseTimer);
     }
     
     function updateStatusLabel(isOpen) {

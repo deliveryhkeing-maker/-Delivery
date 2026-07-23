@@ -44,7 +44,6 @@
     .map-container { flex-grow: 1; position: relative; background: #e0e0e0; }
     #rider-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     
-    /* ปุ่ม GPS Follow Me */
     .gps-follow-btn { position: absolute; bottom: 100px; right: 20px; width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 50; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
     .gps-follow-btn.active { border-color: #4285F4; color: #4285F4; }
     
@@ -113,7 +112,6 @@
     <div class="map-container">
       <div id="rider-map"></div>
       
-      <!-- ปุ่ม Follow GPS -->
       <div class="gps-follow-btn active" id="gps-follow-btn" onclick="toggleGPSFollow()">
         <span class="material-icons">my_location</span>
       </div>
@@ -127,7 +125,6 @@
           </div>
         </div>
         
-        <!-- ปุ่มนำทางและโทรศัพท์ -->
         <div style="display: flex; gap:10px;">
           <a href="#" id="nav-btn" target="_blank" class="btn-nav-map"><span class="material-icons">navigation</span> นำทาง</a>
           <a href="#" id="call-cus-btn" class="btn-call"><span class="material-icons">call</span> โทรหาลูกค้า</a>
@@ -152,6 +149,11 @@
       <div class="job-details">
         <div class="location-row"><div class="loc-icon" style="background: var(--rider-primary);"><span class="material-icons" style="font-size:14px;">storefront</span></div><div><h4 style="margin:0;" id="alert-res-name">ร้านอาหาร</h4><p style="margin:0; font-size:12px; color:#777;">รับอาหารที่นี่</p></div></div>
         <div class="location-row" style="margin-top: 10px;"><div class="loc-icon" style="background: var(--success);"><span class="material-icons" style="font-size:14px;">person</span></div><div><h4 style="margin:0;" id="alert-cus-name">ลูกค้า</h4><p style="margin:0; font-size:12px; color:#777;">จุดจัดส่ง</p></div></div>
+        
+        <div style="margin-top: 15px; padding: 10px; background: rgba(66, 133, 244, 0.1); border-radius: 8px; color: #4285F4; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+           <span class="material-icons" style="font-size: 18px;">route</span> <span id="alert-distance">คำนวณระยะทาง...</span>
+        </div>
+
         <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 1px dashed #ccc; font-weight: 700;"><span>ยอดจัดเก็บรวม</span><span style="color: var(--rider-primary); font-size: 20px;">฿<span id="alert-total">0</span></span></div>
       </div>
       <button class="btn-main" onclick="acceptJob()">กดเพื่อรับงานนี้</button>
@@ -193,7 +195,7 @@
     let currentRiderId = null;
     let riderData = null;
     let isOnline = true;
-    let isFollowingGPS = true; // ตัวแปรล็อกเป้า GPS
+    let isFollowingGPS = true; 
     let incomingOrderId = null;
     let activeOrderId = null;
     let currentOrderStatus = "";
@@ -203,6 +205,7 @@
     let activeOrderData = null;
     
     let riderMap = null; let riderMarker = null; let resMarker = null; let cusMarker = null; let routeLine = null; let watchId = null;
+    let currentRiderLat = 17.15; let currentRiderLng = 102.95;
 
     window.onload = function() {
       currentRiderId = localStorage.getItem('hk_rider_id');
@@ -245,24 +248,22 @@
       riderMap = L.map('rider-map', {zoomControl: false}).setView([17.15, 102.95], 16);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(riderMap);
       
-      const rIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--rider-primary); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 8px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: transform 0.5s linear;"><span class="material-icons" style="font-size:14px; color:white;">navigation</span></div>`});
+      const rIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--rider-primary); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: transform 0.5s linear;"><span class="material-icons" style="font-size:18px; color:white;">navigation</span></div>`});
       riderMarker = L.marker([17.15, 102.95], {icon: rIcon}).addTo(riderMap);
 
       if(navigator.geolocation) {
         watchId = navigator.geolocation.watchPosition(pos => {
-          const lat = pos.coords.latitude; const lng = pos.coords.longitude;
-          riderMarker.setLatLng([lat, lng]);
+          currentRiderLat = pos.coords.latitude; currentRiderLng = pos.coords.longitude;
+          riderMarker.setLatLng([currentRiderLat, currentRiderLng]);
           
-          if(isFollowingGPS) riderMap.setView([lat, lng]); // ถ้าล็อกเป้าหมาย ให้แผนที่วิ่งตาม
+          if(isFollowingGPS) riderMap.setView([currentRiderLat, currentRiderLng]); 
           
           if(activeOrderId) {
-            // ยิงพิกัดขึ้น Firebase ตลอดเวลาที่วิ่ง
-            db.collection("orders").doc(activeOrderId).update({ riderLat: lat, riderLng: lng }).catch(e => console.log("GPS Sync Error:", e));
+            db.collection("orders").doc(activeOrderId).update({ riderLat: currentRiderLat, riderLng: currentRiderLng }).catch(e => console.log("GPS Sync Error:", e));
           }
         }, err => console.log(err), {enableHighAccuracy: true, timeout: 5000, maximumAge: 0});
       }
 
-      // ปลดล็อกเป้าหมายถ้าผู้ใช้ใช้นิ้วเลื่อนแผนที่เอง
       riderMap.on('dragstart', function() {
          isFollowingGPS = false;
          document.getElementById('gps-follow-btn').classList.remove('active');
@@ -283,6 +284,14 @@
       else { btn.classList.add('offline'); text.innerText = "ออฟไลน์"; if(findJobListener) { findJobListener(); findJobListener = null; } showToast("คุณหยุดรับงานชั่วคราว"); }
     }
 
+    function getDistance(lat1, lon1, lat2, lon2) {
+      if(!lat1 || !lon1 || !lat2 || !lon2) return 0;
+      const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return (R * c).toFixed(1);
+    }
+
     function startFindingJobs() {
       if(findJobListener) findJobListener();
       findJobListener = db.collection("orders").where("status", "in", ["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว"]).onSnapshot((snapshot) => {
@@ -300,6 +309,12 @@
       document.getElementById('alert-res-name').innerText = data.restaurantName;
       document.getElementById('alert-cus-name').innerText = "ลูกค้า: " + data.customerName;
       document.getElementById('alert-total').innerText = data.totalPrice;
+      
+      let distToRes = getDistance(currentRiderLat, currentRiderLng, data.resLat, data.resLng);
+      let distToCus = getDistance(data.resLat, data.resLng, data.cusLat, data.cusLng);
+      let totalDist = (parseFloat(distToRes) + parseFloat(distToCus)).toFixed(1);
+      document.getElementById('alert-distance').innerText = `ระยะทางจัดส่งรวมประมาณ ${totalDist} กม.`;
+
       document.getElementById('order-alert').style.display = 'flex';
       if ('speechSynthesis' in window) { const msg = new SpeechSynthesisUtterance("มีงานใหม่เข้าครับ"); msg.lang = 'th-TH'; window.speechSynthesis.speak(msg); }
     }
@@ -363,7 +378,6 @@
       
       if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") { 
         btn.innerHTML = "ฉันเดินทางถึงร้านอาหารแล้ว"; btn.style.background = "var(--rider-primary)"; btn.disabled = false;
-        // นำทางไปร้าน
         if(activeOrderData.resLat && activeOrderData.resLng) {
           navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.resLat},${activeOrderData.resLng}`;
           navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปร้าน`; 
@@ -381,7 +395,6 @@
       }
       else if(currentOrderStatus === "กำลังจัดส่ง") { 
         btn.innerHTML = "จัดส่งสำเร็จ! (กดเมื่อส่งให้ลูกค้าแล้ว)"; btn.style.background = "var(--success)"; btn.disabled = false;
-        // นำทางไปลูกค้า
         if(activeOrderData.cusLat && activeOrderData.cusLng) {
           navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.cusLat},${activeOrderData.cusLng}`;
           navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปหาลูกค้า`; 

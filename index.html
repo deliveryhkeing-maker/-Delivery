@@ -10,6 +10,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- เพิ่ม Library พลุฉลอง -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -106,10 +108,9 @@
     .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 10px; width: 0%; transition: width 1s linear; }
     .progress-moto { position: absolute; top: -20px; left: 0%; transform: translateX(-50%); font-size: 24px; transition: left 1s linear; }
     
-    /* *เคล็ดลับ* ทำให้หมุดบนแผนที่วิ่งสมูทๆ แบบเรียลไทม์ (Smooth Translation) */
     .leaflet-marker-icon { transition: transform 1.5s linear !important; }
 
-    #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; }
+    #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; transition: transform 0.2s; }
     #cart-bar { bottom: 85px; background-color: var(--primary-color); }
     #active-order-bar { bottom: 85px; background-color: #2196F3; }
     
@@ -119,6 +120,13 @@
 
     .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; opacity: 0; transition: 0.3s; }
     .toast.show { visibility: visible; opacity: 1; bottom: 150px; }
+
+    /* ดาว Rating */
+    .rating-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; justify-content: center; align-items: center; }
+    .rating-card { background: white; padding: 30px 20px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: scaleUp 0.3s ease-out; }
+    @keyframes scaleUp { from{transform:scale(0.8); opacity:0;} to{transform:scale(1); opacity:1;} }
+    .star-group { display: flex; justify-content: center; gap: 10px; margin: 15px 0; font-size: 32px; color: #e0e0e0; cursor: pointer; }
+    .star-group .material-icons.active { color: #ff9800; }
   </style>
 </head>
 <body>
@@ -191,7 +199,6 @@
     </div>
 
     <div style="background: var(--white); margin-top: 15px;">
-      <!-- แก้ไขลิงก์ไปหน้า Edit Profile ตรงนี้ -->
       <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('edit-profile-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว / ที่อยู่</div>
       <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('topup-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท (QR Code)</div>
     </div>
@@ -301,7 +308,7 @@
         <span style="font-weight: 500;">โอนเงิน (แนบสลิป)</span>
       </label>
       
-      <!-- กล่องอัปโหลดสลิป -->
+      <!-- กล่องอัปโหลดสลิป พร้อมรูปพรีวิว -->
       <div id="transfer-box" class="transfer-box">
         <div style="font-size: 14px; margin-bottom: 10px;">
           <strong>พร้อมเพย์:</strong> <span style="font-size: 18px; color: var(--primary-color); font-weight: 700;">1410400401805</span><br>
@@ -311,6 +318,8 @@
           อัปโหลดรูปสลิป <input type="file" style="display: none;" onchange="handleSlipUpload(event)">
         </label>
         <div id="slip-preview-name" style="font-size: 12px; color: var(--success); margin-top: 5px;"></div>
+        <!-- พรีวิวรูปสลิป -->
+        <img id="slip-preview-img" style="display:none; width: 120px; border-radius: 8px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />
       </div>
     </div>
 
@@ -368,13 +377,42 @@
         <span class="material-icons" style="cursor:pointer;" onclick="closeToppingModal()">close</span>
       </div>
       <div class="topping-content" id="topping-options-container"></div>
-      <button class="btn-primary" onclick="confirmAddWithTopping()">เพิ่มลงตะกร้า - ฿<span id="topping-total-price">0</span></button>
+      <button class="btn-primary" onclick="confirmAddWithTopping(event)">เพิ่มลงตะกร้า - ฿<span id="topping-total-price">0</span></button>
+    </div>
+  </div>
+
+  <!-- หน้าต่างรีวิว (Rating Modal) -->
+  <div class="rating-modal-overlay" id="rating-modal">
+    <div class="rating-card">
+      <div style="font-size:40px; color:var(--success); margin-bottom:10px;"><span class="material-icons" style="font-size:inherit;">check_circle</span></div>
+      <h2 style="margin:0 0 10px; font-size:20px;">ส่งอาหารสำเร็จ!</h2>
+      <p style="color:var(--text-light); font-size:14px; margin-bottom:20px;">ให้คะแนนประสบการณ์ของคุณในครั้งนี้</p>
+      
+      <p style="margin:0; font-weight:600;">ความอร่อยของอาหาร</p>
+      <div class="star-group" id="shop-stars">
+        <span class="material-icons" onclick="setStar('shop-stars', 1)">star</span>
+        <span class="material-icons" onclick="setStar('shop-stars', 2)">star</span>
+        <span class="material-icons" onclick="setStar('shop-stars', 3)">star</span>
+        <span class="material-icons" onclick="setStar('shop-stars', 4)">star</span>
+        <span class="material-icons" onclick="setStar('shop-stars', 5)">star</span>
+      </div>
+
+      <p style="margin:10px 0 0; font-weight:600;">การบริการของไรเดอร์</p>
+      <div class="star-group" id="rider-stars">
+        <span class="material-icons" onclick="setStar('rider-stars', 1)">star</span>
+        <span class="material-icons" onclick="setStar('rider-stars', 2)">star</span>
+        <span class="material-icons" onclick="setStar('rider-stars', 3)">star</span>
+        <span class="material-icons" onclick="setStar('rider-stars', 4)">star</span>
+        <span class="material-icons" onclick="setStar('rider-stars', 5)">star</span>
+      </div>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitRating()">ส่งคะแนนรีวิว</button>
     </div>
   </div>
 
   <!-- แถบตะกร้าลอยตัว & เมนูด้านล่าง -->
   <div id="cart-bar" onclick="goToPayment()">
-    <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;"><div class="cart-count" id="cart-count" style="background: white; color: var(--primary-color); width: 26px; height: 26px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">1</div><span>ดูตะกร้าของคุณ</span></div>
+    <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;"><div class="cart-count" id="cart-count">1</div><span>ดูตะกร้าของคุณ</span></div>
     <div style="font-weight: 600;">฿<span id="cart-total">0</span></div>
   </div>
 
@@ -413,9 +451,7 @@
     let currentUserId = guestId; 
     let currentUserName = "ลูกค้าทั่วไป";
     
-    // เพิ่มตัวแปรเก็บข้อมูลโทรศัพท์และที่อยู่
     let userProfileData = { phone: "", address: "" };
-
     let cartItems = []; 
     let selectedRestaurant = null;
     let userLat = 17.1500;
@@ -423,7 +459,6 @@
     let restaurants = [];
     let currentCategory = 'ทั้งหมด';
 
-    // โหลดกระเป๋าเงินจาก Local Storage
     let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
 
     let currentToppingMenu = null;
@@ -442,7 +477,6 @@
       const savedScreen = sessionStorage.getItem('activeScreen') || 'home-screen';
       showScreen(savedScreen);
       
-      // โหลดข้อมูลโปรไฟล์จาก Local Storage เบื้องต้น
       const savedProfile = localStorage.getItem('hk_user_profile_data');
       if (savedProfile) {
         userProfileData = JSON.parse(savedProfile);
@@ -453,7 +487,11 @@
       await initializeLiff(); 
       await getLocation(); 
       checkActiveOrder();
-      fetchOrderHistory(); // ดึงประวัติทันที
+      
+      // ดึงประวัติเฉพาะถ้าไม่ใช่ Guest แบบใหม่เอี่ยม
+      if (currentUserId !== guestId || localStorage.getItem('has_history')) {
+          fetchOrderHistory(); 
+      }
     };
 
     function updateWalletUI() {
@@ -476,8 +514,8 @@
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
           
-          loadUserProfileFromDB(); // ดึงข้อมูลโปรไฟล์จาก Firebase หลังจาก Login
-          fetchOrderHistory(); // ดึงประวัติใหม่ตาม LINE ID
+          loadUserProfileFromDB();
+          fetchOrderHistory(); 
         }
       } catch (error) { console.error('LIFF Error:', error); }
     }
@@ -490,14 +528,8 @@
       db.collection("users").doc(currentUserId).get().then(doc => {
         if (doc.exists) {
           const data = doc.data();
-          if (data.phone) {
-            userProfileData.phone = data.phone;
-            document.getElementById('edit-phone').value = data.phone;
-          }
-          if (data.address) {
-            userProfileData.address = data.address;
-            document.getElementById('edit-address').value = data.address;
-          }
+          if (data.phone) { userProfileData.phone = data.phone; document.getElementById('edit-phone').value = data.phone; }
+          if (data.address) { userProfileData.address = data.address; document.getElementById('edit-address').value = data.address; }
           localStorage.setItem('hk_user_profile_data', JSON.stringify(userProfileData));
         }
       }).catch(e => console.log("Profile Load Error", e));
@@ -506,26 +538,16 @@
     function saveUserProfile() {
       const phone = document.getElementById('edit-phone').value;
       const address = document.getElementById('edit-address').value;
-      
       if(!phone) { showToast("กรุณากรอกเบอร์โทรศัพท์ด้วยครับ"); return; }
       
-      userProfileData.phone = phone;
-      userProfileData.address = address;
+      userProfileData.phone = phone; userProfileData.address = address;
       localStorage.setItem('hk_user_profile_data', JSON.stringify(userProfileData));
       
       if(!currentUserId.startsWith('guest')) {
-        db.collection("users").doc(currentUserId).set({
-          name: currentUserName,
-          phone: phone,
-          address: address,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).then(() => {
-          showToast("บันทึกข้อมูลเรียบร้อยแล้ว");
-          showScreen('profile-screen');
-        });
+        db.collection("users").doc(currentUserId).set({ name: currentUserName, phone: phone, address: address, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true })
+        .then(() => { showToast("บันทึกข้อมูลเรียบร้อยแล้ว"); showScreen('profile-screen'); });
       } else {
-        showToast("บันทึกข้อมูลส่วนตัวในเครื่องแล้ว (แนะนำให้ล็อกอิน LINE)");
-        showScreen('profile-screen');
+        showToast("บันทึกข้อมูลส่วนตัวในเครื่องแล้ว"); showScreen('profile-screen');
       }
     }
 
@@ -574,9 +596,7 @@
 
     function filterCategory(cat) {
       currentCategory = cat;
-      document.querySelectorAll('.category-item').forEach(el => {
-         el.style.opacity = (cat === 'ทั้งหมด' || el.dataset.cat === cat) ? '1' : '0.5';
-      });
+      document.querySelectorAll('.category-item').forEach(el => { el.style.opacity = (cat === 'ทั้งหมด' || el.dataset.cat === cat) ? '1' : '0.5'; });
       renderRestaurants();
     }
 
@@ -631,19 +651,68 @@
                 <div class="menu-item-img" style="background-image: url('${menu.image}')"></div>
                 <div><h4 style="margin: 0 0 5px; font-size:15px;">${menu.name}</h4><p style="margin: 0; color:var(--text-light); font-size:14px;">฿${menu.price}</p>${addonBadge}</div>
               </div>
-              <button class="add-btn" onclick="handleMenuClick(${i})">+ เพิ่ม</button>
+              <button class="add-btn" onclick="handleMenuClick(${i}, event)">+ เพิ่ม</button>
             </div>`;
         });
       }
       showScreen('menu-screen');
     }
 
-    function handleMenuClick(menuIdx) {
+    // ฟังก์ชันลูกเล่นลอยเข้าตะกร้า
+    function flyToCartAnimation(event) {
+        if(!event) return;
+        const dot = document.createElement('div');
+        dot.style.position = 'fixed';
+        dot.style.left = (event.clientX - 10) + 'px';
+        dot.style.top = (event.clientY - 10) + 'px';
+        dot.style.width = '20px';
+        dot.style.height = '20px';
+        dot.style.background = 'var(--primary-color)';
+        dot.style.borderRadius = '50%';
+        dot.style.zIndex = '1000';
+        dot.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        dot.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+        document.body.appendChild(dot);
+        
+        const cart = document.getElementById('cart-bar');
+        const cartRect = cart.getBoundingClientRect();
+        
+        // ถ้าตะกร้าซ่อนอยู่ ให้โชว์ก่อนเพื่อเอาพิกัด
+        if(cart.style.display === 'none') {
+           cart.style.display = 'flex';
+           cart.style.transform = 'translateY(100px)';
+           setTimeout(()=> cart.style.transform = 'translateY(0)', 10);
+        }
+
+        setTimeout(() => {
+            const finalRect = document.getElementById('cart-count').getBoundingClientRect();
+            dot.style.left = finalRect.left + 'px';
+            dot.style.top = finalRect.top + 'px';
+            dot.style.transform = 'scale(0.2)';
+            dot.style.opacity = '0.5';
+        }, 10);
+        
+        setTimeout(() => {
+            dot.remove();
+            const cartCount = document.getElementById('cart-count');
+            cartCount.style.transform = 'scale(1.5)';
+            cartCount.style.backgroundColor = 'var(--warning)';
+            cartCount.style.color = 'white';
+            setTimeout(() => {
+                cartCount.style.transform = 'scale(1)';
+                cartCount.style.backgroundColor = 'white';
+                cartCount.style.color = 'var(--primary-color)';
+            }, 200);
+        }, 600);
+    }
+
+    function handleMenuClick(menuIdx, event) {
       const menu = selectedRestaurant.menus[menuIdx];
       if (menu.addons && menu.addons.length > 0) { openToppingModal(menu); } 
       else {
+        flyToCartAnimation(event);
         cartItems.push({ name: menu.name, price: menu.price });
-        updateCartTotal(); showToast(`เพิ่ม ${menu.name} ลงตะกร้าแล้ว`);
+        updateCartTotal(); 
       }
     }
 
@@ -673,13 +742,15 @@
       document.getElementById('topping-total-price').innerText = total; return total;
     }
     
-    function confirmAddWithTopping() {
+    function confirmAddWithTopping(event) {
       const finalPrice = calculateToppingPrice();
       let toppingsList = [];
       document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked').forEach(cb => { toppingsList.push(cb.getAttribute('data-name')); });
       let toppingsText = toppingsList.length > 0 ? ` (+${toppingsList.join(', ')})` : '';
+      
+      flyToCartAnimation(event);
       cartItems.push({ name: currentToppingMenu.name + toppingsText, price: finalPrice });
-      updateCartTotal(); closeToppingModal(); showToast(`เพิ่มลงตะกร้าแล้ว`);
+      updateCartTotal(); closeToppingModal();
     }
 
     function setTopupAmount(amt) {
@@ -725,7 +796,12 @@
       showScreen('payment-screen');
     }
 
-    function toggleTransferBox(show) { document.getElementById('transfer-box').style.display = show ? 'block' : 'none'; tempSlipBase64 = null; document.getElementById('slip-preview-name').innerText = ""; }
+    function toggleTransferBox(show) { 
+      document.getElementById('transfer-box').style.display = show ? 'block' : 'none'; 
+      tempSlipBase64 = null; 
+      document.getElementById('slip-preview-name').innerText = ""; 
+      document.getElementById('slip-preview-img').style.display = "none";
+    }
     
     function handleSlipUpload(event) {
       const file = event.target.files[0];
@@ -738,6 +814,11 @@
             if (w > h && w > MAX) { h *= MAX / w; w = MAX; } else if (h > MAX) { w *= MAX / h; h = MAX; }
             canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
             tempSlipBase64 = canvas.toDataURL('image/jpeg', 0.6);
+            
+            // โชว์รูปพรีวิวสลิป
+            const previewImg = document.getElementById('slip-preview-img');
+            previewImg.src = tempSlipBase64;
+            previewImg.style.display = 'block';
           }; img.src = e.target.result;
         }; reader.readAsDataURL(file);
       }
@@ -748,7 +829,6 @@
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
         const totalAmount = parseFloat(document.getElementById('pay-grand-total').dataset.amount);
         
-        // ตรวจสอบเบอร์โทรศัพท์ก่อนสั่ง (สำคัญมาก)
         if (!userProfileData.phone) {
            showToast("กรุณาเพิ่มเบอร์โทรศัพท์ในโปรไฟล์ก่อนสั่งอาหารครับ");
            showScreen('edit-profile-screen');
@@ -776,7 +856,7 @@
           status: paymentMethod === 'transfer' ? 'รอตรวจสอบสลิป' : 'กำลังค้นหาไรเดอร์',
           resLat: selectedRestaurant.lat, resLng: selectedRestaurant.lng,
           cusLat: userLat, cusLng: userLng,
-          customerPhone: userProfileData.phone, // แนบเบอร์โทรจริง
+          customerPhone: userProfileData.phone,
           customerAddressNote: userProfileData.address,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -784,6 +864,7 @@
         db.collection("orders").add(orderData).then((docRef) => {
           orderData.docId = docRef.id;
           localStorage.setItem('activeOrder', JSON.stringify(orderData));
+          localStorage.setItem('has_history', 'true');
           
           if (liff.isLoggedIn()) {
             liff.sendMessages([{ type: "text", text: `[ห้วยเกิ้ง Delivery]\nรับออเดอร์เรียบร้อยแล้ว! 🍽️\nร้าน: ${selectedRestaurant.name}\nยอดรวม: ฿${totalAmount}\n\nระบบกำลังค้นหาไรเดอร์ให้คุณครับ 🛵💨` }])
@@ -793,17 +874,13 @@
           cartItems = []; 
           showScreen('tracking-screen');
           initTrackingMapAndTimer(); 
-          fetchOrderHistory(); // รีเฟรชประวัติทันทีหลังจากสั่ง
-        }).catch((error) => { alert("Error DB: " + error.message); });
-      } catch (err) { alert("Error: " + err.message); }
+          fetchOrderHistory(); 
+        }).catch((error) => { showToast("Error: " + error.message); });
+      } catch (err) { showToast("Error: " + err.message); }
     }
 
     function fetchOrderHistory() {
-      // ยกเลิก Listener เก่าเพื่อป้องกันการดึงข้อมูลซ้อน
-      if (historyListenerUnsubscribe) {
-        historyListenerUnsubscribe();
-      }
-
+      if (historyListenerUnsubscribe) { historyListenerUnsubscribe(); }
       historyListenerUnsubscribe = db.collection("orders").where("userId", "==", currentUserId).onSnapshot((snapshot) => {
           const container = document.getElementById('order-history-list');
           if(snapshot.empty) { container.innerHTML = '<div style="text-align: center; color: var(--text-light); margin-top: 40px;"><span class="material-icons" style="font-size: 48px; color: #ddd; margin-bottom: 10px;">receipt_long</span><p>ยังไม่มีประวัติการสั่งซื้อ</p></div>'; return; }
@@ -830,9 +907,7 @@
               </div>`;
           });
           container.innerHTML = html;
-        }, (error) => {
-          console.error("Fetch History Error:", error);
-        });
+        }, (error) => { console.error("Fetch History Error:", error); });
     }
 
     function checkActiveOrder() { const activeData = localStorage.getItem('activeOrder'); if(activeData) { updateFloatingBars(sessionStorage.getItem('activeScreen')); selectedRestaurant = JSON.parse(activeData); } }
@@ -877,7 +952,7 @@
               document.getElementById('track-rider-call').href = `tel:${data.riderPhone || ""}`;
 
               if(data.riderLat && data.riderLng && trackingMap) {
-                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: all 0.5s ease;"><span class="material-icons" style="font-size:18px; color:white;">sports_motorsports</span></div>` });
+                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:32px; height:32px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: all 0.5s ease;"><span class="material-icons" style="font-size:20px; color:white;">sports_motorsports</span></div>` });
                 if(riderMarkerForTracking) { 
                   riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]); 
                 } 
@@ -890,12 +965,21 @@
 
             if(data.status === "ร้านกำลังเตรียมอาหาร") { trackTitle.innerText = "ร้านรับออเดอร์แล้ว!"; trackTitle.style.color = "var(--text-dark)"; trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่"; } 
             else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") { trackTitle.innerText = "อาหารเสร็จแล้ว!"; trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน"; }
-            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") { trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร"; trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่`; }
+            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") { trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร"; trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่แบบเรียลไทม์`; }
             else if(data.status === "ไรเดอร์ถึงร้านแล้ว") { trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว"; trackSub.innerText = `กำลังรอรับอาหารเพื่อจัดส่งให้คุณ`; }
             else if(data.status === "กำลังจัดส่ง") { trackTitle.innerText = "อาหารกำลังไปส่ง!"; trackTitle.style.color = "var(--primary-color)"; trackSub.innerText = `ติดตามไรเดอร์บนแผนที่ได้เลยครับ`; }
             else if (data.status === "จัดส่งสำเร็จ") {
               trackTitle.innerText = "จัดส่งสำเร็จ!"; trackTitle.style.color = "var(--success)"; trackSub.innerText = "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการ";
-              setTimeout(() => { localStorage.removeItem('activeOrder'); showScreen('home-screen'); showToast("ออเดอร์จัดส่งสำเร็จแล้ว!"); fetchOrderHistory(); }, 4000);
+              
+              // ยิงพลุฉลอง 🎇
+              if(typeof confetti === "function") {
+                 confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+              }
+
+              setTimeout(() => { 
+                  localStorage.removeItem('activeOrder'); 
+                  document.getElementById('rating-modal').style.display = 'flex';
+              }, 3000);
             }
             else if (data.status.includes("ยกเลิก") || data.status.includes("ปฏิเสธ")) {
               trackTitle.innerText = "ถูกยกเลิก: " + data.status; trackTitle.style.color = "var(--danger)"; trackSub.innerText = "ระบบได้คืนเงินเข้าวอลเล็ทแล้ว (หากชำระล่วงหน้า)";
@@ -958,7 +1042,24 @@
       else if (!hasOrder && (currentScreen === 'home-screen' || currentScreen === 'menu-screen') && cartItems.length > 0) { document.getElementById('active-order-bar').style.display = 'none'; document.getElementById('cart-bar').style.display = 'flex'; } 
       else { document.getElementById('active-order-bar').style.display = 'none'; document.getElementById('cart-bar').style.display = 'none'; }
     }
+    
     function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
+
+    // ระบบดาว Rating
+    function setStar(groupId, rating) {
+       const stars = document.getElementById(groupId).querySelectorAll('.material-icons');
+       stars.forEach((s, idx) => {
+          if(idx < rating) s.classList.add('active');
+          else s.classList.remove('active');
+       });
+    }
+
+    function submitRating() {
+       document.getElementById('rating-modal').style.display = 'none';
+       showToast("ขอบคุณสำหรับคำติชมของคุณครับ!");
+       showScreen('home-screen');
+       fetchOrderHistory();
+    }
   </script>
 </body>
 </html>
