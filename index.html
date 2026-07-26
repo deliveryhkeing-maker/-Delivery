@@ -141,6 +141,15 @@
     
     .modal-common { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 400; justify-content: center; align-items: center; }
     .modal-common-content { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; animation: scaleUp 0.2s ease-out; }
+    
+    .chat-sheet { background: var(--bg-color); width: 100%; height: 80vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; position: absolute; bottom: 0; }
+    .chat-header { background: white; padding: 15px 20px; border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; }
+    .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .chat-input-area { background: white; padding: 15px 20px; display: flex; gap: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+    .chat-input-area input { flex-grow: 1; background: #f1f5f9; border: none; border-radius: 20px; padding: 10px 15px; font-family: 'Prompt'; outline: none; }
+    .btn-send { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    
+    .review-sheet { background: var(--white); width: 100%; max-height: 80vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; position: absolute; bottom: 0; }
   </style>
 </head>
 <body>
@@ -301,7 +310,7 @@
     <div class="menu-shop-info">
       <h2 id="menu-name" style="margin: 0 0 5px;">ชื่อร้าน</h2>
       <div class="res-meta" style="font-size: 13px; color: var(--text-light);">
-        <span class="rating" style="color: #ff9800; font-weight: 600;"><i class="material-icons" style="font-size:14px; vertical-align: middle;">star</i> 5.0</span>
+        <span class="rating" style="color: #ff9800; font-weight: 600; cursor: pointer; text-decoration: underline;" onclick="openReviewModal()"><i class="material-icons" style="font-size:14px; vertical-align: middle;">star</i> 5.0 (ดูรีวิว)</span>
         <span>• <span id="menu-distance">1.2 กม.</span></span>
       </div>
     </div>
@@ -369,7 +378,7 @@
 
     <div class="tracking-overlay">
       <div id="rider-info-panel" style="display:none; background:white; padding:15px; border-radius:16px; margin: 0 15px 15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:calc(100% - 30px); pointer-events:auto;">
-         <div style="display:flex; justify-content:space-between; align-items:center;">
+         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
            <div style="display:flex; gap:12px; align-items:center;">
              <div style="width:45px;height:45px;border-radius:50%;background:var(--primary-light); color:var(--primary-color); display:flex;justify-content:center;align-items:center;"><span class="material-icons">sports_motorsports</span></div>
              <div>
@@ -377,7 +386,10 @@
                <p style="margin:0; font-size:13px; color:var(--text-light);" id="track-rider-plate">ทะเบียนรถ</p>
              </div>
            </div>
-           <a href="#" id="track-rider-call" style="background:rgba(0,185,0,0.1); color:var(--success); padding:10px 15px; border-radius:12px; text-decoration:none; font-weight:600; font-size:14px; display:flex; align-items:center; gap:5px;"><span class="material-icons" style="font-size:18px;">call</span> โทร</a>
+           <div style="display:flex; gap:8px;">
+             <button onclick="openChatModal()" style="background:rgba(33, 150, 243, 0.1); color:#2196F3; border:none; padding:10px 15px; border-radius:12px; font-weight:600; font-size:14px; display:flex; align-items:center; gap:5px; cursor:pointer;"><span class="material-icons" style="font-size:18px;">chat</span> แชท</button>
+             <a href="#" id="track-rider-call" style="background:rgba(0,185,0,0.1); color:var(--success); padding:10px 15px; border-radius:12px; text-decoration:none; font-weight:600; font-size:14px; display:flex; align-items:center; gap:5px;"><span class="material-icons" style="font-size:18px;">call</span> โทร</a>
+           </div>
          </div>
       </div>
 
@@ -467,6 +479,37 @@
     </div>
   </div>
 
+  <!-- หน้าต่างรีวิว (Review List Modal) -->
+  <div class="topping-overlay" id="review-view-modal">
+    <div class="review-sheet">
+      <div class="chat-header">
+        <h3 style="margin:0; font-size:18px;">คะแนนและรีวิวร้านค้า</h3>
+        <span class="material-icons" style="cursor:pointer;" onclick="closeReviewModal()">close</span>
+      </div>
+      <div style="padding: 20px; overflow-y: auto;" id="review-list-container">
+        <!-- Mockup Reviews -->
+      </div>
+    </div>
+  </div>
+
+  <!-- หน้าต่างแชท (Chat Modal) -->
+  <div class="topping-overlay" id="chat-modal">
+    <div class="chat-sheet">
+      <div class="chat-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+           <span class="material-icons" style="color: var(--primary-color);">sports_motorsports</span>
+           <h3 style="margin:0; font-size:16px;">แชทกับไรเดอร์</h3>
+        </div>
+        <span class="material-icons" style="cursor:pointer;" onclick="closeChatModal()">close</span>
+      </div>
+      <div class="chat-messages" id="chat-messages-container"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input-text" placeholder="พิมพ์ข้อความที่นี่..." onkeypress="if(event.key === 'Enter') sendChatMessage('customer')">
+        <button class="btn-send" onclick="sendChatMessage('customer')"><span class="material-icons">send</span></button>
+      </div>
+    </div>
+  </div>
+
   <!-- แถบตะกร้าลอยตัว & เมนูด้านล่าง -->
   <div id="cart-bar" onclick="goToPayment()">
     <div style="display: flex; align-items: center; gap: 12px; font-weight: 600;"><div class="cart-count" id="cart-count">1</div><span>ดูตะกร้าของคุณ</span></div>
@@ -528,6 +571,7 @@
     let searchTimeLeft = 120;
     let orderListenerUnsubscribe = null;
     let historyListenerUnsubscribe = null;
+    let activeChatOrderId = null; // ตัวแปรเก็บ ID ออเดอร์สำหรับแชท
 
     window.onload = async function() {
       updateWalletUI();
@@ -1009,6 +1053,7 @@
 
     function initTrackingMapAndTimer() {
       const order = JSON.parse(localStorage.getItem('activeOrder')); if(!order) return;
+      activeChatOrderId = order.docId; // เก็บ ID ออเดอร์ไว้ให้แชทใช้
 
       if (trackingMap !== null) { trackingMap.remove(); }
       const centerLat = (userLat + order.resLat) / 2; const centerLng = (userLng + order.resLng) / 2;
@@ -1056,6 +1101,9 @@
               document.getElementById('track-rider-name').innerText = data.riderName || "ไรเดอร์รับงานแล้ว";
               document.getElementById('track-rider-plate').innerText = data.riderPlate || "กำลังเดินทาง";
               document.getElementById('track-rider-call').href = `tel:${data.riderPhone || ""}`;
+
+              // อัปเดตแชทแบบ Real-time ถ้าระบบแชทเปิดอยู่
+              if (data.chatMessages) { renderChatMessages(data.chatMessages, 'customer'); }
 
               // อัปเดตพิกัดไรเดอร์สมูทๆ
               if(data.riderLat && data.riderLng && trackingMap) {
@@ -1187,6 +1235,77 @@
        showToast("ขอบคุณสำหรับคำติชมของคุณครับ!");
        showScreen('home-screen');
        fetchOrderHistory();
+    }
+
+    function openReviewModal() {
+       document.getElementById('review-view-modal').style.display = 'flex';
+       const container = document.getElementById('review-list-container');
+       container.innerHTML = `
+          <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px; text-align:left;">
+             <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:15px;">คุณสมเกียรติ</strong>
+                <span style="color:#ff9800; font-size:13px; font-weight:600;"><i class="material-icons" style="font-size:14px; vertical-align:middle;">star</i> 5.0</span>
+             </div>
+             <p style="margin:5px 0 0; font-size:14px; color:#555;">อาหารอร่อยมากครับ ได้เยอะคุ้มราคา ไรเดอร์ส่งไวด้วย</p>
+          </div>
+          <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px; text-align:left;">
+             <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:15px;">คุณมาลี</strong>
+                <span style="color:#ff9800; font-size:13px; font-weight:600;"><i class="material-icons" style="font-size:14px; vertical-align:middle;">star</i> 4.0</span>
+             </div>
+             <p style="margin:5px 0 0; font-size:14px; color:#555;">รสชาติดีค่ะ แต่รอนานไปนิดนึงตอนช่วงเที่ยง</p>
+          </div>
+          <div style="text-align:left;">
+             <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:15px;">ลูกค้าไม่ประสงค์ออกนาม</strong>
+                <span style="color:#ff9800; font-size:13px; font-weight:600;"><i class="material-icons" style="font-size:14px; vertical-align:middle;">star</i> 5.0</span>
+             </div>
+             <p style="margin:5px 0 0; font-size:14px; color:#555;">แม่ค้าใจดี แพ็คของมาอย่างดีเลยค่ะ</p>
+          </div>
+       `;
+    }
+    function closeReviewModal() { document.getElementById('review-view-modal').style.display = 'none'; }
+
+    function openChatModal() { document.getElementById('chat-modal').style.display = 'flex'; }
+    function closeChatModal() { document.getElementById('chat-modal').style.display = 'none'; }
+    
+    function sendChatMessage(sender) {
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+      if (!text || !activeChatOrderId) return;
+
+      const message = {
+         sender: sender, 
+         text: text,
+         time: new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'})
+      };
+
+      db.collection("orders").doc(activeChatOrderId).update({
+         chatMessages: firebase.firestore.FieldValue.arrayUnion(message)
+      });
+      input.value = '';
+    }
+
+    function renderChatMessages(messages, currentUserType) {
+        const container = document.getElementById('chat-messages-container');
+        if(!container) return;
+        container.innerHTML = '';
+        if(!messages || messages.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#999; font-size:13px; margin-top:20px;">เริ่มการสนทนากับไรเดอร์...</p>';
+            return;
+        }
+        messages.forEach(msg => {
+            const isMe = msg.sender === currentUserType;
+            container.innerHTML += `
+               <div style="display:flex; justify-content: ${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:10px;">
+                  <div style="background: ${isMe ? 'var(--primary-color)' : '#f1f5f9'}; color: ${isMe ? 'white' : '#333'}; padding:10px 15px; border-radius:16px; max-width:80%; font-size:14px; position:relative;">
+                     ${msg.text}
+                     <span style="font-size:10px; color:${isMe ? 'rgba(255,255,255,0.7)' : '#999'}; display:block; text-align:right; margin-top:4px;">${msg.time}</span>
+                  </div>
+               </div>
+            `;
+        });
+        container.scrollTop = container.scrollHeight;
     }
   </script>
 </body>

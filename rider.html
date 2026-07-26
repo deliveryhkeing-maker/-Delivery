@@ -72,6 +72,14 @@
 
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 600; justify-content: center; align-items: center; }
     .modal-content { background: var(--white); width: 90%; max-width: 320px; border-radius: 16px; padding: 25px; text-align: center; }
+    
+    .chat-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 700; justify-content: center; align-items: flex-end; }
+    .chat-sheet { background: var(--bg-color); width: 100%; height: 80vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; }
+    .chat-header { background: white; padding: 15px 20px; border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; }
+    .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .chat-input-area { background: white; padding: 15px 20px; display: flex; gap: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+    .chat-input-area input { flex-grow: 1; background: #f1f5f9; border: none; border-radius: 20px; padding: 10px 15px; font-family: 'Prompt'; outline: none; }
+    .btn-send { background: var(--rider-primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -125,9 +133,10 @@
           </div>
         </div>
         
-        <div style="display: flex; gap:10px;">
-          <a href="#" id="nav-btn" target="_blank" class="btn-nav-map"><span class="material-icons">navigation</span> นำทาง</a>
-          <a href="#" id="call-cus-btn" class="btn-call"><span class="material-icons">call</span> โทรหาลูกค้า</a>
+        <div style="display: flex; gap:10px; flex-wrap: wrap; margin-bottom: 15px;">
+          <a href="#" id="nav-btn" target="_blank" class="btn-nav-map" style="flex: 1 1 100%; margin-bottom: 0;"><span class="material-icons">navigation</span> นำทาง</a>
+          <button id="chat-cus-btn" onclick="openChatModal()" class="btn-call" style="background:rgba(33, 150, 243, 0.1); color:#2196F3; flex: 1; margin-bottom: 0;"><span class="material-icons">chat</span> แชท</button>
+          <a href="#" id="call-cus-btn" class="btn-call" style="flex: 1; margin-bottom: 0;"><span class="material-icons">call</span> โทรหาลูกค้า</a>
         </div>
         
         <div style="flex-grow: 1; max-height: 120px; overflow-y:auto; margin-bottom: 15px;">
@@ -168,6 +177,24 @@
       <div style="display: flex; gap: 10px;">
         <button style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeConfirmModal()">ยกเลิก</button>
         <button id="confirm-yes-btn" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';">ตกลง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- หน้าต่างแชท (Chat Modal) -->
+  <div class="chat-overlay" id="chat-modal">
+    <div class="chat-sheet">
+      <div class="chat-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+           <span class="material-icons" style="color: var(--rider-primary);">person</span>
+           <h3 style="margin:0; font-size:16px;" id="chat-cus-title">แชทกับลูกค้า</h3>
+        </div>
+        <span class="material-icons" style="cursor:pointer;" onclick="closeChatModal()">close</span>
+      </div>
+      <div class="chat-messages" id="chat-messages-container"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input-text" placeholder="พิมพ์ข้อความที่นี่..." onkeypress="if(event.key === 'Enter') sendChatMessage('rider')">
+        <button class="btn-send" onclick="sendChatMessage('rider')"><span class="material-icons">send</span></button>
       </div>
     </div>
   </div>
@@ -341,6 +368,7 @@
           activeOrderData = doc.data(); currentOrderStatus = activeOrderData.status;
           document.getElementById('active-res-name').innerText = "ร้าน: " + activeOrderData.restaurantName;
           document.getElementById('active-cus-name').innerText = "ส่งให้: " + activeOrderData.customerName;
+          document.getElementById('chat-cus-title').innerText = "แชทกับคุณ " + activeOrderData.customerName.split(' ')[0];
           document.getElementById('active-total').innerText = activeOrderData.totalPrice;
           
           let pMethodText = activeOrderData.paymentMethod === 'wallet' || activeOrderData.paymentMethod === 'transfer' ? "(โอนแล้ว ไม่ต้องเก็บเงิน)" : "(เก็บเงินสด)";
@@ -350,6 +378,9 @@
           document.getElementById('call-cus-btn').href = "tel:" + phoneToCall;
           document.getElementById('call-cus-btn').innerHTML = `<span class="material-icons">call</span> โทรหาคุณ ${activeOrderData.customerName.split(' ')[0]}`;
           
+          // อัปเดตแชทแบบ Real-time
+          if (activeOrderData.chatMessages) { renderChatMessages(activeOrderData.chatMessages, 'rider'); }
+
           const ul = document.getElementById('active-items'); ul.innerHTML = '';
           activeOrderData.items.forEach(item => { ul.innerHTML += `<li>${item}</li>`; });
           
@@ -435,6 +466,48 @@
     function openConfirm(message, callback) { document.getElementById('confirm-message').innerText = message; confirmCallback = callback; document.getElementById('custom-confirm-modal').style.display = 'flex'; }
     function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
     document.getElementById('confirm-yes-btn').addEventListener('click', () => { if (confirmCallback) confirmCallback(); closeConfirmModal(); });
+    
+    function openChatModal() { document.getElementById('chat-modal').style.display = 'flex'; }
+    function closeChatModal() { document.getElementById('chat-modal').style.display = 'none'; }
+    
+    function sendChatMessage(sender) {
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+      if (!text || !activeOrderId) return;
+
+      const message = {
+         sender: sender, 
+         text: text,
+         time: new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'})
+      };
+
+      db.collection("orders").doc(activeOrderId).update({
+         chatMessages: firebase.firestore.FieldValue.arrayUnion(message)
+      });
+      input.value = '';
+    }
+
+    function renderChatMessages(messages, currentUserType) {
+        const container = document.getElementById('chat-messages-container');
+        if(!container) return;
+        container.innerHTML = '';
+        if(!messages || messages.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#999; font-size:13px; margin-top:20px;">เริ่มการสนทนากับลูกค้า...</p>';
+            return;
+        }
+        messages.forEach(msg => {
+            const isMe = msg.sender === currentUserType;
+            container.innerHTML += `
+               <div style="display:flex; justify-content: ${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:10px;">
+                  <div style="background: ${isMe ? 'var(--rider-primary)' : '#f1f5f9'}; color: ${isMe ? 'white' : '#333'}; padding:10px 15px; border-radius:16px; max-width:80%; font-size:14px; position:relative;">
+                     ${msg.text}
+                     <span style="font-size:10px; color:${isMe ? 'rgba(255,255,255,0.7)' : '#999'}; display:block; text-align:right; margin-top:4px;">${msg.time}</span>
+                  </div>
+               </div>
+            `;
+        });
+        container.scrollTop = container.scrollHeight;
+    }
   </script>
 </body>
 </html>
