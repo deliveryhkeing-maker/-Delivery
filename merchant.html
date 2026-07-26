@@ -152,8 +152,8 @@
         <span class="status-text" id="status-label" style="color: var(--success);">เปิดร้าน</span>
       </div>
     </div>
-
-    <!-- เพิ่มปุ่มพักเบรกชั่วคราว -->
+    
+    <!-- ปุ่มพักเบรกชั่วคราว -->
     <div style="padding: 10px 15px; background: white; border-bottom: 1px solid #eee;">
        <button class="btn-outline" style="border-color: var(--warning); color: var(--warning); padding: 8px; font-size: 13px;" onclick="pauseStore()">
           <span class="material-icons" style="font-size: 16px;">pause_circle</span> พักเบรก 30 นาที (ซ่อนร้านชั่วคราว)
@@ -166,7 +166,7 @@
     </div>
 
     <div class="content-area" id="new-orders">
-      <button class="btn-outline" style="width: 100%; margin-bottom: 20px; border-color: var(--primary); color: var(--primary);" onclick="simulateOrderAlert()">
+      <button class="btn-outline" style="width: 100%; margin-bottom: 20px; border-color: var(--warning); color: var(--warning);" onclick="simulateOrderAlert()">
         <span class="material-icons">notifications_active</span> ทดสอบเสียงออเดอร์เข้า
       </button>
       <p id="empty-order-msg" style="text-align: center; color: var(--text-light); margin-top: 30px;">รอออเดอร์ใหม่จากลูกค้า...</p>
@@ -330,6 +330,9 @@
     let confirmCallback = null;
     let pauseTimer = null;
 
+    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้ (ต้องใส่ให้ถูกต้อง!)
+    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
+
     window.onload = function() { 
       currentMerchantId = localStorage.getItem('hk_merchant_id');
       if(currentMerchantId) {
@@ -460,7 +463,7 @@
                  btnHtml = `<button class="btn-main" style="background-color: var(--success); padding: 8px; font-size: 14px;" onclick="acceptRealOrder('${order.id}')">รับออเดอร์</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">ออเดอร์ใหม่</span>`;
               } 
-              // ควบรวมสถานะต่างๆ ให้ปุ่มร้านค้ายังคงอยู่จนกว่าจะกดอาหารเสร็จ
+              // รวมสถานะเพื่อให้ปุ่ม "อาหารเสร็จ" ยังคงอยู่ไม่หายไปไหน
               else if (order.status === "ร้านกำลังเตรียมอาหาร" || order.status === "ไรเดอร์กำลังไปรับอาหาร" || order.status === "ไรเดอร์ถึงร้านแล้ว") {
                  btnHtml = `<button class="btn-main" style="background-color: var(--warning); padding: 8px; font-size: 14px;" onclick="markFoodReady('${order.id}')">จัดเตรียมอาหารเสร็จแล้ว</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">กำลังเตรียมอาหาร</span>`;
@@ -527,16 +530,19 @@
         });
     }
 
-    
-    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
-    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
-
-    function notifyCustomerLINE(userId, message) {
+    function notifyCustomerLINE(userId, title, message, color, details) {
       if(!userId || userId.startsWith("guest")) return;
       fetch(LINE_BOT_API_URL, {
         method: "POST", mode: "no-cors",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userId, message: message })
+        body: JSON.stringify({ 
+          userId: userId, 
+          isFlex: true,
+          title: title,
+          message: message,
+          color: color,
+          details: details
+        })
       }).catch(e => console.log("Notify Error", e));
     }
 
@@ -546,10 +552,12 @@
             status: "ร้านกำลังเตรียมอาหาร"
           }).then(() => {
             showToast("รับออเดอร์เรียบร้อย!");
-            // ดึง User ID แล้วแจ้งเตือน LINE
             db.collection("orders").doc(orderId).get().then(doc => {
                const data = doc.data();
-               notifyCustomerLINE(data.userId, `👨‍🍳 ร้าน ${data.restaurantName} รับออเดอร์แล้ว!\nกำลังปรุงอาหารอย่างพิถีพิถัน โปรดรอสักครู่ครับ`);
+               notifyCustomerLINE(data.userId, "👨‍🍳 ร้านรับออเดอร์แล้ว!", "กำลังปรุงอาหารอย่างพิถีพิถัน โปรดรอสักครู่ครับ", "#f59e0b", {
+                  "ร้านอาหาร": data.restaurantName,
+                  "สถานะ": "กำลังเตรียมอาหาร"
+               });
             });
           });
        });
@@ -563,7 +571,10 @@
             showToast("อัปเดตสถานะสำเร็จ! รอไรเดอร์มารับได้เลย");
             db.collection("orders").doc(orderId).get().then(doc => {
                const data = doc.data();
-               notifyCustomerLINE(data.userId, `✅ อาหารเสร็จแล้ว!\nตอนนี้ร้านกำลังรอไรเดอร์เข้ามารับอาหารครับ`);
+               notifyCustomerLINE(data.userId, "✅ อาหารเสร็จแล้ว!", "ตอนนี้ร้านกำลังรอไรเดอร์เข้ามารับอาหารครับ", "#10b981", {
+                  "ร้านอาหาร": data.restaurantName,
+                  "สถานะ": "รอไรเดอร์มารับ"
+               });
             });
           });
        });
@@ -577,28 +588,12 @@
              showToast("ยกเลิกออเดอร์สำเร็จ");
              db.collection("orders").doc(orderId).get().then(doc => {
                const data = doc.data();
-               notifyCustomerLINE(data.userId, `❌ ขออภัยครับ ทางร้านมีความจำเป็นต้องยกเลิกออเดอร์เนื่องจากไม่มีไรเดอร์รับงาน\n(ระบบได้ทำการคืนเงินให้คุณเรียบร้อยแล้ว)`);
+               notifyCustomerLINE(data.userId, "❌ ยกเลิกออเดอร์", "ขออภัยครับ ทางร้านมีความจำเป็นต้องยกเลิกออเดอร์เนื่องจากไม่มีไรเดอร์รับงาน (ระบบคืนเงินให้แล้ว)", "#ef4444", {
+                  "ร้านอาหาร": data.restaurantName
+               });
             });
           });
       });
-    }
-
-    // ระบบพักเบรก 30 นาที
-    function pauseStore() {
-        openConfirm('คุณต้องการปิดรับออเดอร์ชั่วคราวเป็นเวลา 30 นาทีใช่หรือไม่?', () => {
-            db.collection("merchants").doc(currentMerchantId).update({ isOpen: false });
-            document.getElementById('store-status').checked = false;
-            updateStatusLabel(false);
-            showToast("ปิดร้านชั่วคราวแล้ว ระบบจะเปิดใหม่อีก 30 นาที");
-            
-            if(pauseTimer) clearTimeout(pauseTimer);
-            pauseTimer = setTimeout(() => {
-                db.collection("merchants").doc(currentMerchantId).update({ isOpen: true });
-                document.getElementById('store-status').checked = true;
-                updateStatusLabel(true);
-                showToast("ระบบเปิดรับออเดอร์ตามปกติแล้ว!");
-            }, 30 * 60 * 1000); 
-        });
     }
 
     function triggerRealOrderAlert(orderId, orderData) {
@@ -747,6 +742,24 @@
       if(isChecked && pauseTimer) clearTimeout(pauseTimer);
     }
     
+    // ระบบพักเบรก 30 นาที
+    function pauseStore() {
+        openConfirm('คุณต้องการปิดรับออเดอร์ชั่วคราวเป็นเวลา 30 นาทีใช่หรือไม่?', () => {
+            db.collection("merchants").doc(currentMerchantId).update({ isOpen: false });
+            document.getElementById('store-status').checked = false;
+            updateStatusLabel(false);
+            showToast("ปิดร้านชั่วคราวแล้ว ระบบจะเปิดใหม่อีก 30 นาที");
+            
+            if(pauseTimer) clearTimeout(pauseTimer);
+            pauseTimer = setTimeout(() => {
+                db.collection("merchants").doc(currentMerchantId).update({ isOpen: true });
+                document.getElementById('store-status').checked = true;
+                updateStatusLabel(true);
+                showToast("ระบบเปิดรับออเดอร์ตามปกติแล้ว!");
+            }, 30 * 60 * 1000); 
+        });
+    }
+
     function updateStatusLabel(isOpen) {
       const label = document.getElementById('status-label');
       if(isOpen) { label.innerText = 'เปิดร้าน'; label.style.color = 'var(--success)'; } 
