@@ -84,6 +84,7 @@
 </head>
 <body>
 
+  <!-- หน้า Login -->
   <div id="login-screen" class="screen auth-screen" style="display: flex;">
     <div class="auth-card">
       <div style="font-size: 48px; color: var(--rider-primary); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">sports_motorsports</span></div>
@@ -95,6 +96,7 @@
     </div>
   </div>
 
+  <!-- หน้า Register -->
   <div id="register-screen" class="screen auth-screen">
     <div class="auth-card">
       <h2 style="margin: 0 0 20px;">สมัครคนขับใหม่</h2>
@@ -106,6 +108,7 @@
     </div>
   </div>
 
+  <!-- หน้าจอแผนที่ & จัดการออเดอร์ -->
   <div id="map-screen" class="screen">
     <div class="rider-header">
       <div class="rider-profile">
@@ -124,6 +127,7 @@
         <span class="material-icons">my_location</span>
       </div>
       
+      <!-- Panel แสดงรายละเอียดออเดอร์ขณะกำลังจัดส่ง -->
       <div class="order-panel collapsed" id="active-order-panel" style="display:none;">
         <div class="drag-handle" onclick="togglePanel()"></div>
         <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
@@ -134,6 +138,7 @@
         </div>
         
         <div style="display: flex; gap:10px; flex-wrap: wrap; margin-bottom: 15px;">
+          <!-- ปุ่มนำทาง (Google Maps) -->
           <a href="#" id="nav-btn" target="_blank" class="btn-nav-map" style="flex: 1 1 100%; margin-bottom: 0;"><span class="material-icons">navigation</span> นำทาง</a>
           <button id="chat-cus-btn" onclick="openChatModal()" class="btn-call" style="background:rgba(33, 150, 243, 0.1); color:#2196F3; flex: 1; margin-bottom: 0;"><span class="material-icons">chat</span> แชท</button>
           <a href="#" id="call-cus-btn" class="btn-call" style="flex: 1; margin-bottom: 0;"><span class="material-icons">call</span> โทรหาลูกค้า</a>
@@ -147,11 +152,14 @@
           <div><p style="margin: 0; color: var(--text-dark); font-weight: 600;">ยอดที่ต้องเก็บลูกค้า</p><span style="font-size: 12px; color: var(--text-light);" id="active-pay-method">(เงินสด)</span></div>
           <h2 style="margin: 0; color: var(--rider-primary); font-size: 20px;">฿<span id="active-total">0</span></h2>
         </div>
+        
+        <!-- ปุ่มหลักในการเปลี่ยนสถานะ (ไปรับของ > ถึงร้าน > ส่งลูกค้า > สำเร็จ) -->
         <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
       </div>
     </div>
   </div>
 
+  <!-- หน้าต่างแจ้งเตือนเวลามีออเดอร์ใหม่เข้า -->
   <div class="order-alert-overlay" id="order-alert">
     <div class="order-alert-content">
       <h3 style="font-size: 20px; font-weight: 700; color: var(--rider-primary); margin: 0 0 15px; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
@@ -251,156 +259,133 @@
     }
 
     function riderLogin() {
-      const phone = document.getElementById('login-phone').value; if(!phone) { showToast("กรุณากรอกเบอร์โทร"); return; }
+      const phone = document.getElementById('login-phone').value;
+      if(!phone) { showToast("กรุณากรอกเบอร์โทรศัพท์"); return; }
       db.collection("riders").doc(phone).get().then(doc => {
-        if(doc.exists) { localStorage.setItem('hk_rider_id', phone); currentRiderId = phone; document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile(); } 
-        else { showToast("ไม่พบเบอร์โทรนี้ในระบบ กรุณาสมัครสมาชิก"); }
-      });
+        if(doc.exists) { showToast("เข้าสู่ระบบสำเร็จ"); localStorage.setItem('hk_rider_id', phone); currentRiderId = phone; document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile(); }
+        else { showToast("ไม่พบบัญชีนี้ กรุณาสมัครใหม่"); }
+      }).catch(err => showToast("Error: " + err.message));
     }
 
     function promptLogout() { openConfirm("ต้องการออกจากระบบหรือไม่?", () => { localStorage.removeItem('hk_rider_id'); location.reload(); }); }
 
     function loadRiderProfile() {
       db.collection("riders").doc(currentRiderId).get().then(doc => {
-        if(doc.exists) {
-          riderData = doc.data(); if(!riderData.phone) riderData.phone = currentRiderId;
-          document.getElementById('display-rider-name').innerText = riderData.name; document.getElementById('display-rider-plate').innerText = riderData.plate || "ไม่มีข้อมูลรถ";
-          showScreen('map-screen'); initMap(); checkActiveJob();
-        }
+        if(doc.exists) { riderData = doc.data(); document.getElementById('display-rider-name').innerText = riderData.name; document.getElementById('display-rider-plate').innerText = riderData.plate; showScreen('map-screen'); initRiderMap(); checkActiveJob(); }
       });
-    }
-
-    function initMap() {
-      if(riderMap !== null) return;
-      riderMap = L.map('rider-map', {zoomControl: false}).setView([17.15, 102.95], 16);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(riderMap);
-      
-      const rIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--rider-primary); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: transform 0.5s linear;"><span class="material-icons" style="font-size:18px; color:white;">navigation</span></div>`});
-      riderMarker = L.marker([17.15, 102.95], {icon: rIcon}).addTo(riderMap);
-
-      if(navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition(pos => {
-          currentRiderLat = pos.coords.latitude; currentRiderLng = pos.coords.longitude;
-          riderMarker.setLatLng([currentRiderLat, currentRiderLng]);
-          
-          if(isFollowingGPS) riderMap.setView([currentRiderLat, currentRiderLng]); 
-          
-          if(activeOrderId) {
-            db.collection("orders").doc(activeOrderId).update({ riderLat: currentRiderLat, riderLng: currentRiderLng }).catch(e => console.log("GPS Sync Error:", e));
-          }
-        }, err => console.log(err), {enableHighAccuracy: true, timeout: 5000, maximumAge: 0});
-      }
-
-      riderMap.on('dragstart', function() {
-         isFollowingGPS = false;
-         document.getElementById('gps-follow-btn').classList.remove('active');
-      });
-    }
-
-    function toggleGPSFollow() {
-      isFollowingGPS = true;
-      document.getElementById('gps-follow-btn').classList.add('active');
-      const pos = riderMarker.getLatLng();
-      riderMap.setView([pos.lat, pos.lng], 16);
-      showToast('ล็อกเป้าหมาย GPS แล้ว');
     }
 
     function toggleOnlineStatus() {
-      isOnline = !isOnline; const btn = document.getElementById('status-btn'); const text = document.getElementById('status-text');
-      if(isOnline) { btn.classList.remove('offline'); text.innerText = "ออนไลน์"; startFindingJobs(); showToast("คุณเปิดรับงานแล้ว"); } 
-      else { btn.classList.add('offline'); text.innerText = "ออฟไลน์"; if(findJobListener) { findJobListener(); findJobListener = null; } showToast("คุณหยุดรับงานชั่วคราว"); }
+      isOnline = !isOnline;
+      const btn = document.getElementById('status-btn'); const text = document.getElementById('status-text');
+      if(isOnline) { btn.classList.remove('offline'); text.innerText = 'ออนไลน์'; startFindingJobs(); showToast('คุณออนไลน์แล้ว รอรับงานได้เลย'); } 
+      else { btn.classList.add('offline'); text.innerText = 'ออฟไลน์'; if(findJobListener) findJobListener(); showToast('คุณออฟไลน์แล้ว ระบบจะไม่ส่งงานให้'); }
+    }
+
+    function initRiderMap() {
+      if(riderMap !== null) return;
+      riderMap = L.map('rider-map', { zoomControl: false }).setView([currentRiderLat, currentRiderLng], 15);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(riderMap);
+      
+      const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--rider-primary); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:18px; color:white;">sports_motorsports</span></div>` });
+      riderMarker = L.marker([currentRiderLat, currentRiderLng], {icon: riderIcon}).addTo(riderMap);
+
+      if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition((position) => {
+          currentRiderLat = position.coords.latitude; currentRiderLng = position.coords.longitude;
+          riderMarker.setLatLng([currentRiderLat, currentRiderLng]);
+          if(isFollowingGPS && riderMap) { riderMap.setView([currentRiderLat, currentRiderLng]); }
+          
+          if(activeOrderId) { db.collection("orders").doc(activeOrderId).update({ riderLat: currentRiderLat, riderLng: currentRiderLng }); }
+        }, (err) => console.log(err), { enableHighAccuracy: true });
+      }
+
+      riderMap.on('dragstart', () => { isFollowingGPS = false; document.getElementById('gps-follow-btn').classList.remove('active'); });
+    }
+
+    function toggleGPSFollow() {
+      isFollowingGPS = !isFollowingGPS;
+      const btn = document.getElementById('gps-follow-btn');
+      if(isFollowingGPS) { btn.classList.add('active'); if(riderMap) riderMap.setView([currentRiderLat, currentRiderLng], 16); } 
+      else { btn.classList.remove('active'); }
+    }
+
+    function checkActiveJob() {
+      db.collection("orders").where("riderId", "==", currentRiderId).where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "ร้านเตรียมอาหารเสร็จแล้ว", "กำลังจัดส่ง"]).get().then(snapshot => {
+        if(!snapshot.empty) { const doc = snapshot.docs[0]; activeOrderId = doc.id; listenToActiveJob(); } 
+        else { startFindingJobs(); }
+      });
+    }
+
+    function startFindingJobs() {
+      if(findJobListener) findJobListener();
+      findJobListener = db.collection("orders").where("status", "==", "กำลังค้นหาไรเดอร์").onSnapshot(snapshot => {
+        if(!snapshot.empty && isOnline && !activeOrderId) {
+           const doc = snapshot.docs[0]; incomingOrderId = doc.id; const data = doc.data();
+           
+           document.getElementById('alert-res-name').innerText = data.restaurantName;
+           document.getElementById('alert-cus-name').innerText = data.customerName;
+           document.getElementById('alert-total').innerText = data.totalPrice;
+           
+           const distStr = (getDistance(data.resLat, data.resLng, data.cusLat, data.cusLng) + getDistance(currentRiderLat, currentRiderLng, data.resLat, data.resLng)).toFixed(1);
+           document.getElementById('alert-distance').innerHTML = `ระยะทางรวมจัดส่งประมาณ ${distStr} กม.`;
+           
+           document.getElementById('order-alert').style.display = 'flex';
+           if ('speechSynthesis' in window) { const msg = new SpeechSynthesisUtterance("มีงานใหม่เข้าครับ"); msg.lang = 'th-TH'; window.speechSynthesis.speak(msg); }
+        } else { document.getElementById('order-alert').style.display = 'none'; incomingOrderId = null; }
+      });
     }
 
     function getDistance(lat1, lon1, lat2, lon2) {
       if(!lat1 || !lon1 || !lat2 || !lon2) return 0;
       const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return (R * c).toFixed(1);
-    }
-
-    function startFindingJobs() {
-      if(findJobListener) findJobListener();
-      findJobListener = db.collection("orders").where("status", "in", ["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว"]).onSnapshot((snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
-              const orderData = change.doc.data();
-              if(!orderData.riderId && isOnline && !activeOrderId) triggerJobAlert(change.doc.id, orderData);
-            }
-          });
-        });
-    }
-
-    function triggerJobAlert(orderId, data) {
-      incomingOrderId = orderId;
-      document.getElementById('alert-res-name').innerText = data.restaurantName;
-      document.getElementById('alert-cus-name').innerText = "ลูกค้า: " + data.customerName;
-      document.getElementById('alert-total').innerText = data.totalPrice;
-      
-      let distToRes = getDistance(currentRiderLat, currentRiderLng, data.resLat, data.resLng);
-      let distToCus = getDistance(data.resLat, data.resLng, data.cusLat, data.cusLng);
-      let totalDist = (parseFloat(distToRes) + parseFloat(distToCus)).toFixed(1);
-      document.getElementById('alert-distance').innerText = `ระยะทางจัดส่งรวมประมาณ ${totalDist} กม.`;
-
-      document.getElementById('order-alert').style.display = 'flex';
-      if ('speechSynthesis' in window) { const msg = new SpeechSynthesisUtterance("มีงานใหม่เข้าครับ"); msg.lang = 'th-TH'; window.speechSynthesis.speak(msg); }
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     function acceptJob() {
-      if(!incomingOrderId) return; document.getElementById('order-alert').style.display = 'none'; showToast("กำลังรับงาน...");
+      if(!incomingOrderId) return;
       db.collection("orders").doc(incomingOrderId).update({ riderId: currentRiderId, riderName: riderData.name, riderPhone: riderData.phone, riderPlate: riderData.plate, status: "ไรเดอร์กำลังไปรับอาหาร" }).then(() => {
-        activeOrderId = incomingOrderId; incomingOrderId = null; if(findJobListener) { findJobListener(); findJobListener = null; } listenToActiveJob();
-      }).catch(err => showToast("ไม่สามารถรับงานได้: " + err.message));
-    }
-
-    function checkActiveJob() {
-      db.collection("orders").where("riderId", "==", currentRiderId).where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง", "ร้านเตรียมอาหารเสร็จแล้ว"]).get().then(snapshot => {
-          if(!snapshot.empty) { activeOrderId = snapshot.docs[0].id; listenToActiveJob(); } else { startFindingJobs(); }
-        });
+        document.getElementById('order-alert').style.display = 'none'; activeOrderId = incomingOrderId; incomingOrderId = null;
+        if(findJobListener) { findJobListener(); findJobListener = null; }
+        listenToActiveJob();
+      }).catch(err => { showToast("ไม่สามารถรับงานได้ อาจมีคนรับไปแล้ว"); document.getElementById('order-alert').style.display = 'none'; });
     }
 
     function listenToActiveJob() {
-      if(!activeOrderId) return; if(activeJobListener) activeJobListener();
-      document.getElementById('active-order-panel').style.display = 'block'; setTimeout(() => document.getElementById('active-order-panel').classList.remove('collapsed'), 100);
-
+      if(activeJobListener) activeJobListener();
       activeJobListener = db.collection("orders").doc(activeOrderId).onSnapshot(doc => {
         if(doc.exists) {
           activeOrderData = doc.data(); currentOrderStatus = activeOrderData.status;
-          document.getElementById('active-res-name').innerText = "ร้าน: " + activeOrderData.restaurantName;
-          document.getElementById('active-cus-name').innerText = "ส่งให้: " + activeOrderData.customerName;
-          document.getElementById('chat-cus-title').innerText = "แชทกับคุณ " + activeOrderData.customerName.split(' ')[0];
+          
+          document.getElementById('active-order-panel').style.display = 'block'; setTimeout(() => document.getElementById('active-order-panel').classList.remove('collapsed'), 100);
+          document.getElementById('active-res-name').innerText = activeOrderData.restaurantName;
+          document.getElementById('active-cus-name').innerText = `ส่งให้: ${activeOrderData.customerName}`;
+          document.getElementById('active-items').innerHTML = activeOrderData.items.map(item => `<li>${item}</li>`).join('');
           document.getElementById('active-total').innerText = activeOrderData.totalPrice;
-          
-          let pMethodText = activeOrderData.paymentMethod === 'wallet' || activeOrderData.paymentMethod === 'transfer' ? "(โอนแล้ว ไม่ต้องเก็บเงิน)" : "(เก็บเงินสด)";
-          document.getElementById('active-pay-method').innerText = pMethodText;
-          
-          let phoneToCall = activeOrderData.customerPhone || "0800000000"; 
-          document.getElementById('call-cus-btn').href = "tel:" + phoneToCall;
-          document.getElementById('call-cus-btn').innerHTML = `<span class="material-icons">call</span> โทรหาคุณ ${activeOrderData.customerName.split(' ')[0]}`;
-          
-          // อัปเดตแชทแบบ Real-time
-          if (activeOrderData.chatMessages) { renderChatMessages(activeOrderData.chatMessages, 'rider'); }
+          document.getElementById('active-pay-method').innerText = activeOrderData.paymentMethod === 'transfer' ? '(โอนเงินแล้ว)' : '(เก็บเงินสด)';
+          document.getElementById('call-cus-btn').href = `tel:${activeOrderData.customerPhone || ''}`;
 
-          const ul = document.getElementById('active-items'); ul.innerHTML = '';
-          activeOrderData.items.forEach(item => { ul.innerHTML += `<li>${item}</li>`; });
+          if(activeOrderData.chatMessages) { renderChatMessages(activeOrderData.chatMessages, 'rider'); }
           
-          updateButtonUI(); drawRouteOnMap(activeOrderData);
+          drawJobMap(activeOrderData); updateButtonUI();
         }
       });
     }
 
-    function drawRouteOnMap(data) {
+    function drawJobMap(data) {
+      if(!riderMap) return;
       if(resMarker) riderMap.removeLayer(resMarker); if(cusMarker) riderMap.removeLayer(cusMarker); if(routeLine) riderMap.removeLayer(routeLine);
-      const sIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--danger); width:20px; height:20px; border-radius:50%; border:3px solid white; display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">storefront</span></div>`});
-      const cIcon = L.divIcon({className:'custom-pin', html:`<div style="background:var(--success); width:20px; height:20px; border-radius:50%; border:3px solid white; display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:12px; color:white;">person</span></div>`});
       
-      let latlngs = []; if(riderMarker) latlngs.push(riderMarker.getLatLng());
-      if(data.resLat && data.resLng) { resMarker = L.marker([data.resLat, data.resLng], {icon: sIcon}).addTo(riderMap); latlngs.push([data.resLat, data.resLng]); }
-      if(data.cusLat && data.cusLng) { cusMarker = L.marker([data.cusLat, data.cusLng], {icon: cIcon}).addTo(riderMap); latlngs.push([data.cusLat, data.cusLng]); }
+      const resIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:#2196F3; width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:14px; color:white;">storefront</span></div>` });
+      const cusIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--success); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:14px; color:white;">person</span></div>` });
       
-      if(latlngs.length > 1) {
-        routeLine = L.polyline(latlngs, {color: 'var(--rider-primary)', weight: 4, dashArray: '5, 10'}).addTo(riderMap);
-      }
+      resMarker = L.marker([data.resLat, data.resLng], {icon: resIcon}).addTo(riderMap);
+      cusMarker = L.marker([data.cusLat, data.cusLng], {icon: cusIcon}).addTo(riderMap);
+      
+      let latlngs = [[currentRiderLat, currentRiderLng], [data.resLat, data.resLng]];
+      if(currentOrderStatus === "กำลังจัดส่ง") latlngs = [[currentRiderLat, currentRiderLng], [data.cusLat, data.cusLng]];
+      routeLine = L.polyline(latlngs, {color: '#4285F4', weight: 4, dashArray: '5, 10'}).addTo(riderMap);
     }
 
     function updateButtonUI() {
@@ -438,16 +423,40 @@
       }
     }
 
+    
+    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
+    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
+
+    function notifyCustomerLINE(userId, message) {
+      if(!userId || userId.startsWith("guest")) return;
+      fetch(LINE_BOT_API_URL, {
+        method: "POST", mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userId, message: message })
+      }).catch(e => console.log("Notify Error", e));
+    }
+
     function updateOrderStatus() {
       if(!activeOrderId) return; let nextStatus = "";
       if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") nextStatus = "ไรเดอร์ถึงร้านแล้ว";
-      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว" || currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") nextStatus = "กำลังจัดส่ง";
+      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") nextStatus = "กำลังจัดส่ง";
       else if(currentOrderStatus === "กำลังจัดส่ง") nextStatus = "จัดส่งสำเร็จ";
       
       if(nextStatus) {
         openConfirm(`ยืนยันเปลี่ยนสถานะเป็น: ${nextStatus} ?`, () => {
           db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
-            showToast("อัปเดตสถานะสำเร็จ!"); if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
+            showToast("อัปเดตสถานะสำเร็จ!"); 
+            
+            // แจ้งเตือนตามสถานะ
+            if(nextStatus === "ไรเดอร์ถึงร้านแล้ว") {
+               notifyCustomerLINE(activeOrderData.userId, `📍 ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ`);
+            } else if (nextStatus === "กำลังจัดส่ง") {
+               notifyCustomerLINE(activeOrderData.userId, `🛵 อาหารอยู่บนรถแล้ว! ไรเดอร์กำลังเดินทางไปส่งให้คุณครับ`);
+            } else if (nextStatus === "จัดส่งสำเร็จ") {
+               notifyCustomerLINE(activeOrderData.userId, `🎉 จัดส่งสำเร็จ! ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการห้วยเกิ้ง Delivery`);
+            }
+
+            if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
           });
         });
       }
