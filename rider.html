@@ -139,8 +139,15 @@
         
         <div style="display: flex; gap:10px; flex-wrap: wrap; margin-bottom: 15px;">
           <!-- ปุ่มนำทาง (Google Maps) -->
-          <a href="#" id="nav-btn" target="_blank" class="btn-nav-map" style="flex: 1 1 100%; margin-bottom: 0;"><span class="material-icons">navigation</span> นำทาง</a>
-          <button id="chat-cus-btn" onclick="openChatModal()" class="btn-call" style="background:rgba(33, 150, 243, 0.1); color:#2196F3; flex: 1; margin-bottom: 0;"><span class="material-icons">chat</span> แชท</button>
+          <a href="#" id="nav-btn" target="_blank" class="btn-nav-map" style="flex: 1 1 100%; margin-bottom: 0;"><span class="material-icons">navigation</span> นำทางไปร้าน</a>
+          
+          <!-- ปุ่มแชทหาลูกค้า (พร้อมจุดแจ้งเตือนสีแดง) -->
+          <button id="chat-cus-btn" onclick="openChatModal()" class="btn-call" style="position:relative; background:rgba(33, 150, 243, 0.1); color:#2196F3; flex: 1; margin-bottom: 0;">
+            <span class="material-icons">chat</span> แชท
+            <span id="chat-badge" style="display:none; position:absolute; top:-5px; right:-5px; background:var(--danger); border-radius:50%; width:14px; height:14px; border:2px solid white;"></span>
+          </button>
+          
+          <!-- ปุ่มโทรหาลูกค้า -->
           <a href="#" id="call-cus-btn" class="btn-call" style="flex: 1; margin-bottom: 0;"><span class="material-icons">call</span> โทรหาลูกค้า</a>
         </div>
         
@@ -153,7 +160,7 @@
           <h2 style="margin: 0; color: var(--rider-primary); font-size: 20px;">฿<span id="active-total">0</span></h2>
         </div>
         
-        <!-- ปุ่มหลักในการเปลี่ยนสถานะ (ไปรับของ > ถึงร้าน > ส่งลูกค้า > สำเร็จ) -->
+        <!-- ปุ่มหลักในการเปลี่ยนสถานะ -->
         <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
       </div>
     </div>
@@ -241,6 +248,7 @@
     
     let riderMap = null; let riderMarker = null; let resMarker = null; let cusMarker = null; let routeLine = null; let watchId = null;
     let currentRiderLat = 17.15; let currentRiderLng = 102.95;
+    let previousChatCount = 0; // ใช้สำหรับตรวจสอบแชทใหม่
 
     window.onload = function() {
       currentRiderId = localStorage.getItem('hk_rider_id');
@@ -366,7 +374,23 @@
           document.getElementById('active-pay-method').innerText = activeOrderData.paymentMethod === 'transfer' ? '(โอนเงินแล้ว)' : '(เก็บเงินสด)';
           document.getElementById('call-cus-btn').href = `tel:${activeOrderData.customerPhone || ''}`;
 
-          if(activeOrderData.chatMessages) { renderChatMessages(activeOrderData.chatMessages, 'rider'); }
+          // ตรวจสอบข้อความแชทใหม่
+          if(activeOrderData.chatMessages) { 
+            renderChatMessages(activeOrderData.chatMessages, 'rider'); 
+            if(activeOrderData.chatMessages.length > previousChatCount) {
+                const lastMsg = activeOrderData.chatMessages[activeOrderData.chatMessages.length - 1];
+                // ถ้ารับข้อความจากลูกค้า และหน้าต่างแชทปิดอยู่
+                if(lastMsg.sender === 'customer' && document.getElementById('chat-modal').style.display !== 'flex') {
+                    document.getElementById('chat-badge').style.display = 'block';
+                    showToast("💬 มีข้อความใหม่จากลูกค้า");
+                    if ('speechSynthesis' in window) {
+                        const msg = new SpeechSynthesisUtterance("มีข้อความใหม่จากลูกค้าครับ");
+                        msg.lang = 'th-TH'; window.speechSynthesis.speak(msg);
+                    }
+                }
+                previousChatCount = activeOrderData.chatMessages.length;
+            }
+          }
           
           drawJobMap(activeOrderData); updateButtonUI();
         }
@@ -423,9 +447,8 @@
       }
     }
 
-    
     // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
-    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
+    const LINE_BOT_API_URL = "นำ_URL_ของเว็บแอปมาใส่ตรงนี้_ให้เก็บเครื่องหมายคำพูดไว้";
 
     function notifyCustomerLINE(userId, message) {
       if(!userId || userId.startsWith("guest")) return;
@@ -463,7 +486,7 @@
     }
 
     function finishJobLocally() {
-      activeOrderId = null; if(activeJobListener) activeJobListener();
+      activeOrderId = null; previousChatCount = 0; if(activeJobListener) activeJobListener();
       document.getElementById('active-order-panel').classList.add('collapsed'); setTimeout(() => document.getElementById('active-order-panel').style.display='none', 300);
       if(resMarker) riderMap.removeLayer(resMarker); if(cusMarker) riderMap.removeLayer(cusMarker); if(routeLine) riderMap.removeLayer(routeLine);
       startFindingJobs();
@@ -476,7 +499,15 @@
     function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
     document.getElementById('confirm-yes-btn').addEventListener('click', () => { if (confirmCallback) confirmCallback(); closeConfirmModal(); });
     
-    function openChatModal() { document.getElementById('chat-modal').style.display = 'flex'; }
+    function openChatModal() { 
+        document.getElementById('chat-modal').style.display = 'flex'; 
+        document.getElementById('chat-badge').style.display = 'none'; // ซ่อนจุดแดงเมื่อเปิดอ่าน
+        
+        // เลื่อนแชทลงล่างสุด
+        const container = document.getElementById('chat-messages-container');
+        if(container) { container.scrollTop = container.scrollHeight; }
+    }
+    
     function closeChatModal() { document.getElementById('chat-modal').style.display = 'none'; }
     
     function sendChatMessage(sender) {
