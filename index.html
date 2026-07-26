@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <!-- เพิ่ม Library พลุฉลอง -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -48,16 +47,21 @@
     .search-bar { background-color: var(--white); border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
     .search-bar input { border: none; background: transparent; width: 100%; font-family: 'Prompt'; outline: none; font-size: 14px; }
     
+    .banner-container { padding: 0 20px 15px; }
+    .promo-banner { background: linear-gradient(135deg, #ff9800, #f44336); border-radius: 16px; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2); position: relative; overflow: hidden; }
+    .promo-banner::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+
     .categories { display: flex; overflow-x: auto; padding: 0 20px 15px; gap: 15px; scrollbar-width: none; }
     .categories::-webkit-scrollbar { display: none; }
-    .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; }
+    .category-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; gap: 8px; cursor: pointer; transition: 0.2s; }
+    .category-item:active { transform: scale(0.95); }
     .category-icon { width: 60px; height: 60px; background-color: var(--white); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .category-item span { font-size: 13px; font-weight: 500; }
     
     .restaurant-section { padding: 0 20px 15px; }
     .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
-    
-    .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; position: relative; }
+    .restaurant-card { background-color: var(--white); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; position: relative; transition: 0.2s; }
+    .restaurant-card:active { transform: scale(0.98); }
     .res-image { width: 100%; height: 160px; background-size: cover; background-position: center; background-color: #f0f0f0; }
     .distance-tag { position: absolute; bottom: 12px; right: 12px; background-color: rgba(255,255,255,0.9); padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
     .res-info { padding: 15px; }
@@ -71,7 +75,8 @@
     .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
     .menu-item-left { display: flex; gap: 15px; flex-grow: 1; }
     .menu-item-img { width: 70px; height: 70px; border-radius: 8px; background-size: cover; background-position: center; background-color: #f0f0f0; }
-    .add-btn { background-color: var(--primary-light); color: var(--primary-color); border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; }
+    .add-btn { background-color: var(--primary-light); color: var(--primary-color); border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .add-btn:active { transform: scale(0.95); background-color: #ccebcce8; }
 
     .topping-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end; }
     .topping-sheet { background: var(--white); width: 100%; border-radius: 24px 24px 0 0; padding: 25px 20px; animation: slideUp 0.3s ease-out; max-height: 85vh; display: flex; flex-direction: column; }
@@ -85,13 +90,10 @@
     .checkout-items, .summary-card, .payment-methods { background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .pay-option { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; cursor: pointer; }
     .pay-option input { width: 20px; height: 20px; accent-color: var(--primary-color); margin-right: 15px; }
-    
-    .transfer-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-top: 15px; display: none; }
+    .transfer-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-top: 15px; display: none; text-align: center; }
     
     .qr-box { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 20px; }
     .qr-image { width: 200px; height: 200px; margin: 15px auto; background: #f0f0f0; border-radius: 8px; padding: 10px; }
-    .amount-btn-group { display: flex; gap: 10px; padding: 0 20px; margin-bottom: 20px; }
-    .amount-btn { flex: 1; padding: 10px; background: white; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: 600; cursor: pointer; }
 
     #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; position: relative; overflow: hidden; }
     #tracking-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
@@ -104,29 +106,41 @@
     
     .tracking-status-card { background: var(--white); border-radius: 24px 24px 0 0; padding: 30px 25px 25px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; }
     
-    .progress-container { width: 100%; height: 8px; background: #e0e0e0; border-radius: 10px; margin: 25px 0 15px; position: relative; }
-    .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 10px; width: 0%; transition: width 1s linear; }
-    .progress-moto { position: absolute; top: -20px; left: 0%; transform: translateX(-50%); font-size: 24px; transition: left 1s linear; }
+    /* ระบบหลอดสถานะแบบใหม่ (Stepped Progress Bar) */
+    .stepper-container { display: flex; justify-content: space-between; align-items: center; position: relative; margin: 30px 0 20px; width: 100%; padding: 0 10px; }
+    .stepper-line { position: absolute; top: 50%; left: 10px; right: 10px; height: 4px; background: #e0e0e0; z-index: 1; transform: translateY(-50%); border-radius: 2px; }
+    .stepper-progress { position: absolute; top: 50%; left: 10px; height: 4px; background: var(--primary-color); z-index: 2; transform: translateY(-50%); transition: width 0.8s ease-in-out; border-radius: 2px; width: 0%; }
     
-    .leaflet-marker-icon { transition: transform 1.5s linear !important; }
+    .step-dot { width: 16px; height: 16px; background: #e0e0e0; border-radius: 50%; z-index: 3; position: relative; transition: 0.3s; border: 3px solid white; box-shadow: 0 0 0 1px #e0e0e0; }
+    .step-dot.active { background: var(--primary-color); box-shadow: 0 0 0 2px var(--primary-color); }
+    
+    .moto-runner { position: absolute; top: -35px; left: 0%; transform: translateX(-50%); font-size: 28px; z-index: 10; transition: left 0.8s ease-in-out; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    
+    .step-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-light); margin-bottom: 20px; padding: 0 5px; }
+    .step-label { width: 25%; text-align: center; line-height: 1.2; }
+    .step-label.active { color: var(--primary-color); font-weight: 600; }
+
+    .leaflet-marker-icon { transition: transform 1.0s linear !important; }
 
     #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; transition: transform 0.2s; }
     #cart-bar { bottom: 85px; background-color: var(--primary-color); }
     #active-order-bar { bottom: 85px; background-color: #2196F3; }
     
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100; border-top: 1px solid #eee; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 25%; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 25%; transition: 0.2s; }
     .nav-item.active { color: var(--primary-color); }
 
     .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; opacity: 0; transition: 0.3s; }
     .toast.show { visibility: visible; opacity: 1; bottom: 150px; }
 
-    /* ดาว Rating */
     .rating-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; justify-content: center; align-items: center; }
     .rating-card { background: white; padding: 30px 20px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: scaleUp 0.3s ease-out; }
     @keyframes scaleUp { from{transform:scale(0.8); opacity:0;} to{transform:scale(1); opacity:1;} }
     .star-group { display: flex; justify-content: center; gap: 10px; margin: 15px 0; font-size: 32px; color: #e0e0e0; cursor: pointer; }
     .star-group .material-icons.active { color: #ff9800; }
+    
+    .modal-common { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 400; justify-content: center; align-items: center; }
+    .modal-common-content { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; animation: scaleUp 0.2s ease-out; }
   </style>
 </head>
 <body>
@@ -142,7 +156,7 @@
       <div class="location-box" onclick="getLocation()">
         <span class="material-icons pin">location_on</span>
         <div class="location-text">
-          <span>พิกัดจัดส่ง (กดเพื่ออัปเดต)</span>
+          <span>จัดส่งที่ (กดเพื่ออัปเดต)</span>
           <span id="current-location-text">กำลังค้นหาพิกัด...</span>
         </div>
       </div>
@@ -151,7 +165,17 @@
     <div class="search-section">
       <div class="search-bar">
         <span class="material-icons" style="color: #999;">search</span>
-        <input type="text" id="search-input" placeholder="ค้นหาร้านอาหาร..." onkeyup="renderRestaurants()">
+        <input type="text" id="search-input" placeholder="ค้นหาร้านอาหาร, เมนู..." onkeyup="renderRestaurants()">
+      </div>
+    </div>
+
+    <div class="banner-container">
+      <div class="promo-banner">
+        <div style="z-index: 2;">
+          <h3 style="margin: 0 0 5px; font-size: 18px; font-weight: 700;">🔥 โค้ดลดชุมชน</h3>
+          <p style="margin: 0; font-size: 13px; opacity: 0.9;">ใส่โค้ด <b>LOCAL50</b> ลดทันที 50.-</p>
+        </div>
+        <span class="material-icons" style="font-size: 48px; opacity: 0.8; z-index: 2;">local_offer</span>
       </div>
     </div>
 
@@ -199,8 +223,15 @@
     </div>
 
     <div style="background: var(--white); margin-top: 15px;">
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('edit-profile-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว / ที่อยู่</div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('topup-screen')"><span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท (QR Code)</div>
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('edit-profile-screen')">
+        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว / ที่อยู่
+      </div>
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('topup-screen')">
+        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท
+      </div>
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="document.getElementById('help-modal').style.display='flex'">
+        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">support_agent</span> ช่วยเหลือ / ติดต่อแอดมิน
+      </div>
     </div>
   </div>
 
@@ -213,17 +244,14 @@
     <div style="padding: 20px;">
       <div class="summary-card" style="margin: 0 0 20px 0;">
         <p style="font-size: 13px; color: var(--text-light); margin-bottom: 20px;">ข้อมูลนี้จะถูกส่งให้ไรเดอร์ เพื่อความสะดวกในการติดต่อและจัดส่งอาหารครับ</p>
-        
         <div style="margin-bottom: 15px;">
           <label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600;">เบอร์โทรศัพท์ (จำเป็น)</label>
           <input type="tel" id="edit-phone" placeholder="08X-XXX-XXXX" style="width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Prompt'; font-size: 15px;">
         </div>
-        
         <div style="margin-bottom: 20px;">
           <label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600;">ที่อยู่ / จุดสังเกตเพิ่มเติม</label>
           <textarea id="edit-address" rows="3" placeholder="เช่น บ้านสีฟ้า ซอย 2 หน้าปากซอยมีร้านค้า" style="width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Prompt'; font-size: 15px;"></textarea>
         </div>
-        
         <button class="btn-primary" onclick="saveUserProfile()">บันทึกข้อมูล</button>
       </div>
     </div>
@@ -235,10 +263,10 @@
       <div class="back-btn-simple" onclick="showScreen('profile-screen')"><span class="material-icons">arrow_back</span></div>
       <div class="page-title">เติมเงินเข้าวอลเล็ท</div>
     </div>
-    
     <div class="qr-box">
       <h3 style="margin-top:0;">แสกน QR Code เพื่อเติมเงิน</h3>
-      <p style="color:var(--text-light); font-size:13px;">พร้อมเพย์: 1410400401805 (สหภาพ เนาว์แสง)</p>
+      <p style="color:var(--text-light); font-size:13px; margin-bottom:5px;">พร้อมเพย์: 1410400401805</p>
+      <p style="color:var(--text-light); font-size:13px; margin-top:0;">ชื่อบัญชี: สหภาพ เนาว์แสง</p>
       
       <img id="promptpay-qr" class="qr-image" src="https://promptpay.io/1410400401805/100.png" alt="QR Code">
       
@@ -247,13 +275,13 @@
         <input type="number" id="topup-amount" value="100" onkeyup="updateQRCode()" onchange="updateQRCode()" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Prompt'; font-size: 16px; margin-top: 8px; text-align: center;">
       </div>
       
-      <div class="amount-btn-group">
-        <button class="amount-btn" onclick="setTopupAmount(100)">100</button>
-        <button class="amount-btn" onclick="setTopupAmount(200)">200</button>
-        <button class="amount-btn" onclick="setTopupAmount(500)">500</button>
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button style="flex: 1; padding: 10px; background: white; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; cursor: pointer;" onclick="setTopupAmount(100)">100</button>
+        <button style="flex: 1; padding: 10px; background: white; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; cursor: pointer;" onclick="setTopupAmount(200)">200</button>
+        <button style="flex: 1; padding: 10px; background: white; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; cursor: pointer;" onclick="setTopupAmount(500)">500</button>
       </div>
       
-      <button class="btn-primary" onclick="simulateTopupSuccess()" style="margin-top: 15px;"><span class="material-icons" style="vertical-align: middle;">upload_file</span> อัปโหลดสลิปยืนยัน</button>
+      <button class="btn-primary" onclick="simulateTopupSuccess()" style="margin-top: 15px;"><span class="material-icons" style="vertical-align: middle;">upload_file</span> อัปโหลดสลิปยืนยัน (ทดสอบระบบ)</button>
     </div>
   </div>
 
@@ -271,9 +299,9 @@
       <div class="back-btn-img" onclick="showScreen('home-screen')"><span class="material-icons">arrow_back</span></div>
     </div>
     <div class="menu-shop-info">
-      <h2 id="menu-name">ชื่อร้าน</h2>
-      <div class="res-meta" style="margin-bottom: 0;">
-        <span class="rating"><i class="material-icons" style="font-size:16px; color:#ff9800;">star</i> 5.0</span>
+      <h2 id="menu-name" style="margin: 0 0 5px;">ชื่อร้าน</h2>
+      <div class="res-meta" style="font-size: 13px; color: var(--text-light);">
+        <span class="rating" style="color: #ff9800; font-weight: 600;"><i class="material-icons" style="font-size:14px; vertical-align: middle;">star</i> 5.0</span>
         <span>• <span id="menu-distance">1.2 กม.</span></span>
       </div>
     </div>
@@ -305,21 +333,22 @@
       </label>
       <label class="pay-option">
         <input type="radio" name="payment_method" value="transfer" onchange="toggleTransferBox(true)">
-        <span style="font-weight: 500;">โอนเงิน (แนบสลิป)</span>
+        <span style="font-weight: 500;">โอนเงินผ่าน QR Code</span>
       </label>
       
-      <!-- กล่องอัปโหลดสลิป พร้อมรูปพรีวิว -->
       <div id="transfer-box" class="transfer-box">
         <div style="font-size: 14px; margin-bottom: 10px;">
-          <strong>พร้อมเพย์:</strong> <span style="font-size: 18px; color: var(--primary-color); font-weight: 700;">1410400401805</span><br>
+          <strong>พร้อมเพย์:</strong> <span style="font-size: 16px; color: var(--primary-color); font-weight: 700;">1410400401805</span><br>
           <strong>ชื่อบัญชี:</strong> สหภาพ เนาว์แสง
         </div>
-        <label style="display: inline-block; background: var(--primary-light); color: var(--primary-color); padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+        <!-- แสดง QR Code ตามยอดจ่ายจริง -->
+        <img id="payment-qr-img" src="" style="width: 150px; display: none; margin: 10px auto; border-radius: 8px; border: 1px solid #ddd; padding: 5px; background: white;">
+        
+        <label style="display: inline-block; background: var(--primary-light); color: var(--primary-color); padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
           อัปโหลดรูปสลิป <input type="file" style="display: none;" onchange="handleSlipUpload(event)">
         </label>
         <div id="slip-preview-name" style="font-size: 12px; color: var(--success); margin-top: 5px;"></div>
-        <!-- พรีวิวรูปสลิป -->
-        <img id="slip-preview-img" style="display:none; width: 120px; border-radius: 8px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />
+        <img id="slip-preview-img" style="display:none; width: 120px; border-radius: 8px; margin: 10px auto 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />
       </div>
     </div>
 
@@ -353,15 +382,29 @@
       </div>
 
       <div class="tracking-status-card">
-        <h3 style="font-size: 22px; font-weight: 700; margin: 0 0 8px;" id="track-status-title">กำลังค้นหาไรเดอร์</h3>
-        <p style="color: var(--text-light); font-size: 14px; margin: 0 0 20px;" id="track-status-subtitle">รอสักครู่ ระบบกำลังจับคู่กับไรเดอร์ที่ใกล้ที่สุด</p>
+        <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 5px;" id="track-status-title">กำลังค้นหาไรเดอร์</h3>
+        <p style="color: var(--text-light); font-size: 13px; margin: 0;" id="track-status-subtitle">รอสักครู่ ระบบกำลังจับคู่กับไรเดอร์ที่ใกล้ที่สุด</p>
         
-        <div class="progress-container">
-          <div class="progress-bar-fill" id="search-progress-bar"></div>
-          <div class="progress-moto" id="search-moto">🛵</div>
+        <!-- หลอดสถานะแบบ Step -->
+        <div class="stepper-container">
+          <div class="stepper-line"></div>
+          <div class="stepper-progress" id="stepper-progress"></div>
+          
+          <div class="moto-runner" id="moto-runner">🛵</div>
+          
+          <div class="step-dot active" id="dot-1"></div>
+          <div class="step-dot" id="dot-2"></div>
+          <div class="step-dot" id="dot-3"></div>
+          <div class="step-dot" id="dot-4"></div>
+        </div>
+        <div class="step-labels">
+          <div class="step-label active" id="lbl-1">รับ<br>ออเดอร์</div>
+          <div class="step-label" id="lbl-2">ร้านกำลัง<br>ทำอาหาร</div>
+          <div class="step-label" id="lbl-3">ไรเดอร์<br>รับของ</div>
+          <div class="step-label" id="lbl-4">กำลัง<br>มาส่ง</div>
         </div>
         
-        <button class="btn-outline disabled" style="color:#999; border-color:#999;" id="btn-cancel-order" onclick="cancelOrder()">ยกเลิกคำสั่งซื้อ (รอสักครู่)</button>
+        <button class="btn-outline disabled" style="color:#999; border-color:#999; width: 100%; transition: 0.3s;" id="btn-cancel-order" onclick="cancelOrder()">ยกเลิกคำสั่งซื้อ (01:59)</button>
       </div>
     </div>
   </div>
@@ -390,23 +433,37 @@
       
       <p style="margin:0; font-weight:600;">ความอร่อยของอาหาร</p>
       <div class="star-group" id="shop-stars">
-        <span class="material-icons" onclick="setStar('shop-stars', 1)">star</span>
-        <span class="material-icons" onclick="setStar('shop-stars', 2)">star</span>
-        <span class="material-icons" onclick="setStar('shop-stars', 3)">star</span>
-        <span class="material-icons" onclick="setStar('shop-stars', 4)">star</span>
-        <span class="material-icons" onclick="setStar('shop-stars', 5)">star</span>
+        <span class="material-icons active" onclick="setStar('shop-stars', 1)">star</span>
+        <span class="material-icons active" onclick="setStar('shop-stars', 2)">star</span>
+        <span class="material-icons active" onclick="setStar('shop-stars', 3)">star</span>
+        <span class="material-icons active" onclick="setStar('shop-stars', 4)">star</span>
+        <span class="material-icons active" onclick="setStar('shop-stars', 5)">star</span>
       </div>
 
       <p style="margin:10px 0 0; font-weight:600;">การบริการของไรเดอร์</p>
       <div class="star-group" id="rider-stars">
-        <span class="material-icons" onclick="setStar('rider-stars', 1)">star</span>
-        <span class="material-icons" onclick="setStar('rider-stars', 2)">star</span>
-        <span class="material-icons" onclick="setStar('rider-stars', 3)">star</span>
-        <span class="material-icons" onclick="setStar('rider-stars', 4)">star</span>
-        <span class="material-icons" onclick="setStar('rider-stars', 5)">star</span>
+        <span class="material-icons active" onclick="setStar('rider-stars', 1)">star</span>
+        <span class="material-icons active" onclick="setStar('rider-stars', 2)">star</span>
+        <span class="material-icons active" onclick="setStar('rider-stars', 3)">star</span>
+        <span class="material-icons active" onclick="setStar('rider-stars', 4)">star</span>
+        <span class="material-icons active" onclick="setStar('rider-stars', 5)">star</span>
       </div>
 
       <button class="btn-primary" style="margin-top:20px;" onclick="submitRating()">ส่งคะแนนรีวิว</button>
+    </div>
+  </div>
+
+  <!-- หน้าช่วยเหลือ / ติดต่อแอดมิน -->
+  <div class="modal-common" id="help-modal">
+    <div class="modal-common-content">
+      <div style="font-size: 40px; color: var(--primary-color); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">support_agent</span></div>
+      <h3 style="margin: 0 0 10px;">ศูนย์ช่วยเหลือ</h3>
+      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">หากพบปัญหาการใช้งาน สั่งอาหาร หรือเติมเงิน ติดต่อแอดมินได้ตลอด 24 ชม.</p>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-line" onclick="window.open('https://line.me/ti/p/~@your_line_id', '_blank')"><span class="material-icons">chat</span> แชทกับแอดมิน (LINE)</button>
+        <a href="tel:0800000000" class="btn-outline" style="text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px;"><span class="material-icons">call</span> โทรด่วน (080-000-0000)</a>
+      </div>
+      <div style="margin-top: 15px; cursor: pointer; color: var(--text-light); font-size: 14px;" onclick="document.getElementById('help-modal').style.display='none'">ปิดหน้าต่าง</div>
     </div>
   </div>
 
@@ -480,18 +537,16 @@
       const savedProfile = localStorage.getItem('hk_user_profile_data');
       if (savedProfile) {
         userProfileData = JSON.parse(savedProfile);
-        document.getElementById('edit-phone').value = userProfileData.phone;
-        document.getElementById('edit-address').value = userProfileData.address;
+        document.getElementById('edit-phone').value = userProfileData.phone || "";
+        document.getElementById('edit-address').value = userProfileData.address || "";
       }
       
+      // ดึงประวัติทุกครั้งที่เปิดแอป (ไม่ว่าจะเป็น Guest หรือ LINE)
+      fetchOrderHistory();
+
       await initializeLiff(); 
       await getLocation(); 
       checkActiveOrder();
-      
-      // ดึงประวัติเฉพาะถ้าไม่ใช่ Guest แบบใหม่เอี่ยม
-      if (currentUserId !== guestId || localStorage.getItem('has_history')) {
-          fetchOrderHistory(); 
-      }
     };
 
     function updateWalletUI() {
@@ -515,7 +570,7 @@
           document.getElementById('btn-line-logout').style.display = 'block';
           
           loadUserProfileFromDB();
-          fetchOrderHistory(); 
+          fetchOrderHistory(); // โหลดประวัติใหม่ตาม User ID ของ LINE
         }
       } catch (error) { console.error('LIFF Error:', error); }
     }
@@ -558,17 +613,35 @@
           navigator.geolocation.getCurrentPosition(
             (position) => {
               userLat = position.coords.latitude; userLng = position.coords.longitude;
-              document.getElementById('current-location-text').innerText = "พิกัดดาวเทียมล่าสุด";
+              fetchLocationName(userLat, userLng);
               fetchRestaurants(); resolve();
             },
             (error) => {
-              document.getElementById('current-location-text').innerText = "พิกัดเริ่มต้น (ห้วยเกิ้ง)";
+              document.getElementById('current-location-text').innerText = "ชุมชนบ้านห้วยเกิ้ง (พิกัดเริ่มต้น)";
               fetchRestaurants(); resolve();
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
           );
         } else { fetchRestaurants(); resolve(); }
       });
+    }
+
+    async function fetchLocationName(lat, lng) {
+        try {
+            // ใช้ Nominatim API ของ OpenStreetMap แปลงพิกัดเป็นชื่อสถานที่
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`);
+            const data = await response.json();
+            
+            if(data && data.address) {
+                // ดึงชื่อหมู่บ้าน หรือ ตำบล หรือ อำเภอ
+                let placeName = data.address.village || data.address.suburb || data.address.town || data.address.city_district || "พิกัดปัจจุบัน";
+                document.getElementById('current-location-text').innerText = placeName;
+            } else {
+                document.getElementById('current-location-text').innerText = "พิกัดดาวเทียมล่าสุด";
+            }
+        } catch (e) {
+            document.getElementById('current-location-text').innerText = "พิกัดดาวเทียมล่าสุด";
+        }
     }
 
     function getDistance(lat1, lon1, lat2, lon2) {
@@ -591,7 +664,7 @@
           });
         });
         renderRestaurants();
-      } catch (error) { showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า"); }
+      } catch (error) { console.log(error); showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า"); }
     }
 
     function filterCategory(cat) {
@@ -623,7 +696,7 @@
               ${isTooFar ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:white; padding:10px; border-radius:20px;">ไกลเกินระยะส่ง</div>` : ''}
               <div class="distance-tag"><span class="material-icons" style="font-size:14px; color:var(--primary-color);">location_on</span> ${distance} กม.</div>
             </div>
-            <div class="res-info"><h3 class="res-name">${res.name}</h3><div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px; color: #ff9800;">star</i> ${res.rating}</span></div></div>
+            <div class="res-info"><h3 class="res-name">${res.name}</h3><div class="res-meta"><span class="rating"><i class="material-icons" style="font-size:14px; color: #ff9800; vertical-align: middle;">star</i> ${res.rating}</span> <span style="font-size: 13px; color: var(--text-light);">${res.category || 'อาหารทั่วไป'}</span></div></div>
           </div>`;
       });
     }
@@ -658,7 +731,6 @@
       showScreen('menu-screen');
     }
 
-    // ฟังก์ชันลูกเล่นลอยเข้าตะกร้า
     function flyToCartAnimation(event) {
         if(!event) return;
         const dot = document.createElement('div');
@@ -675,9 +747,6 @@
         document.body.appendChild(dot);
         
         const cart = document.getElementById('cart-bar');
-        const cartRect = cart.getBoundingClientRect();
-        
-        // ถ้าตะกร้าซ่อนอยู่ ให้โชว์ก่อนเพื่อเอาพิกัด
         if(cart.style.display === 'none') {
            cart.style.display = 'flex';
            cart.style.transform = 'translateY(100px)';
@@ -757,10 +826,14 @@
       document.getElementById('topup-amount').value = amt;
       updateQRCode();
     }
+    
     function updateQRCode() {
       const amt = document.getElementById('topup-amount').value;
-      document.getElementById('promptpay-qr').src = `https://promptpay.io/1410400401805/${amt}.png`;
+      if(amt && amt > 0) {
+        document.getElementById('promptpay-qr').src = `https://promptpay.io/1410400401805/${amt}.png`;
+      }
     }
+    
     function simulateTopupSuccess() {
       const amt = parseFloat(document.getElementById('topup-amount').value);
       if(amt > 0) {
@@ -769,6 +842,8 @@
         updateWalletUI();
         showToast(`เติมเงินสำเร็จ ฿${amt} เข้าสู่กระเป๋าเงินแล้ว!`);
         showScreen('profile-screen');
+      } else {
+        showToast("กรุณาระบุจำนวนเงินให้ถูกต้อง");
       }
     }
 
@@ -780,6 +855,12 @@
     }
 
     function goToPayment() {
+      if(!userProfileData.phone) {
+         showToast("กรุณาเพิ่มเบอร์โทรศัพท์ก่อนสั่งอาหาร เพื่อให้ไรเดอร์ติดต่อได้ครับ");
+         showScreen('edit-profile-screen');
+         return;
+      }
+        
       const checkoutList = document.getElementById('checkout-items-list'); checkoutList.innerHTML = '';
       cartItems.forEach(item => { checkoutList.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px;"><span>${item.name}</span><span>฿${item.price}</span></div>`; });
       
@@ -793,11 +874,19 @@
       document.getElementById('pay-grand-total').innerText = grandTotal;
       document.getElementById('pay-grand-total').dataset.amount = grandTotal;
       
+      // อัปเดต QR Code สำหรับชำระเงิน
+      document.getElementById('payment-qr-img').src = `https://promptpay.io/1410400401805/${grandTotal}.png`;
+      
       showScreen('payment-screen');
     }
 
     function toggleTransferBox(show) { 
-      document.getElementById('transfer-box').style.display = show ? 'block' : 'none'; 
+      const box = document.getElementById('transfer-box');
+      box.style.display = show ? 'block' : 'none'; 
+      if(show) {
+          document.getElementById('payment-qr-img').style.display = 'block';
+      }
+      
       tempSlipBase64 = null; 
       document.getElementById('slip-preview-name').innerText = ""; 
       document.getElementById('slip-preview-img').style.display = "none";
@@ -815,7 +904,6 @@
             canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
             tempSlipBase64 = canvas.toDataURL('image/jpeg', 0.6);
             
-            // โชว์รูปพรีวิวสลิป
             const previewImg = document.getElementById('slip-preview-img');
             previewImg.src = tempSlipBase64;
             previewImg.style.display = 'block';
@@ -864,7 +952,6 @@
         db.collection("orders").add(orderData).then((docRef) => {
           orderData.docId = docRef.id;
           localStorage.setItem('activeOrder', JSON.stringify(orderData));
-          localStorage.setItem('has_history', 'true');
           
           if (liff.isLoggedIn()) {
             liff.sendMessages([{ type: "text", text: `[ห้วยเกิ้ง Delivery]\nรับออเดอร์เรียบร้อยแล้ว! 🍽️\nร้าน: ${selectedRestaurant.name}\nยอดรวม: ฿${totalAmount}\n\nระบบกำลังค้นหาไรเดอร์ให้คุณครับ 🛵💨` }])
@@ -875,12 +962,14 @@
           showScreen('tracking-screen');
           initTrackingMapAndTimer(); 
           fetchOrderHistory(); 
-        }).catch((error) => { showToast("Error: " + error.message); });
+        }).catch((error) => { showToast("Error Firestore: " + error.message); alert(error.message); });
       } catch (err) { showToast("Error: " + err.message); }
     }
 
     function fetchOrderHistory() {
       if (historyListenerUnsubscribe) { historyListenerUnsubscribe(); }
+      
+      // ดึงข้อมูลตาม userId เสมอ (ไม่ว่าจะเป็น LINE ID หรือ Guest ID)
       historyListenerUnsubscribe = db.collection("orders").where("userId", "==", currentUserId).onSnapshot((snapshot) => {
           const container = document.getElementById('order-history-list');
           if(snapshot.empty) { container.innerHTML = '<div style="text-align: center; color: var(--text-light); margin-top: 40px;"><span class="material-icons" style="font-size: 48px; color: #ddd; margin-bottom: 10px;">receipt_long</span><p>ยังไม่มีประวัติการสั่งซื้อ</p></div>'; return; }
@@ -910,7 +999,13 @@
         }, (error) => { console.error("Fetch History Error:", error); });
     }
 
-    function checkActiveOrder() { const activeData = localStorage.getItem('activeOrder'); if(activeData) { updateFloatingBars(sessionStorage.getItem('activeScreen')); selectedRestaurant = JSON.parse(activeData); } }
+    function checkActiveOrder() { 
+      const activeData = localStorage.getItem('activeOrder'); 
+      if(activeData) { 
+        updateFloatingBars(sessionStorage.getItem('activeScreen')); 
+        selectedRestaurant = JSON.parse(activeData); 
+      } 
+    }
 
     function initTrackingMapAndTimer() {
       const order = JSON.parse(localStorage.getItem('activeOrder')); if(!order) return;
@@ -928,10 +1023,17 @@
       L.polyline([ [userLat, userLng], [order.resLat, order.resLng] ], {color: 'rgba(0,185,0,0.5)', weight: 4, dashArray: '5, 10'}).addTo(trackingMap);
       trackingMap.fitBounds([ [userLat, userLng], [order.resLat, order.resLng] ], { padding: [100, 100] });
 
-      searchTimeLeft = 120; clearInterval(searchTimer); if(orderListenerUnsubscribe) orderListenerUnsubscribe();
+      searchTimeLeft = 120; 
+      clearInterval(searchTimer); 
+      if(orderListenerUnsubscribe) orderListenerUnsubscribe();
       
       const btnCancel = document.getElementById('btn-cancel-order');
-      btnCancel.classList.add('disabled'); btnCancel.style.color = "#999"; btnCancel.innerText = "ยกเลิกคำสั่งซื้อ (รอสักครู่)";
+      btnCancel.classList.add('disabled'); 
+      btnCancel.style.color = "#999"; 
+      btnCancel.style.borderColor = "#999"; 
+      
+      // รีเซ็ต Stepper
+      updateStepper(0);
       
       if(order.docId) {
         orderListenerUnsubscribe = db.collection("orders").doc(order.docId).onSnapshot((doc) => {
@@ -940,38 +1042,46 @@
             const trackTitle = document.getElementById('track-status-title');
             const trackSub = document.getElementById('track-status-subtitle');
             
+            // ล็อกปุ่มยกเลิกถ้าร้าน/ไรเดอร์รับไปแล้ว
             if(!["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป"].includes(data.status)) {
-              btnCancel.classList.add('disabled'); btnCancel.style.color = "#999"; btnCancel.innerText = "อยู่ระหว่างดำเนินการ (ยกเลิกไม่ได้)";
-              clearInterval(searchTimer); document.getElementById('radar-animation').style.display = 'none'; 
+              btnCancel.classList.add('disabled'); 
+              btnCancel.style.display = "none"; 
+              clearInterval(searchTimer); 
+              document.getElementById('radar-animation').style.display = 'none'; 
             }
 
+            // แสดงข้อมูลไรเดอร์
             if(data.riderId) {
               document.getElementById('rider-info-panel').style.display = 'block';
               document.getElementById('track-rider-name').innerText = data.riderName || "ไรเดอร์รับงานแล้ว";
               document.getElementById('track-rider-plate').innerText = data.riderPlate || "กำลังเดินทาง";
               document.getElementById('track-rider-call').href = `tel:${data.riderPhone || ""}`;
 
+              // อัปเดตพิกัดไรเดอร์สมูทๆ
               if(data.riderLat && data.riderLng && trackingMap) {
                 const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:32px; height:32px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: all 0.5s ease;"><span class="material-icons" style="font-size:20px; color:white;">sports_motorsports</span></div>` });
                 if(riderMarkerForTracking) { 
                   riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]); 
-                } 
-                else { riderMarkerForTracking = L.marker([data.riderLat, data.riderLng], {icon: riderIcon}).addTo(trackingMap); }
+                } else { 
+                  riderMarkerForTracking = L.marker([data.riderLat, data.riderLng], {icon: riderIcon}).addTo(trackingMap); 
+                }
                 
                 if(data.status === "ไรเดอร์กำลังไปรับอาหาร" || data.status === "ไรเดอร์ถึงร้านแล้ว") { trackingMap.fitBounds([[data.riderLat, data.riderLng], [data.resLat, data.resLng]], { padding: [50, 50] }); } 
                 else if(data.status === "กำลังจัดส่ง") { trackingMap.fitBounds([[data.riderLat, data.riderLng], [userLat, userLng]], { padding: [50, 50] }); }
               }
             }
 
-            if(data.status === "ร้านกำลังเตรียมอาหาร") { trackTitle.innerText = "ร้านรับออเดอร์แล้ว!"; trackTitle.style.color = "var(--text-dark)"; trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่"; } 
-            else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") { trackTitle.innerText = "อาหารเสร็จแล้ว!"; trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน"; }
-            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") { trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร"; trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่แบบเรียลไทม์`; }
-            else if(data.status === "ไรเดอร์ถึงร้านแล้ว") { trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว"; trackSub.innerText = `กำลังรอรับอาหารเพื่อจัดส่งให้คุณ`; }
-            else if(data.status === "กำลังจัดส่ง") { trackTitle.innerText = "อาหารกำลังไปส่ง!"; trackTitle.style.color = "var(--primary-color)"; trackSub.innerText = `ติดตามไรเดอร์บนแผนที่ได้เลยครับ`; }
+            // ปรับระดับ Stepper ตาม Status
+            if(data.status === "กำลังค้นหาไรเดอร์" || data.status === "รอตรวจสอบสลิป") { updateStepper(0); }
+            else if(data.status === "ร้านกำลังเตรียมอาหาร") { updateStepper(33); trackTitle.innerText = "ร้านรับออเดอร์แล้ว!"; trackTitle.style.color = "var(--text-dark)"; trackSub.innerText = "อาหารกำลังถูกปรุงอย่างพิถีพิถัน โปรดรอสักครู่"; } 
+            else if(data.status === "ร้านเตรียมอาหารเสร็จแล้ว") { updateStepper(33); trackTitle.innerText = "อาหารเสร็จแล้ว!"; trackSub.innerText = "กำลังรอไรเดอร์มารับอาหารที่ร้าน"; }
+            else if(data.status === "ไรเดอร์กำลังไปรับอาหาร") { updateStepper(66); trackTitle.innerText = "ไรเดอร์กำลังไปรับอาหาร"; trackSub.innerText = `พิกัด GPS จะอัปเดตบนแผนที่แบบเรียลไทม์`; }
+            else if(data.status === "ไรเดอร์ถึงร้านแล้ว") { updateStepper(66); trackTitle.innerText = "ไรเดอร์ถึงร้านแล้ว"; trackSub.innerText = `กำลังรอรับอาหารเพื่อจัดส่งให้คุณ`; }
+            else if(data.status === "กำลังจัดส่ง") { updateStepper(100); trackTitle.innerText = "อาหารกำลังไปส่ง!"; trackTitle.style.color = "var(--primary-color)"; trackSub.innerText = `ติดตามไรเดอร์บนแผนที่ได้เลยครับ`; }
             else if (data.status === "จัดส่งสำเร็จ") {
+              updateStepper(100);
               trackTitle.innerText = "จัดส่งสำเร็จ!"; trackTitle.style.color = "var(--success)"; trackSub.innerText = "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการ";
               
-              // ยิงพลุฉลอง 🎇
               if(typeof confetti === "function") {
                  confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
               }
@@ -983,7 +1093,7 @@
             }
             else if (data.status.includes("ยกเลิก") || data.status.includes("ปฏิเสธ")) {
               trackTitle.innerText = "ถูกยกเลิก: " + data.status; trackTitle.style.color = "var(--danger)"; trackSub.innerText = "ระบบได้คืนเงินเข้าวอลเล็ทแล้ว (หากชำระล่วงหน้า)";
-              btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.innerText = "รับทราบ (กลับหน้าแรก)";
+              btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.style.borderColor = "var(--danger)"; btnCancel.style.display = "block"; btnCancel.innerText = "รับทราบ (กลับหน้าแรก)";
               
               if(data.paymentMethod === 'wallet' || data.paymentMethod === 'transfer') {
                  if(localStorage.getItem('refund_flag_'+data.docId) !== 'true') {
@@ -997,23 +1107,42 @@
         });
       }
 
+      // นับถอยหลังปุ่มยกเลิก
       searchTimer = setInterval(() => {
         searchTimeLeft--;
-        let percent = ((120 - searchTimeLeft) / 120) * 100;
-        document.getElementById('search-progress-bar').style.width = percent + "%";
-        document.getElementById('search-moto').style.left = percent + "%";
-
-        if (searchTimeLeft <= 0) {
-          clearInterval(searchTimer); document.getElementById('radar-animation').style.display = 'none';
+        let m = Math.floor(searchTimeLeft / 60);
+        let s = searchTimeLeft % 60;
+        let timeString = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        
+        if (searchTimeLeft > 0) {
+          btnCancel.innerText = `ยกเลิกคำสั่งซื้อ (${timeString})`;
+        } else {
+          clearInterval(searchTimer); 
+          document.getElementById('radar-animation').style.display = 'none';
           document.getElementById('track-status-title').innerText = "รอนานผิดปกติ"; document.getElementById('track-status-subtitle').innerText = "คุณสามารถกดยกเลิกออเดอร์ได้แล้ว";
           btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.style.borderColor = "var(--danger)"; btnCancel.innerText = "ยกเลิกคำสั่งซื้อ";
         }
       }, 1000);
     }
 
+    function updateStepper(percent) {
+      document.getElementById('stepper-progress').style.width = percent + "%";
+      document.getElementById('moto-runner').style.left = percent + "%";
+      
+      const d1 = document.getElementById('dot-1'); const l1 = document.getElementById('lbl-1');
+      const d2 = document.getElementById('dot-2'); const l2 = document.getElementById('lbl-2');
+      const d3 = document.getElementById('dot-3'); const l3 = document.getElementById('lbl-3');
+      const d4 = document.getElementById('dot-4'); const l4 = document.getElementById('lbl-4');
+
+      if(percent >= 0)  { d1.classList.add('active'); l1.classList.add('active'); } else { d1.classList.remove('active'); l1.classList.remove('active'); }
+      if(percent >= 33) { d2.classList.add('active'); l2.classList.add('active'); } else { d2.classList.remove('active'); l2.classList.remove('active'); }
+      if(percent >= 66) { d3.classList.add('active'); l3.classList.add('active'); } else { d3.classList.remove('active'); l3.classList.remove('active'); }
+      if(percent >= 100){ d4.classList.add('active'); l4.classList.add('active'); } else { d4.classList.remove('active'); l4.classList.remove('active'); }
+    }
+
     function cancelOrder() {
       const btnCancel = document.getElementById('btn-cancel-order');
-      if(btnCancel.classList.contains('disabled')) { showToast("โปรดรอให้ระบบประมวลผลก่อนครับ (รอปุ่มเปลี่ยนสี)"); return; }
+      if(btnCancel.classList.contains('disabled')) { showToast("โปรดรอให้หมดเวลาก่อนถึงจะกดยกเลิกได้ครับ"); return; }
 
       const activeData = localStorage.getItem('activeOrder');
       if(activeData) {
@@ -1045,7 +1174,6 @@
     
     function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.className = "toast show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
 
-    // ระบบดาว Rating
     function setStar(groupId, rating) {
        const stars = document.getElementById(groupId).querySelectorAll('.material-icons');
        stars.forEach((s, idx) => {
