@@ -472,10 +472,45 @@
       <h3 style="margin: 0 0 10px;">ศูนย์ช่วยเหลือ</h3>
       <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">หากพบปัญหาการใช้งาน สั่งอาหาร หรือเติมเงิน ติดต่อแอดมินได้ตลอด 24 ชม.</p>
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="btn-line" onclick="window.open('https://line.me/ti/p/~@your_line_id', '_blank')"><span class="material-icons">chat</span> แชทกับแอดมิน (LINE)</button>
+        <button class="btn-line" onclick="window.open('https://line.me/ti/p/~@847anvnn', '_blank')"><span class="material-icons">chat</span> แชทกับแอดมิน (LINE)</button>
         <a href="tel:0800000000" class="btn-outline" style="text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px;"><span class="material-icons">call</span> โทรด่วน (080-000-0000)</a>
       </div>
       <div style="margin-top: 15px; cursor: pointer; color: var(--text-light); font-size: 14px;" onclick="document.getElementById('help-modal').style.display='none'">ปิดหน้าต่าง</div>
+    </div>
+  </div>
+
+  <!-- หน้าต่างรายละเอียดคำสั่งซื้อ (Order Detail Modal) -->
+  <div class="topping-overlay" id="order-detail-modal">
+    <div class="topping-sheet" style="max-height: 90vh;">
+      <div class="topping-header">
+        <div>
+          <h3 style="margin:0; font-size:18px;">รายละเอียดคำสั่งซื้อ</h3>
+          <p style="margin:0; font-size:14px; color:var(--text-light);" id="detail-order-id"></p>
+        </div>
+        <span class="material-icons" style="cursor:pointer;" onclick="closeOrderDetailModal()">close</span>
+      </div>
+      <div class="topping-content" style="margin-bottom: 0;">
+         <div id="detail-order-status" style="font-weight:bold; margin-bottom: 15px; font-size: 16px;"></div>
+         <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee;">
+            <h4 id="detail-res-name" style="margin: 0 0 10px 0; font-size: 16px;"></h4>
+            <ul id="detail-items" style="margin:0; padding-left:20px; font-size:14px; color:var(--text-dark);"></ul>
+         </div>
+         <div style="display:flex; justify-content:space-between; margin-bottom: 10px; font-size:14px;">
+            <span>ยอดรวมทั้งหมด</span>
+            <strong id="detail-total-price" style="font-size: 16px; color: var(--primary-color);"></strong>
+         </div>
+         <div style="display:flex; justify-content:space-between; margin-bottom: 10px; font-size:14px;">
+            <span>ช่องทางชำระเงิน</span>
+            <span id="detail-payment-method"></span>
+         </div>
+         <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); border-top: 1px dashed #eee; padding-top: 10px; margin-top: 10px;">
+            <span>วันที่สั่งซื้อ</span>
+            <span id="detail-date"></span>
+         </div>
+      </div>
+      <div style="margin-top: 20px;">
+         <button class="btn-primary" id="btn-reorder" onclick="">กลับไปสั่งร้านนี้อีกครั้ง</button>
+      </div>
     </div>
   </div>
 
@@ -545,6 +580,9 @@
 
     const LIFF_ID = "2010799042-aNBObgM9"; 
     
+    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
+    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
+    
     let userProfile = null; 
     let guestId = localStorage.getItem('hk_guest_id');
     if (!guestId) { guestId = "guest_" + Date.now(); localStorage.setItem('hk_guest_id', guestId); }
@@ -558,6 +596,7 @@
     let userLng = 102.9500;
     let restaurants = [];
     let currentCategory = 'ทั้งหมด';
+    let globalUserOrders = []; // เพิ่มตัวแปรเพื่อเก็บประวัติไว้ดูรายละเอียด
 
     let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
 
@@ -1012,8 +1051,14 @@
           const container = document.getElementById('order-history-list');
           if(snapshot.empty) { container.innerHTML = '<div style="text-align: center; color: var(--text-light); margin-top: 40px;"><span class="material-icons" style="font-size: 48px; color: #ddd; margin-bottom: 10px;">receipt_long</span><p>ยังไม่มีประวัติการสั่งซื้อ</p></div>'; return; }
           
-          let allOrders = []; snapshot.forEach(doc => allOrders.push(doc.data()));
+          let allOrders = []; 
+          snapshot.forEach(doc => { 
+             let d = doc.data(); 
+             d.id = doc.id; 
+             allOrders.push(d); 
+          });
           allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+          globalUserOrders = allOrders; // เก็บไว้ใช้ดูรายละเอียด
 
           let html = '';
           allOrders.forEach(order => {
@@ -1023,18 +1068,77 @@
             else if(order.status.includes('รอ') || order.status.includes('เตรียม') || order.status.includes('ค้นหา')) statusColor = 'var(--warning)';
 
             html += `
-              <div style="background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee;">
+              <div style="background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; cursor: pointer;" onclick="openOrderDetail('${order.id}')">
                 <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
                   <span style="color: ${statusColor}; font-weight: 600; font-size: 14px;">${order.status}</span><span style="color: var(--text-light); font-size: 12px;">${date}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div><h4 style="font-weight: 600; font-size: 16px; margin: 0 0 5px 0;">${order.restaurantName}</h4><p style="margin:0; font-size:13px; color:var(--text-light);">${order.items.length} รายการ</p></div>
-                  <div style="font-weight:700; font-size:16px;">฿${order.totalPrice}</div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <div style="flex-grow:1; padding-right:10px;">
+                    <h4 style="font-weight: 600; font-size: 16px; margin: 0 0 5px 0;">${order.restaurantName}</h4>
+                    <p style="margin:0; font-size:13px; color:var(--text-light);">${order.items.length} รายการ</p>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-weight:700; font-size:16px; margin-bottom: 5px;">฿${order.totalPrice}</div>
+                    <button class="btn-primary" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; width: auto; box-shadow: none;" onclick="event.stopPropagation(); reorderRestaurant('${order.merchantId}')">สั่งซื้อซ้ำ</button>
+                  </div>
                 </div>
               </div>`;
           });
           container.innerHTML = html;
         }, (error) => { console.error("Fetch History Error:", error); });
+    }
+
+    function openOrderDetail(orderId) {
+       const order = globalUserOrders.find(o => o.id === orderId);
+       if(!order) return;
+
+       document.getElementById('detail-order-id').innerText = "ออเดอร์ #" + order.id.substring(0,8).toUpperCase();
+       
+       let statusColor = 'var(--primary-color)';
+       if(order.status.includes('ยกเลิก') || order.status.includes('ปฏิเสธ')) statusColor = 'var(--danger)';
+       else if(order.status.includes('รอ') || order.status.includes('เตรียม') || order.status.includes('ค้นหา')) statusColor = 'var(--warning)';
+       
+       const statusEl = document.getElementById('detail-order-status');
+       statusEl.innerText = order.status;
+       statusEl.style.color = statusColor;
+
+       document.getElementById('detail-res-name').innerText = order.restaurantName;
+       
+       const itemsList = document.getElementById('detail-items');
+       itemsList.innerHTML = order.items.map(item => `<li style="margin-bottom:4px;">${item}</li>`).join('');
+
+       document.getElementById('detail-total-price').innerText = "฿" + order.totalPrice;
+       
+       let payText = order.paymentMethod === 'transfer' ? 'โอนเงิน (QR Code)' : (order.paymentMethod === 'wallet' ? 'ตัดจากวอลเล็ท' : 'เงินสดปลายทาง');
+       document.getElementById('detail-payment-method').innerText = payText;
+       
+       const date = order.createdAt ? new Date(order.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : 'ล่าสุด';
+       document.getElementById('detail-date').innerText = date;
+
+       document.getElementById('btn-reorder').onclick = () => {
+           closeOrderDetailModal();
+           reorderRestaurant(order.merchantId);
+       };
+
+       document.getElementById('order-detail-modal').style.display = 'flex';
+    }
+
+    function closeOrderDetailModal() {
+       document.getElementById('order-detail-modal').style.display = 'none';
+    }
+
+    function reorderRestaurant(merchantId) {
+       const res = restaurants.find(r => r.id === merchantId);
+       if(!res) {
+          showToast("ขออภัยครับ ร้านค้านี้อาจปิดให้บริการชั่วคราว");
+          return;
+       }
+       const distance = getDistance(userLat, userLng, res.lat, res.lng);
+       if(distance > 5.0) {
+          showToast("ร้านนี้อยู่ไกลเกินระยะ 5 กม. จากพิกัดปัจจุบัน");
+          return;
+       }
+       openRestaurant(merchantId, distance);
     }
 
     function checkActiveOrder() { 
