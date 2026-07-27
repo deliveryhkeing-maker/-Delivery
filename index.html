@@ -97,13 +97,20 @@
 
     #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; position: relative; overflow: hidden; }
     #tracking-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    
+    /* 🌟 เพิ่มเลเยอร์แบล็คกราวด์ตอนค้นหาไรเดอร์ */
+    .searching-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(4px); z-index: 4; transition: opacity 0.5s ease; pointer-events: none; }
+    
     .tracking-overlay { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 10; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
     
-    .radar-center { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; }
-    .radar-ring { width: 150px; height: 150px; border-radius: 50%; background: rgba(0, 185, 0, 0.15); border: 2px solid rgba(0, 185, 0, 0.5); animation: radarPulse 2s infinite ease-out; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .radar-center { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; }
+    .radar-ring { width: 150px; height: 150px; border-radius: 50%; background: rgba(0, 185, 0, 0.2); border: 2px solid rgba(0, 185, 0, 0.6); animation: radarPulse 2s infinite ease-out; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .radar-ring:nth-child(2) { animation-delay: 0.6s; }
-    @keyframes radarPulse { 0% { width: 50px; height: 50px; opacity: 1; } 100% { width: 300px; height: 300px; opacity: 0; } }
+    @keyframes radarPulse { 0% { width: 50px; height: 50px; opacity: 1; } 100% { width: 350px; height: 350px; opacity: 0; } }
     
+    /* 🌟 ทำให้ไอคอน GPS ไรเดอร์ไหลแบบสมูท (Real-time Glide) */
+    .leaflet-marker-icon { transition: transform 2s ease-in-out !important; }
+
     .tracking-status-card { background: var(--white); border-radius: 24px 24px 0 0; padding: 30px 25px 25px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; }
     
     .stepper-container { display: flex; justify-content: space-between; align-items: center; position: relative; margin: 30px 0 20px; width: 100%; padding: 0 10px; }
@@ -118,8 +125,6 @@
     .step-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-light); margin-bottom: 20px; padding: 0 5px; }
     .step-label { width: 25%; text-align: center; line-height: 1.2; }
     .step-label.active { color: var(--primary-color); font-weight: 600; }
-
-    .leaflet-marker-icon { transition: transform 1.0s linear !important; }
 
     #cart-bar, #active-order-bar { display: none; position: fixed; left: 20px; right: 20px; color: white; padding: 15px 20px; border-radius: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); z-index: 101; cursor: pointer; transition: transform 0.2s; }
     #cart-bar { bottom: 85px; background-color: var(--primary-color); }
@@ -162,10 +167,10 @@
         </h1>
       </div>
       <div class="location-box" onclick="getLocation()">
-        <span class="material-icons pin">location_on</span>
+        <span class="material-icons pin" style="color: white;">location_on</span>
         <div class="location-text">
-          <span>จัดส่งที่ (กดเพื่ออัปเดต)</span>
-          <span id="current-location-text">กำลังค้นหาพิกัด...</span>
+          <span>จัดส่งที่ (กดเพื่ออัปเดตพิกัด)</span>
+          <span id="current-location-text">กำลังค้นหาตำแหน่ง...</span>
         </div>
       </div>
     </div>
@@ -369,6 +374,9 @@
     </div>
     
     <div id="tracking-map"></div>
+    
+    <!-- พื้นหลังเบลอตอนกำลังค้นหาไรเดอร์ -->
+    <div class="searching-overlay" id="searching-map-overlay"></div>
 
     <div class="radar-center" id="radar-animation">
       <div class="radar-ring"></div><div class="radar-ring"></div>
@@ -520,9 +528,7 @@
         <h3 style="margin:0; font-size:18px;">คะแนนและรีวิวร้านค้า</h3>
         <span class="material-icons" style="cursor:pointer;" onclick="closeReviewModal()">close</span>
       </div>
-      <div style="padding: 20px; overflow-y: auto;" id="review-list-container">
-        <!-- รีวิวถูกโหลดมาแสดงที่นี่ -->
-      </div>
+      <div style="padding: 20px; overflow-y: auto;" id="review-list-container"></div>
     </div>
   </div>
 
@@ -1028,7 +1034,6 @@
         
         db.collection("orders").add(orderData).then((docRef) => {
           orderData.docId = docRef.id;
-          orderData.localTimestamp = Date.now(); // 🎯 บันทึกเวลาเริ่มต้นจริงๆ ณ วินาทีที่กดสั่ง!
           localStorage.setItem('activeOrder', JSON.stringify(orderData));
           
           if (currentUserId && !currentUserId.startsWith("guest")) {
@@ -1072,7 +1077,7 @@
              allOrders.push(d); 
           });
           allOrders.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-          globalUserOrders = allOrders; // เก็บไว้ใช้ดูรายละเอียด
+          globalUserOrders = allOrders; 
 
           let html = '';
           allOrders.forEach(order => {
@@ -1105,6 +1110,15 @@
     function openOrderDetail(orderId) {
        const order = globalUserOrders.find(o => o.id === orderId);
        if(!order) return;
+       
+       // ถ้าระบบหลุดแล้วเข้ามาดูประวัติ ให้กลับเข้าหน้าแผนที่ติดตามได้เลยหากออเดอร์ยังดำเนินอยู่
+       if(["กำลังค้นหาไรเดอร์", "รอตรวจสอบสลิป", "ร้านกำลังเตรียมอาหาร", "ร้านเตรียมอาหารเสร็จแล้ว", "ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "กำลังจัดส่ง"].includes(order.status)) {
+           order.docId = order.id; 
+           localStorage.setItem('activeOrder', JSON.stringify(order));
+           showScreen('tracking-screen');
+           initTrackingMapAndTimer();
+           return;
+       }
 
        document.getElementById('detail-order-id').innerText = "ออเดอร์ #" + order.id.substring(0,8).toUpperCase();
        
@@ -1180,7 +1194,6 @@
       L.polyline([ [userLat, userLng], [order.resLat, order.resLng] ], {color: 'rgba(0,185,0,0.5)', weight: 4, dashArray: '5, 10'}).addTo(trackingMap);
       trackingMap.fitBounds([ [userLat, userLng], [order.resLat, order.resLng] ], { padding: [100, 100] });
 
-      searchTimeLeft = 120; 
       clearInterval(searchTimer); 
       if(orderListenerUnsubscribe) orderListenerUnsubscribe();
       
@@ -1195,6 +1208,8 @@
         orderListenerUnsubscribe = db.collection("orders").doc(order.docId).onSnapshot((doc) => {
           if(doc.exists) {
             const data = doc.data();
+            window.currentActiveOrderData = data; // บันทึกไว้ให้ Timer ใช้แบบ Absolute Time
+            
             const trackTitle = document.getElementById('track-status-title');
             const trackSub = document.getElementById('track-status-subtitle');
             
@@ -1203,6 +1218,11 @@
               btnCancel.style.display = "none"; 
               clearInterval(searchTimer); 
               document.getElementById('radar-animation').style.display = 'none'; 
+              const overlay = document.getElementById('searching-map-overlay');
+              if(overlay) overlay.style.opacity = '0';
+            } else {
+              const overlay = document.getElementById('searching-map-overlay');
+              if(overlay) overlay.style.opacity = '1';
             }
 
             if(data.riderId) {
@@ -1262,22 +1282,29 @@
         });
       }
 
-      // ระบบจับเวลานับถอยหลังอ้างอิงจากเวลาจริง (Real-time Timestamp) ป้องกันแอพค้าง/ปิดจอ
+      // ระบบนับถอยหลังอ้างอิงจาก Server Time / Real-time (กันหลุด กันจอดับ)
       function updateTimerDisplay() {
         const currentOrder = JSON.parse(localStorage.getItem('activeOrder'));
-        if(!currentOrder) return;
+        if(!currentOrder || !currentOrder.docId) return;
         
-        // ถ้าไม่มีเวลาเริ่มต้น ให้เริ่มจับใหม่และเซฟ
-        let startTime = currentOrder.localTimestamp;
-        if(!startTime) {
-            startTime = Date.now();
-            currentOrder.localTimestamp = startTime;
-            localStorage.setItem('activeOrder', JSON.stringify(currentOrder));
+        let startTime = 0;
+        
+        // 1. ลองดึงเวลาสร้างออเดอร์จริงๆ จาก Firebase (แม่นยำที่สุด)
+        if (window.currentActiveOrderData && window.currentActiveOrderData.createdAt) {
+            startTime = window.currentActiveOrderData.createdAt.toMillis();
+        } else {
+            // 2. ถ้าเน็ตช้าหรือ Firebase ยังไม่ตอบสนอง ให้ดึงเวลาที่เครื่องเก็บไว้ (Fallback)
+            const timerKey = 'hk_timer_' + currentOrder.docId;
+            startTime = localStorage.getItem(timerKey);
+            if(!startTime) {
+                startTime = Date.now();
+                localStorage.setItem(timerKey, startTime);
+            }
         }
 
-        // คำนวณเวลาที่ผ่านไปจริงตามนาฬิกาเครื่อง (วินาที)
-        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-        let timeLeft = 120 - elapsedSeconds; // ตั้งเวลาที่ให้รอยกเลิก (120 วินาที = 2 นาที)
+        // คำนวณเวลาที่ผ่านไปจริงตามนาฬิกาโลก (วินาที)
+        const elapsedSeconds = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+        let timeLeft = 120 - elapsedSeconds; 
 
         if (timeLeft > 0) {
           let m = Math.floor(timeLeft / 60);
@@ -1287,6 +1314,8 @@
         } else {
           clearInterval(searchTimer); 
           document.getElementById('radar-animation').style.display = 'none';
+          const overlay = document.getElementById('searching-map-overlay');
+          if(overlay) overlay.style.opacity = '0';
           document.getElementById('track-status-title').innerText = "รอนานผิดปกติ"; 
           document.getElementById('track-status-subtitle').innerText = "คุณสามารถกดยกเลิกออเดอร์ได้แล้ว";
           btnCancel.classList.remove('disabled'); 
@@ -1296,7 +1325,6 @@
         }
       }
 
-      // อัปเดต UI ทันที และตั้งเวลาให้ตรวจสอบเวลาจริงซ้ำทุก 1 วินาที
       updateTimerDisplay();
       searchTimer = setInterval(updateTimerDisplay, 1000);
     }
