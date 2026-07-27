@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
+  <!-- ป้องกันเบราว์เซอร์จำแคช (Anti-Cache) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -86,7 +87,15 @@
     .chat-input-area input { flex-grow: 1; background: #f1f5f9; border: none; border-radius: 20px; padding: 10px 15px; font-family: 'Prompt'; outline: none; }
     .btn-send { background: var(--rider-primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
     
+    /* 🌟 ทำให้ไอคอน GPS ไรเดอร์และลูกค้าไหลแบบสมูท (Real-time Glide) */
     .leaflet-marker-icon { transition: transform 2s ease-in-out !important; }
+
+    /* CSS สำหรับกระเป๋าเงินไรเดอร์ */
+    .wallet-card-rider { background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); border-radius: 20px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(255, 115, 0, 0.2); }
+    .tx-item { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .tx-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center; margin-right: 12px; }
+    .tx-icon.income { background: rgba(0, 185, 0, 0.1); color: var(--success); }
+    .tx-icon.expense { background: rgba(244, 67, 54, 0.1); color: var(--danger); }
   </style>
 </head>
 <body>
@@ -165,6 +174,27 @@
     </div>
   </div>
 
+  <!-- หน้ากระเป๋าเงิน (Wallet) -->
+  <div id="wallet-screen" class="screen">
+    <div class="rider-header">
+      <h2 style="margin:0; font-size:18px; width:100%; text-align:center;">กระเป๋าเงินรายได้</h2>
+    </div>
+    <div style="padding: 20px; flex-grow: 1; overflow-y: auto;">
+      <div class="wallet-card-rider">
+        <p style="margin: 0 0 5px; font-size: 14px; opacity: 0.9;">ยอดเงินที่ถอนได้ (บาท)</p>
+        <h1 style="margin: 0 0 15px; font-size: 40px;">฿<span id="rider-wallet-balance">0.00</span></h1>
+        <button class="btn-main" style="background: white; color: var(--rider-primary); width: auto; padding: 8px 30px; box-shadow: none;" onclick="openWithdrawModal()">แจ้งถอนเงิน</button>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 16px;">ประวัติรายได้ล่าสุด</h3>
+      </div>
+      <div id="rider-tx-list">
+        <p style="text-align: center; color: var(--text-light); margin-top: 20px;">กำลังโหลดข้อมูล...</p>
+      </div>
+    </div>
+  </div>
+
   <div class="order-alert-overlay" id="order-alert">
     <div class="order-alert-content">
       <h3 style="font-size: 20px; font-weight: 700; color: var(--rider-primary); margin: 0 0 15px; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
@@ -194,6 +224,22 @@
     </div>
   </div>
 
+  <!-- ป๊อปอัปแจ้งถอนเงิน -->
+  <div class="modal-overlay" id="withdraw-modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; color: var(--rider-primary);">แจ้งถอนเงินเข้าบัญชี</h3>
+      <p style="color: var(--text-light); font-size: 13px; margin-bottom: 15px;">เงินจะถูกโอนเข้าบัญชีที่ลงทะเบียนไว้ภายใน 24 ชม.</p>
+      <div class="input-group">
+        <label>ระบุจำนวนเงินที่ต้องการถอน (บาท)</label>
+        <input type="number" id="withdraw-amount" placeholder="เช่น 100">
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button style="flex:1; padding:12px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeWithdrawModal()">ยกเลิก</button>
+        <button style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';" onclick="submitWithdraw()">ยืนยันการถอน</button>
+      </div>
+    </div>
+  </div>
+
   <div class="chat-overlay" id="chat-modal">
     <div class="chat-sheet">
       <div class="chat-header">
@@ -212,8 +258,8 @@
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-item active" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
-    <div class="nav-item" onclick="showToast('ระบบกระเป๋าเงินกำลังพัฒนา')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
+    <div class="nav-item active" id="nav-map" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
+    <div class="nav-item" id="nav-wallet" onclick="showScreen('wallet-screen')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
     <div class="nav-item" onclick="promptLogout()"><span class="material-icons">logout</span><span>ออกระบบ</span></div>
   </div>
 
@@ -260,7 +306,7 @@
     function riderRegister() {
       const phone = document.getElementById('reg-phone').value; const name = document.getElementById('reg-name').value; const plate = document.getElementById('reg-plate').value;
       if(!phone || !name) { showToast("กรุณากรอกข้อมูลให้ครบ"); return; }
-      db.collection("riders").doc(phone).set({ name: name, phone: phone, plate: plate, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
+      db.collection("riders").doc(phone).set({ name: name, phone: phone, plate: plate, walletBalance: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
         showToast("สมัครสำเร็จ"); localStorage.setItem('hk_rider_id', phone); currentRiderId = phone;
         document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile();
       }).catch(err => showToast("Error: " + err.message));
@@ -278,9 +324,53 @@
     function promptLogout() { openConfirm("ต้องการออกจากระบบหรือไม่?", () => { localStorage.removeItem('hk_rider_id'); location.reload(); }); }
 
     function loadRiderProfile() {
-      db.collection("riders").doc(currentRiderId).get().then(doc => {
-        if(doc.exists) { riderData = doc.data(); document.getElementById('display-rider-name').innerText = riderData.name; document.getElementById('display-rider-plate').innerText = riderData.plate; showScreen('map-screen'); initRiderMap(); checkActiveJob(); }
+      db.collection("riders").doc(currentRiderId).onSnapshot(doc => {
+        if(doc.exists) { 
+          riderData = doc.data(); 
+          document.getElementById('display-rider-name').innerText = riderData.name; 
+          document.getElementById('display-rider-plate').innerText = riderData.plate; 
+          
+          // โชว์ยอดเงิน
+          const balance = riderData.walletBalance || 0;
+          document.getElementById('rider-wallet-balance').innerText = balance.toFixed(2);
+          
+          showScreen('map-screen'); 
+          initRiderMap(); 
+          checkActiveJob(); 
+          loadRiderTransactions(); // โหลดประวัติ
+        }
       });
+    }
+
+    // ฟังก์ชันโหลดประวัติรายได้
+    function loadRiderTransactions() {
+       db.collection("riders").doc(currentRiderId).collection("transactions")
+         .orderBy("createdAt", "desc").limit(20)
+         .onSnapshot(snapshot => {
+            const list = document.getElementById('rider-tx-list');
+            if(snapshot.empty) {
+               list.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติรายได้</p>';
+               return;
+            }
+            let html = '';
+            snapshot.forEach(doc => {
+               const tx = doc.data();
+               const isIncome = tx.type === 'income';
+               const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
+               html += `
+                 <div class="tx-item">
+                   <div style="display:flex; align-items:center;">
+                     <div class="tx-icon ${isIncome ? 'income' : 'expense'}"><span class="material-icons">${isIncome ? 'payments' : 'account_balance'}</span></div>
+                     <div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div>
+                   </div>
+                   <div style="font-weight:700; color:${isIncome ? 'var(--success)' : 'var(--text-dark)'};">
+                     ${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}
+                   </div>
+                 </div>
+               `;
+            });
+            list.innerHTML = html;
+         });
     }
 
     function toggleOnlineStatus() {
@@ -472,6 +562,7 @@
           db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
             showToast("อัปเดตสถานะสำเร็จ!"); 
             
+            // แจ้งเตือนลูกค้าเป็น Flex Message แบบบล็อกสวยงาม
             if(nextStatus === "ไรเดอร์ถึงร้านแล้ว") {
                notifyCustomerLINE(activeOrderData.userId, "📍 ไรเดอร์ถึงร้านแล้ว", "ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ กำลังรอรับอาหาร", "#3b82f6", {
                   "ร้านอาหาร": activeOrderData.restaurantName,
@@ -488,6 +579,18 @@
                   "ร้านอาหาร": activeOrderData.restaurantName,
                   "ยอดชำระ": "฿" + activeOrderData.totalPrice
                });
+               
+               // 🔥 ให้เงินค่ารอบไรเดอร์ (จำลอง 25 บาท)
+               const earnings = 25;
+               db.collection("riders").doc(currentRiderId).update({
+                  walletBalance: firebase.firestore.FieldValue.increment(earnings)
+               });
+               db.collection("riders").doc(currentRiderId).collection("transactions").add({
+                  title: `ค่าส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`,
+                  amount: earnings,
+                  type: 'income',
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+               });
             }
 
             if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
@@ -503,8 +606,45 @@
       startFindingJobs();
     }
 
+    // --- ระบบถอนเงิน ---
+    function openWithdrawModal() {
+       document.getElementById('withdraw-amount').value = '';
+       document.getElementById('withdraw-modal').style.display = 'flex';
+    }
+    function closeWithdrawModal() { document.getElementById('withdraw-modal').style.display = 'none'; }
+    function submitWithdraw() {
+       const amount = parseFloat(document.getElementById('withdraw-amount').value);
+       const currentBalance = riderData.walletBalance || 0;
+       
+       if(isNaN(amount) || amount <= 0) { showToast("กรุณาระบุจำนวนเงินที่ถูกต้อง"); return; }
+       if(amount > currentBalance) { showToast("ยอดเงินในกระเป๋าไม่เพียงพอ"); return; }
+       if(amount < 100) { showToast("ขั้นต่ำในการถอนคือ 100 บาท"); return; }
+
+       db.collection("riders").doc(currentRiderId).update({
+          walletBalance: firebase.firestore.FieldValue.increment(-amount)
+       }).then(() => {
+          db.collection("riders").doc(currentRiderId).collection("transactions").add({
+             title: "ถอนเงินเข้าบัญชีธนาคาร",
+             amount: amount,
+             type: 'expense',
+             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast(`ทำรายการแจ้งถอน ฿${amount} สำเร็จ`);
+          closeWithdrawModal();
+       }).catch(e => showToast("Error: " + e.message));
+    }
+
     function togglePanel() { document.getElementById('active-order-panel').classList.toggle('collapsed'); }
-    function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); document.getElementById(screenId).style.display = 'flex'; if(screenId === 'map-screen' && riderMap) setTimeout(() => riderMap.invalidateSize(), 300); }
+    
+    function showScreen(screenId) { 
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); 
+      document.getElementById(screenId).style.display = 'flex'; 
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      const activeNavId = 'nav-' + screenId.replace('-screen', '');
+      if (document.getElementById(activeNavId)) document.getElementById(activeNavId).classList.add('active');
+      if(screenId === 'map-screen' && riderMap) setTimeout(() => riderMap.invalidateSize(), 300); 
+    }
+    
     function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
     function openConfirm(message, callback) { document.getElementById('confirm-message').innerText = message; confirmCallback = callback; document.getElementById('custom-confirm-modal').style.display = 'flex'; }
     function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
