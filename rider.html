@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <title>Rider App - คนขับ</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -80,11 +85,12 @@
     .chat-input-area { background: white; padding: 15px 20px; display: flex; gap: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
     .chat-input-area input { flex-grow: 1; background: #f1f5f9; border: none; border-radius: 20px; padding: 10px 15px; font-family: 'Prompt'; outline: none; }
     .btn-send { background: var(--rider-primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    
+    .leaflet-marker-icon { transition: transform 2s ease-in-out !important; }
   </style>
 </head>
 <body>
 
-  <!-- หน้า Login -->
   <div id="login-screen" class="screen auth-screen" style="display: flex;">
     <div class="auth-card">
       <div style="font-size: 48px; color: var(--rider-primary); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">sports_motorsports</span></div>
@@ -96,7 +102,6 @@
     </div>
   </div>
 
-  <!-- หน้า Register -->
   <div id="register-screen" class="screen auth-screen">
     <div class="auth-card">
       <h2 style="margin: 0 0 20px;">สมัครคนขับใหม่</h2>
@@ -108,7 +113,6 @@
     </div>
   </div>
 
-  <!-- หน้าจอแผนที่ & จัดการออเดอร์ -->
   <div id="map-screen" class="screen">
     <div class="rider-header">
       <div class="rider-profile">
@@ -127,7 +131,6 @@
         <span class="material-icons">my_location</span>
       </div>
       
-      <!-- Panel แสดงรายละเอียดออเดอร์ขณะกำลังจัดส่ง -->
       <div class="order-panel collapsed" id="active-order-panel" style="display:none;">
         <div class="drag-handle" onclick="togglePanel()"></div>
         <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
@@ -138,16 +141,13 @@
         </div>
         
         <div style="display: flex; gap:10px; flex-wrap: wrap; margin-bottom: 15px;">
-          <!-- ปุ่มนำทาง (Google Maps) -->
           <a href="#" id="nav-btn" target="_blank" class="btn-nav-map" style="flex: 1 1 100%; margin-bottom: 0;"><span class="material-icons">navigation</span> นำทางไปร้าน</a>
           
-          <!-- ปุ่มแชทหาลูกค้า (พร้อมจุดแจ้งเตือนสีแดง) -->
           <button id="chat-cus-btn" onclick="openChatModal()" class="btn-call" style="position:relative; background:rgba(33, 150, 243, 0.1); color:#2196F3; flex: 1; margin-bottom: 0;">
             <span class="material-icons">chat</span> แชท
             <span id="chat-badge" style="display:none; position:absolute; top:-5px; right:-5px; background:var(--danger); border-radius:50%; width:14px; height:14px; border:2px solid white;"></span>
           </button>
           
-          <!-- ปุ่มโทรหาลูกค้า -->
           <a href="#" id="call-cus-btn" class="btn-call" style="flex: 1; margin-bottom: 0;"><span class="material-icons">call</span> โทรหาลูกค้า</a>
         </div>
         
@@ -160,13 +160,11 @@
           <h2 style="margin: 0; color: var(--rider-primary); font-size: 20px;">฿<span id="active-total">0</span></h2>
         </div>
         
-        <!-- ปุ่มหลักในการเปลี่ยนสถานะ -->
         <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
       </div>
     </div>
   </div>
 
-  <!-- หน้าต่างแจ้งเตือนเวลามีออเดอร์ใหม่เข้า -->
   <div class="order-alert-overlay" id="order-alert">
     <div class="order-alert-content">
       <h3 style="font-size: 20px; font-weight: 700; color: var(--rider-primary); margin: 0 0 15px; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
@@ -196,7 +194,6 @@
     </div>
   </div>
 
-  <!-- หน้าต่างแชท (Chat Modal) -->
   <div class="chat-overlay" id="chat-modal">
     <div class="chat-sheet">
       <div class="chat-header">
@@ -248,7 +245,10 @@
     
     let riderMap = null; let riderMarker = null; let resMarker = null; let cusMarker = null; let routeLine = null; let watchId = null;
     let currentRiderLat = 17.15; let currentRiderLng = 102.95;
-    let previousChatCount = 0; // ใช้สำหรับตรวจสอบแชทใหม่
+    let previousChatCount = 0; 
+
+    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
+    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
 
     window.onload = function() {
       currentRiderId = localStorage.getItem('hk_rider_id');
@@ -374,12 +374,10 @@
           document.getElementById('active-pay-method').innerText = activeOrderData.paymentMethod === 'transfer' ? '(โอนเงินแล้ว)' : '(เก็บเงินสด)';
           document.getElementById('call-cus-btn').href = `tel:${activeOrderData.customerPhone || ''}`;
 
-          // ตรวจสอบข้อความแชทใหม่
           if(activeOrderData.chatMessages) { 
             renderChatMessages(activeOrderData.chatMessages, 'rider'); 
             if(activeOrderData.chatMessages.length > previousChatCount) {
                 const lastMsg = activeOrderData.chatMessages[activeOrderData.chatMessages.length - 1];
-                // ถ้ารับข้อความจากลูกค้า และหน้าต่างแชทปิดอยู่
                 if(lastMsg.sender === 'customer' && document.getElementById('chat-modal').style.display !== 'flex') {
                     document.getElementById('chat-badge').style.display = 'block';
                     showToast("💬 มีข้อความใหม่จากลูกค้า");
@@ -447,15 +445,19 @@
       }
     }
 
-    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
-    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
-
-    function notifyCustomerLINE(userId, message) {
+    function notifyCustomerLINE(userId, title, message, color, details) {
       if(!userId || userId.startsWith("guest")) return;
       fetch(LINE_BOT_API_URL, {
         method: "POST", mode: "no-cors",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userId, message: message })
+        body: JSON.stringify({ 
+          userId: userId, 
+          isFlex: true,
+          title: title,
+          message: message,
+          color: color,
+          details: details
+        })
       }).catch(e => console.log("Notify Error", e));
     }
 
@@ -470,13 +472,22 @@
           db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
             showToast("อัปเดตสถานะสำเร็จ!"); 
             
-            // แจ้งเตือนตามสถานะ
             if(nextStatus === "ไรเดอร์ถึงร้านแล้ว") {
-               notifyCustomerLINE(activeOrderData.userId, `📍 ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ`);
+               notifyCustomerLINE(activeOrderData.userId, "📍 ไรเดอร์ถึงร้านแล้ว", "ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ กำลังรอรับอาหาร", "#3b82f6", {
+                  "ร้านอาหาร": activeOrderData.restaurantName,
+                  "ชื่อไรเดอร์": riderData.name
+               });
             } else if (nextStatus === "กำลังจัดส่ง") {
-               notifyCustomerLINE(activeOrderData.userId, `🛵 อาหารอยู่บนรถแล้ว! ไรเดอร์กำลังเดินทางไปส่งให้คุณครับ`);
+               notifyCustomerLINE(activeOrderData.userId, "🛵 กำลังเดินทางไปส่ง!", "อาหารอยู่บนรถแล้ว! ไรเดอร์กำลังเดินทางไปส่งให้คุณครับ", "#3b82f6", {
+                  "ไรเดอร์": riderData.name,
+                  "ทะเบียนรถ": riderData.plate,
+                  "เบอร์ติดต่อ": riderData.phone
+               });
             } else if (nextStatus === "จัดส่งสำเร็จ") {
-               notifyCustomerLINE(activeOrderData.userId, `🎉 จัดส่งสำเร็จ! ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการห้วยเกิ้ง Delivery`);
+               notifyCustomerLINE(activeOrderData.userId, "🎉 จัดส่งสำเร็จ!", "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการห้วยเกิ้ง Delivery", "#10b981", {
+                  "ร้านอาหาร": activeOrderData.restaurantName,
+                  "ยอดชำระ": "฿" + activeOrderData.totalPrice
+               });
             }
 
             if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
@@ -501,9 +512,7 @@
     
     function openChatModal() { 
         document.getElementById('chat-modal').style.display = 'flex'; 
-        document.getElementById('chat-badge').style.display = 'none'; // ซ่อนจุดแดงเมื่อเปิดอ่าน
-        
-        // เลื่อนแชทลงล่างสุด
+        document.getElementById('chat-badge').style.display = 'none';
         const container = document.getElementById('chat-messages-container');
         if(container) { container.scrollTop = container.scrollHeight; }
     }

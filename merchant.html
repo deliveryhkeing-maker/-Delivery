@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <title>ระบบร้านค้า - ห้วยเกิ้ง Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -100,7 +105,6 @@
 </head>
 <body>
 
-  <!-- หน้า Login -->
   <div id="login-screen" class="auth-screen">
     <div class="auth-card">
       <div style="font-size: 40px; color: var(--primary); margin-bottom: 10px;"><span class="material-icons" style="font-size: 48px;">storefront</span></div>
@@ -113,7 +117,6 @@
     </div>
   </div>
 
-  <!-- หน้า Register -->
   <div id="register-screen" class="auth-screen" style="display: none;">
     <div class="auth-card">
       <h2 style="margin: 0 0 20px;">สมัครเปิดร้านค้าใหม่</h2>
@@ -140,7 +143,6 @@
     </div>
   </div>
 
-  <!-- หน้าจอหลัก (ออเดอร์) -->
   <div id="home-screen" class="screen">
     <div class="header">
       <div class="shop-info-header">
@@ -153,7 +155,6 @@
       </div>
     </div>
     
-    <!-- ปุ่มพักเบรกชั่วคราว -->
     <div style="padding: 10px 15px; background: white; border-bottom: 1px solid #eee;">
        <button class="btn-outline" style="border-color: var(--warning); color: var(--warning); padding: 8px; font-size: 13px;" onclick="pauseStore()">
           <span class="material-icons" style="font-size: 16px;">pause_circle</span> พักเบรก 30 นาที (ซ่อนร้านชั่วคราว)
@@ -181,7 +182,6 @@
     </div>
   </div>
 
-  <!-- หน้าจอจัดการเมนู (Menu) -->
   <div id="menu-screen" class="screen">
     <div class="header">
       <div class="shop-info"><h2>จัดการเมนูอาหาร</h2><p>ระบบซิงค์กับฝั่งลูกค้าอัตโนมัติ</p></div>
@@ -192,7 +192,6 @@
     </div>
   </div>
 
-  <!-- หน้าจอการเงิน (Wallet) -->
   <div id="wallet-screen" class="screen">
     <div class="header"><div class="shop-info"><h2>กระเป๋าเงิน (Wallet)</h2></div></div>
     <div class="content-area">
@@ -210,7 +209,6 @@
     </div>
   </div>
 
-  <!-- หน้าการตั้งค่า (Settings) -->
   <div id="settings-screen" class="screen">
     <div class="header"><div class="shop-info"><h2>ตั้งค่าร้านค้า & บัญชี</h2></div></div>
     <div class="content-area">
@@ -240,7 +238,6 @@
     </div>
   </div>
 
-  <!-- Modal เพิ่มเมนู -->
   <div class="modal-overlay" id="add-menu-modal">
     <div class="modal-content">
       <h3 style="margin-top: 0; margin-bottom: 15px;">เพิ่มเมนูอาหารใหม่</h3>
@@ -266,7 +263,6 @@
     </div>
   </div>
 
-  <!-- Modal ออเดอร์ใหม่ -->
   <div class="modal-overlay" id="order-alert-modal" style="background: rgba(0,0,0,0.8);">
     <div class="modal-content new-order-alert">
       <div class="alert-ring"><span class="material-icons">notifications_active</span></div>
@@ -286,7 +282,6 @@
     </div>
   </div>
 
-  <!-- Custom Confirm Modal -->
   <div class="modal-overlay" id="custom-confirm-modal" style="z-index: 300;">
     <div class="modal-content" style="max-width: 320px; text-align: center; padding: 25px;">
       <h3 style="margin-top: 0; color: var(--text-dark);">โปรดยืนยัน</h3>
@@ -330,7 +325,7 @@
     let confirmCallback = null;
     let pauseTimer = null;
 
-    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้ (ต้องใส่ให้ถูกต้อง!)
+    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
 
     window.onload = function() { 
@@ -463,7 +458,6 @@
                  btnHtml = `<button class="btn-main" style="background-color: var(--success); padding: 8px; font-size: 14px;" onclick="acceptRealOrder('${order.id}')">รับออเดอร์</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">ออเดอร์ใหม่</span>`;
               } 
-              // รวมสถานะเพื่อให้ปุ่ม "อาหารเสร็จ" ยังคงอยู่ไม่หายไปไหน
               else if (order.status === "ร้านกำลังเตรียมอาหาร" || order.status === "ไรเดอร์กำลังไปรับอาหาร" || order.status === "ไรเดอร์ถึงร้านแล้ว") {
                  btnHtml = `<button class="btn-main" style="background-color: var(--warning); padding: 8px; font-size: 14px;" onclick="markFoodReady('${order.id}')">จัดเตรียมอาหารเสร็จแล้ว</button>`;
                  statusBadge = `<span class="status-badge" style="background:#fef3c7; color:#92400e;">กำลังเตรียมอาหาร</span>`;
@@ -477,7 +471,6 @@
                  statusBadge = `<span class="status-badge" style="background:#e0e7ff; color:#3730a3;">กำลังจัดส่งให้ลูกค้า</span>`;
               }
 
-              // ทางออกหากไม่มีไรเดอร์รับงาน
               if(!order.riderId) {
                 cancelBtn = `<button class="btn-outline" style="border-color:var(--danger); color:var(--danger); padding:8px; font-size:13px;" onclick="cancelOrderByMerchant('${order.id}')">ยกเลิก (ไม่มีไรเดอร์)</button>`;
               }
@@ -742,7 +735,6 @@
       if(isChecked && pauseTimer) clearTimeout(pauseTimer);
     }
     
-    // ระบบพักเบรก 30 นาที
     function pauseStore() {
         openConfirm('คุณต้องการปิดรับออเดอร์ชั่วคราวเป็นเวลา 30 นาทีใช่หรือไม่?', () => {
             db.collection("merchants").doc(currentMerchantId).update({ isOpen: false });
