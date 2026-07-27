@@ -106,7 +106,6 @@
     
     .tracking-status-card { background: var(--white); border-radius: 24px 24px 0 0; padding: 30px 25px 25px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; }
     
-    /* ระบบหลอดสถานะแบบใหม่ (Stepped Progress Bar) */
     .stepper-container { display: flex; justify-content: space-between; align-items: center; position: relative; margin: 30px 0 20px; width: 100%; padding: 0 10px; }
     .stepper-line { position: absolute; top: 50%; left: 10px; right: 10px; height: 4px; background: #e0e0e0; z-index: 1; transform: translateY(-50%); border-radius: 2px; }
     .stepper-progress { position: absolute; top: 50%; left: 10px; height: 4px; background: var(--primary-color); z-index: 2; transform: translateY(-50%); transition: width 0.8s ease-in-out; border-radius: 2px; width: 0%; }
@@ -596,7 +595,7 @@
     let userLng = 102.9500;
     let restaurants = [];
     let currentCategory = 'ทั้งหมด';
-    let globalUserOrders = []; // เพิ่มตัวแปรเพื่อเก็บประวัติไว้ดูรายละเอียด
+    let globalUserOrders = [];
 
     let userWallet = parseFloat(localStorage.getItem('hk_user_wallet')) || 0.00;
 
@@ -1029,11 +1028,26 @@
         
         db.collection("orders").add(orderData).then((docRef) => {
           orderData.docId = docRef.id;
+          orderData.localTimestamp = Date.now(); // 🎯 บันทึกเวลาเริ่มต้นจริงๆ ณ วินาทีที่กดสั่ง!
           localStorage.setItem('activeOrder', JSON.stringify(orderData));
           
-          if (liff.isLoggedIn()) {
-            liff.sendMessages([{ type: "text", text: `[ห้วยเกิ้ง Delivery]\nรับออเดอร์เรียบร้อยแล้ว! 🍽️\nร้าน: ${selectedRestaurant.name}\nยอดรวม: ฿${totalAmount}\n\nระบบกำลังค้นหาไรเดอร์ให้คุณครับ 🛵💨` }])
-            .catch(err => console.error("LINE MSG ERR:", err));
+          if (currentUserId && !currentUserId.startsWith("guest")) {
+             fetch(LINE_BOT_API_URL, {
+                method: "POST", mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                  userId: currentUserId, 
+                  isFlex: true,
+                  title: "🧾 ได้รับคำสั่งซื้อแล้ว!",
+                  message: "ระบบกำลังส่งคำสั่งซื้อไปที่ร้าน และค้นหาไรเดอร์ให้คุณครับ 🛵💨",
+                  color: "#00B900",
+                  details: {
+                    "ร้าน": selectedRestaurant.name,
+                    "ยอดรวม": "฿" + totalAmount,
+                    "ชำระเงิน": paymentMethod === 'transfer' ? 'โอนเงินแล้ว' : (paymentMethod === 'wallet' ? 'หักวอลเล็ท' : 'เงินสดปลายทาง')
+                  }
+                })
+             }).catch(e => console.log("Notify Error", e));
           }
           
           cartItems = []; 
@@ -1248,21 +1262,43 @@
         });
       }
 
-      searchTimer = setInterval(() => {
-        searchTimeLeft--;
-        let m = Math.floor(searchTimeLeft / 60);
-        let s = searchTimeLeft % 60;
-        let timeString = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+      // ระบบจับเวลานับถอยหลังอ้างอิงจากเวลาจริง (Real-time Timestamp) ป้องกันแอพค้าง/ปิดจอ
+      function updateTimerDisplay() {
+        const currentOrder = JSON.parse(localStorage.getItem('activeOrder'));
+        if(!currentOrder) return;
         
-        if (searchTimeLeft > 0) {
+        // ถ้าไม่มีเวลาเริ่มต้น ให้เริ่มจับใหม่และเซฟ
+        let startTime = currentOrder.localTimestamp;
+        if(!startTime) {
+            startTime = Date.now();
+            currentOrder.localTimestamp = startTime;
+            localStorage.setItem('activeOrder', JSON.stringify(currentOrder));
+        }
+
+        // คำนวณเวลาที่ผ่านไปจริงตามนาฬิกาเครื่อง (วินาที)
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        let timeLeft = 120 - elapsedSeconds; // ตั้งเวลาที่ให้รอยกเลิก (120 วินาที = 2 นาที)
+
+        if (timeLeft > 0) {
+          let m = Math.floor(timeLeft / 60);
+          let s = timeLeft % 60;
+          let timeString = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
           btnCancel.innerText = `ยกเลิกคำสั่งซื้อ (${timeString})`;
         } else {
           clearInterval(searchTimer); 
           document.getElementById('radar-animation').style.display = 'none';
-          document.getElementById('track-status-title').innerText = "รอนานผิดปกติ"; document.getElementById('track-status-subtitle').innerText = "คุณสามารถกดยกเลิกออเดอร์ได้แล้ว";
-          btnCancel.classList.remove('disabled'); btnCancel.style.color = "var(--danger)"; btnCancel.style.borderColor = "var(--danger)"; btnCancel.innerText = "ยกเลิกคำสั่งซื้อ";
+          document.getElementById('track-status-title').innerText = "รอนานผิดปกติ"; 
+          document.getElementById('track-status-subtitle').innerText = "คุณสามารถกดยกเลิกออเดอร์ได้แล้ว";
+          btnCancel.classList.remove('disabled'); 
+          btnCancel.style.color = "var(--danger)"; 
+          btnCancel.style.borderColor = "var(--danger)"; 
+          btnCancel.innerText = "ยกเลิกคำสั่งซื้อ";
         }
-      }, 1000);
+      }
+
+      // อัปเดต UI ทันที และตั้งเวลาให้ตรวจสอบเวลาจริงซ้ำทุก 1 วินาที
+      updateTimerDisplay();
+      searchTimer = setInterval(updateTimerDisplay, 1000);
     }
 
     function updateStepper(percent) {
