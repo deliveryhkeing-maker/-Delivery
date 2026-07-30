@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- Anti-Cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   
-  <title>Super Admin - ห้วยเกิ้ง Delivery</title>
+  <title>Super Admin Exclusive - ห้วยเกิ้ง Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
@@ -28,13 +27,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
 
-    /* ================= LOGIN SCREEN ================= */
+    /* ================= LOGIN ================= */
     #admin-login { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 9999; }
     .login-box { background: var(--white); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
     .login-box input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; font-family: 'Prompt'; font-size: 15px; outline: none; background: #f8fafc; }
-    .login-box input:focus { border-color: var(--primary); background: var(--white); }
     .login-box button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px;}
-    .login-box button:hover { background: var(--primary-hover); }
 
     /* ================= LAYOUT ================= */
     #admin-app { display: none; width: 100%; height: 100%; }
@@ -45,10 +42,9 @@
     .nav-item:hover { background: var(--sidebar-hover); color: white; }
     .nav-item.active { background: var(--sidebar-hover); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
     .nav-item.hidden { display: none !important; }
-    .nav-item .material-icons { font-size: 22px; }
 
     .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { background: var(--white); height: 75px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); z-index: 5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+    .topbar { background: var(--white); height: 75px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); z-index: 5; }
     .content-area { padding: 30px; overflow-y: auto; flex-grow: 1; }
 
     /* ================= COMPONENTS ================= */
@@ -57,7 +53,7 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
     .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 30px; }
-    .stat-card { background: white; padding: 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 20px; }
+    .stat-card { background: white; padding: 25px; border-radius: 16px; border: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
     .stat-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 28px; }
     .stat-card h3 { color: var(--text-muted); font-size: 14px; margin-bottom: 5px; font-weight: 500; }
     .stat-card .value { font-size: 32px; font-weight: 700; color: var(--text-dark); line-height: 1; }
@@ -67,18 +63,14 @@
     .card-title { font-size: 18px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 10px; }
 
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-dark); margin-bottom: 8px; }
-    .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Prompt'; outline: none; background: #f8fafc; transition: 0.3s; }
-    .form-control:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-    
-    .banner-preview { width: 100%; height: 150px; border-radius: 12px; border: 2px dashed #cbd5e1; background-color: #f8fafc; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; background-size: cover; background-position: center; transition: 0.3s; position: relative; overflow: hidden; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+    .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Prompt'; outline: none; background: #f8fafc; }
+    .form-control:focus { border-color: var(--primary); background: white; }
     
     .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; text-align: left; }
     th, td { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
-    th { background: #f8fafc; color: var(--text-muted); font-weight: 600; white-space: nowrap; text-transform: uppercase; font-size: 12px; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f8fafc; }
+    th { background: #f8fafc; color: var(--text-muted); font-weight: 600; font-size: 12px; }
     
     .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; text-align: center; }
     .bg-success { background: #d1fae5; color: #065f46; }
@@ -88,29 +80,21 @@
     .bg-dark { background: #1e293b; color: white; }
 
     .btn { padding: 10px 20px; border-radius: 10px; font-family: 'Prompt'; font-size: 14px; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(59,130,246,0.2); }
-    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: white; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-dark); }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-success { background: var(--success); color: white; }
 
-    .toast { position: fixed; bottom: -100px; right: 30px; background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10000; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); font-weight: 500; }
+    .toast { position: fixed; bottom: -100px; right: 30px; background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px; transition: 0.4s; z-index: 10000; display: flex; align-items: center; gap: 12px; font-weight: 500; }
     .toast.show { bottom: 30px; }
-    
-    .search-box { display: flex; align-items: center; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 8px 15px; width: 300px; }
-    .search-box input { border: none; background: transparent; outline: none; width: 100%; font-family: 'Prompt'; font-size: 14px; margin-left: 8px; }
 
-    /* Admin Checkbox Group */
-    .perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-    .perm-grid label { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; margin-bottom: 0; }
-    .perm-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
-
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(2px); }
+    .modal-content { background: var(--white); padding: 25px; border-radius: 20px; width: 95%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; }
   </style>
 </head>
 <body>
 
-  <!-- ================= 1. LOGIN SCREEN ================= -->
+  <!-- LOGIN -->
   <div id="admin-login">
     <div class="login-box">
       <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 20px; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px;">
@@ -124,24 +108,15 @@
     </div>
   </div>
 
-  <!-- ================= 2. MAIN APP SHELL ================= -->
+  <!-- APP SHELL -->
   <div id="admin-app">
-    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header"><span class="material-icons">rocket_launch</span> DEV Control</div>
       <ul class="nav-list" id="sidebar-menu">
         <li class="nav-item active" data-target="dashboard" onclick="switchView('dashboard', this)"><span class="material-icons">dashboard</span> ภาพรวมระบบ</li>
-        <li class="nav-item" data-target="config" onclick="switchView('config', this)"><span class="material-icons">tune</span> ตั้งค่าระบบ & โฆษณา</li>
         <li class="nav-item" data-target="finance" onclick="switchView('finance', this)"><span class="material-icons">account_balance</span> ธุรกรรม & เบิกถอน</li>
         <li class="nav-item" data-target="support" onclick="switchView('support', this)"><span class="material-icons">support_agent</span> ศูนย์ช่วยเหลือลูกค้า</li>
-        <li class="nav-item" data-target="merchants" onclick="switchView('merchants', this)"><span class="material-icons">storefront</span> จัดการร้านค้า</li>
-        <li class="nav-item" data-target="riders" onclick="switchView('riders', this)"><span class="material-icons">sports_motorsports</span> จัดการไรเดอร์</li>
-        <li class="nav-item" data-target="users" onclick="switchView('users', this)"><span class="material-icons">group</span> ฐานข้อมูลลูกค้า</li>
-        <li class="nav-item" data-target="promos" onclick="switchView('promos', this)"><span class="material-icons">local_offer</span> โปรโมชันโค้ด</li>
-        <li class="nav-item" data-target="broadcast" onclick="switchView('broadcast', this)"><span class="material-icons">campaign</span> ส่ง Broadcast</li>
-        
-        <!-- เฉพาะ Super Admin -->
-        <li class="nav-item superadmin-only" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;" data-target="admins" onclick="switchView('admins', this)"><span class="material-icons">manage_accounts</span> จัดการทีมแอดมิน</li>
+        <li class="nav-item" data-target="users" onclick="switchView('users', this)"><span class="material-icons">group</span> ฐานข้อมูลผู้ใช้</li>
         <li class="nav-item superadmin-only" data-target="logs" onclick="switchView('logs', this)"><span class="material-icons">history_edu</span> ประวัติทำงาน (Audit Logs)</li>
       </ul>
       <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
@@ -149,14 +124,10 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-wrapper">
       <div class="topbar">
         <h2 style="font-size: 20px; font-weight: 700; color: var(--text-dark);" id="page-title">ภาพรวมระบบ (Dashboard)</h2>
-        <div style="display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 600; color: var(--text-dark);">
-          <div style="width: 40px; height: 40px; background: #eff6ff; color: var(--primary); border-radius: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid #bfdbfe;">
-            <span class="material-icons">admin_panel_settings</span>
-          </div>
+        <div style="display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 600;">
           <span id="current-admin-name">Super Admin</span>
           <span class="badge bg-dark" id="current-admin-role">Owner</span>
         </div>
@@ -164,100 +135,51 @@
 
       <div class="content-area">
         
-        <!-- === VIEW: DASHBOARD === -->
+        <!-- DASHBOARD (ระบบจัดการออเดอร์) -->
         <div id="view-dashboard" class="view-section active">
           <div class="grid-4">
-            <div class="stat-card">
-              <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><span class="material-icons">receipt_long</span></div>
-              <div><h3>ออเดอร์ทั้งหมด</h3><div class="value" id="stat-orders">...</div></div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: #fef3c7; color: #f59e0b;"><span class="material-icons">storefront</span></div>
-              <div><h3>ร้านค้าในระบบ</h3><div class="value" id="stat-merchants">...</div></div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: #d1fae5; color: #10b981;"><span class="material-icons">sports_motorsports</span></div>
-              <div><h3>ไรเดอร์ในระบบ</h3><div class="value" id="stat-riders">...</div></div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: #f3e8ff; color: #a855f7;"><span class="material-icons">group</span></div>
-              <div><h3>ลูกค้าที่ลงทะเบียน</h3><div class="value" id="stat-users">...</div></div>
-            </div>
+            <div class="stat-card"><div class="stat-icon" style="background:#eff6ff; color:#3b82f6;"><span class="material-icons">receipt_long</span></div><div><h3>ออเดอร์ทั้งหมด</h3><div class="value" id="stat-orders">...</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#fef3c7; color:#f59e0b;"><span class="material-icons">storefront</span></div><div><h3>ร้านค้าในระบบ</h3><div class="value" id="stat-merchants">...</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#d1fae5; color:#10b981;"><span class="material-icons">sports_motorsports</span></div><div><h3>ไรเดอร์ในระบบ</h3><div class="value" id="stat-riders">...</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#f3e8ff; color:#a855f7;"><span class="material-icons">group</span></div><div><h3>ลูกค้าที่ลงทะเบียน</h3><div class="value" id="stat-users">...</div></div></div>
           </div>
           <div class="card">
-            <div class="card-header"><h3 class="card-title"><span class="material-icons" style="color: var(--primary);">radar</span> ออเดอร์ล่าสุด (Real-time)</h3></div>
+            <div class="card-header"><h3 class="card-title"><span class="material-icons" style="color: var(--primary);">radar</span> ออเดอร์ล่าสุด (Live Ops)</h3></div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top:-10px; margin-bottom: 15px;">ระบบควบคุมฉุกเฉิน แอดมินสามารถแทรกแซงออเดอร์ที่มีปัญหาได้ที่นี่</p>
             <div class="table-responsive">
               <table id="table-recent-orders">
-                <thead><tr><th>รหัสบิล</th><th>เวลา</th><th>ร้านค้า</th><th>ลูกค้า</th><th>ยอดรวม</th><th>สถานะ</th></tr></thead>
-                <tbody id="tbody-recent-orders"><tr><td colspan="6" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr></tbody>
+                <thead><tr><th>รหัสบิล</th><th>เวลา</th><th>ร้านค้า / ลูกค้า</th><th>ไรเดอร์</th><th>ยอดรวม (วิธีจ่าย)</th><th>สถานะ</th><th>จัดการฉุกเฉิน</th></tr></thead>
+                <tbody id="tbody-recent-orders"><tr><td colspan="7" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr></tbody>
               </table>
             </div>
           </div>
         </div>
 
-        <!-- === VIEW: CONFIG === -->
-        <div id="view-config" class="view-section">
-          <div class="card">
-            <div class="card-header"><h3 class="card-title"><span class="material-icons">tune</span> ตั้งค่าตัวแปรระบบ (System Config)</h3></div>
-            <div class="grid-4" style="grid-template-columns: 1fr 1fr 1fr;">
-              <div class="form-group"><label>ค่าจัดส่งเริ่มต้น (บาท)</label><input type="number" id="cfg-base-fee" class="form-control" placeholder="15"></div>
-              <div class="form-group"><label>ค่าส่งกิโลเมตรถัดไป (บาท/กม.)</label><input type="number" id="cfg-km-fee" class="form-control" placeholder="5"></div>
-              <div class="form-group"><label>ลิมิตระยะทางจัดส่ง (กม.)</label><input type="number" id="cfg-max-dist" class="form-control" placeholder="10"></div>
-            </div>
-            <button class="btn btn-primary" onclick="saveSystemConfig('fees')"><span class="material-icons">save</span> บันทึกค่าระบบ</button>
-          </div>
-          
-          <div class="card">
-            <div class="card-header"><h3 class="card-title"><span class="material-icons">panorama</span> ป้ายโฆษณาหน้าแอป (App Banner)</h3></div>
-            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 300px;">
-                <div class="form-group"><label>ข้อความโปรโมตหลัก (บรรทัดแรก)</label><input type="text" id="cfg-banner-title" class="form-control" placeholder="เช่น โค้ดลดชุมชน"></div>
-                <div class="form-group"><label>ข้อความรอง (บรรทัดสอง)</label><input type="text" id="cfg-banner-sub" class="form-control" placeholder="เช่น ใส่โค้ด LOCAL50 ลดทันที 50.-"></div>
-                <button class="btn btn-primary" style="width: 100%;" onclick="saveSystemConfig('banner')"><span class="material-icons">cloud_upload</span> อัปเดตแบนเนอร์ให้ลูกค้า</button>
-              </div>
-              <div style="flex: 1; min-width: 300px;">
-                <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px;">อัปโหลดรูปพื้นหลังแบนเนอร์</label>
-                <div class="banner-preview" id="banner-preview-box" onclick="document.getElementById('banner-upload-input').click()">
-                  <span class="material-icons" id="banner-icon-placeholder">add_photo_alternate</span>
-                  <span id="banner-text-placeholder">คลิกเพื่ออัปโหลดรูปภาพ (แนวนอน)</span>
-                </div>
-                <input type="file" id="banner-upload-input" accept="image/*" onchange="handleBannerUpload(event)" style="display:none;">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- === VIEW: FINANCE === -->
+        <!-- FINANCE, SUPPORT, USERS, LOGS ... (เหมือนเวอร์ชันก่อนหน้า) -->
+        <!-- VIEW: FINANCE -->
         <div id="view-finance" class="view-section">
           <div class="card">
             <div class="card-header" style="margin-bottom: 10px;">
               <h3 class="card-title"><span class="material-icons">account_balance</span> ธุรกรรมแจ้งถอน / เติมเครดิต</h3>
               <button class="btn btn-outline" onclick="loadFinancials()"><span class="material-icons">refresh</span> โหลดใหม่</button>
             </div>
-            
             <div style="display:flex; gap:10px; margin-bottom: 20px;">
                <button class="btn btn-primary" id="tab-fin-pending" onclick="toggleFinanceTab('pending')" style="flex:1;">รอดำเนินการ</button>
                <button class="btn btn-outline" id="tab-fin-history" onclick="toggleFinanceTab('history')" style="flex:1;">ประวัติที่สำเร็จแล้ว</button>
             </div>
-
             <div class="table-responsive">
               <table id="table-fin-pending">
-                <thead><tr><th>วันที่</th><th>ผู้ทำรายการ (พร้อมเพย์/ธนาคาร)</th><th>ประเภท</th><th>ยอดเงิน</th><th>การจัดการ</th></tr></thead>
-                <tbody id="tbody-finance">
-                  <tr><td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr>
-                </tbody>
+                <thead><tr><th>วันที่</th><th>ผู้ทำรายการ</th><th>ประเภท</th><th>ยอดเงิน</th><th>การจัดการ</th></tr></thead>
+                <tbody id="tbody-finance"><tr><td colspan="5" style="text-align: center;">กำลังโหลด...</td></tr></tbody>
               </table>
               <table id="table-fin-history" style="display:none;">
                 <thead><tr><th>วันที่อนุมัติ</th><th>ผู้ทำรายการ</th><th>ประเภท</th><th>ยอดเงิน</th><th>สถานะ</th></tr></thead>
-                <tbody id="tbody-finance-history">
-                  <tr><td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr>
-                </tbody>
+                <tbody id="tbody-finance-history"><tr><td colspan="5" style="text-align: center;">กำลังโหลด...</td></tr></tbody>
               </table>
             </div>
           </div>
         </div>
-
-        <!-- === VIEW: SUPPORT (ศูนย์ช่วยเหลือ) === -->
+        <!-- VIEW: SUPPORT -->
         <div id="view-support" class="view-section">
           <div class="card">
              <div class="card-header">
@@ -266,128 +188,36 @@
              </div>
              <div class="table-responsive">
                <table>
-                 <thead><tr><th>วันที่แจ้ง</th><th>ผู้แจ้ง (เบอร์โทร)</th><th>รายละเอียดปัญหา</th><th>สถานะ</th><th>อัปเดตสถานะ</th></tr></thead>
+                 <thead><tr><th>วันที่แจ้ง</th><th>ผู้แจ้ง</th><th>รายละเอียดปัญหา</th><th>สถานะ</th><th>อัปเดตสถานะ</th></tr></thead>
                  <tbody id="tbody-support"><tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
                </table>
              </div>
           </div>
         </div>
-
-        <!-- === VIEW: MERCHANTS === -->
-        <div id="view-merchants" class="view-section">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><span class="material-icons">storefront</span> ฐานข้อมูลร้านค้า</h3> 
-              <div class="search-box"><span class="material-icons" style="color:var(--text-muted);">search</span><input type="text" placeholder="ค้นหาชื่อร้าน, เบอร์โทร..." onkeyup="filterTable('tbody-merchants', this.value)"></div>
-            </div>
-            <div class="table-responsive">
-              <table>
-                <thead><tr><th>รหัส (เบอร์)</th><th>ชื่อร้าน</th><th>หมวดหมู่</th><th>สถานะร้าน</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-merchants"><tr><td colspan="5" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- === VIEW: RIDERS === -->
-        <div id="view-riders" class="view-section">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><span class="material-icons">sports_motorsports</span> ฐานข้อมูลไรเดอร์</h3>
-              <div class="search-box"><span class="material-icons" style="color:var(--text-muted);">search</span><input type="text" placeholder="ค้นหาชื่อ, ทะเบียนรถ..." onkeyup="filterTable('tbody-riders', this.value)"></div>
-            </div>
-            <div class="table-responsive">
-              <table>
-                <thead><tr><th>เบอร์โทร</th><th>ชื่อ-สกุล</th><th>ทะเบียนรถ</th><th>เครดิต (Wallet)</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-riders"><tr><td colspan="5" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        
-        <!-- === VIEW: USERS === -->
+        <!-- VIEW: USERS -->
         <div id="view-users" class="view-section">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><span class="material-icons">group</span> ฐานข้อมูลลูกค้า (Users)</h3>
-              <div class="search-box"><span class="material-icons" style="color:var(--text-muted);">search</span><input type="text" placeholder="ค้นหาชื่อ, เบอร์โทร..." onkeyup="filterTable('tbody-users', this.value)"></div>
+              <h3 class="card-title"><span class="material-icons">group</span> ฐานข้อมูลผู้ใช้</h3>
             </div>
             <div class="table-responsive">
               <table>
-                <thead><tr><th>รหัส (UID)</th><th>ชื่อลูกค้า (LINE)</th><th>เบอร์โทร</th><th>ที่อยู่หลัก</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-users"><tr><td colspan="5" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
+                <thead><tr><th>รหัส (UID)</th><th>ชื่อลูกค้า</th><th>เบอร์โทร</th><th>จัดการ</th></tr></thead>
+                <tbody id="tbody-users"><tr><td colspan="4" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
               </table>
             </div>
           </div>
         </div>
-
-        <!-- === VIEW: PROMOS === -->
-        <div id="view-promos" class="view-section">
-          <div class="card">
-            <div class="card-header"><h3 class="card-title"><span class="material-icons">local_offer</span> สร้างโค้ดส่วนลด</h3></div>
-            <div style="display: flex; gap: 15px; margin-bottom: 25px; align-items: flex-end; flex-wrap: wrap;">
-               <div style="flex:1; min-width:150px;"><label style="font-size:12px; font-weight:600;">รหัสโค้ด (Code)</label><input type="text" id="promo-code" class="form-control" placeholder="เช่น SALE50" style="text-transform: uppercase;"></div>
-               <div style="flex:1; min-width:150px;"><label style="font-size:12px; font-weight:600;">ส่วนลด (บาท)</label><input type="number" id="promo-discount" class="form-control" placeholder="เช่น 50"></div>
-               <div style="flex:1; min-width:150px;"><label style="font-size:12px; font-weight:600;">ขั้นต่ำ (บาท)</label><input type="number" id="promo-min" class="form-control" placeholder="เช่น 150"></div>
-               <button class="btn btn-primary" style="height: 46px;" onclick="createPromoCode()"><span class="material-icons">add</span> สร้างโค้ด</button>
-            </div>
-            <div class="table-responsive">
-              <table>
-                <thead><tr><th>รหัสโค้ด</th><th>ส่วนลด</th><th>ขั้นต่ำ</th><th>สร้างเมื่อ</th><th>ลบ</th></tr></thead>
-                <tbody id="tbody-promos"><tr><td colspan="5" style="text-align:center;">กำลังโหลดโปรโมชัน...</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- === VIEW: BROADCAST === -->
-        <div id="view-broadcast" class="view-section">
-          <div class="card" style="max-width: 700px; margin: 0 auto;">
-            <div class="card-header"><h3 class="card-title"><span class="material-icons">campaign</span> ส่งข้อความแจ้งเตือน (Broadcast)</h3></div>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">* ฟีเจอร์นี้ต้องเชื่อมต่อกับ LINE Messaging API แบบ Broadcast</p>
-            
-            <div class="form-group">
-              <label>กลุ่มเป้าหมาย (Target)</label>
-              <select class="form-control" id="bc-target">
-                <option value="all">ทุกคน (Customer, Merchant, Rider)</option>
-                <option value="customer">เฉพาะลูกค้าทั้งหมด</option>
-                <option value="merchant">เฉพาะร้านค้าทั้งหมด</option>
-              </select>
-            </div>
-            <div class="form-group"><label>หัวข้อ (Title)</label><input type="text" id="bc-title" class="form-control" placeholder="เช่น ข่าวสารสำคัญจากแอดมิน"></div>
-            <div class="form-group"><label>รายละเอียดข้อความ (Message)</label><textarea id="bc-msg" class="form-control" rows="5" placeholder="พิมพ์ข้อความที่ต้องการประกาศ..."></textarea></div>
-            <button class="btn btn-primary" style="width: 100%; font-size: 16px; padding: 15px;" onclick="sendBroadcast()"><span class="material-icons">send</span> ยิง Broadcast ไปยัง LINE</button>
-          </div>
-        </div>
-
-        <!-- === VIEW: ADMINS (SUPER ADMIN ONLY) === -->
-        <div id="view-admins" class="view-section">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><span class="material-icons">manage_accounts</span> จัดการทีมแอดมิน</h3>
-              <button class="btn btn-primary" onclick="document.getElementById('add-admin-modal').style.display='flex'"><span class="material-icons">person_add</span> สร้างแอดมินใหม่</button>
-            </div>
-            <div class="table-responsive">
-              <table>
-                <thead><tr><th>Username</th><th>ชื่อพนักงาน</th><th>ระดับสิทธิ์ (Role)</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-admins"><tr><td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- === VIEW: LOGS (SUPER ADMIN ONLY) === -->
+        <!-- VIEW: LOGS -->
         <div id="view-logs" class="view-section">
           <div class="card">
             <div class="card-header">
               <h3 class="card-title"><span class="material-icons">history_edu</span> ประวัติการทำงานระบบ (Audit Logs)</h3>
-              <button class="btn btn-outline" onclick="loadAuditLogs()"><span class="material-icons">refresh</span> โหลดใหม่</button>
             </div>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top:-10px; margin-bottom: 15px;">ตรวจสอบการทำรายการทั้งหมดของแอดมินทุกคน เพื่อความโปร่งใสและตรวจสอบย้อนหลังได้</p>
             <div class="table-responsive">
               <table>
-                <thead><tr><th>วัน-เวลา</th><th>พนักงาน (Admin)</th><th>หัวข้อการทำรายการ</th><th>รายละเอียดเพิ่มเติม</th></tr></thead>
-                <tbody id="tbody-logs"><tr><td colspan="4" style="text-align: center;">กำลังโหลดประวัติ...</td></tr></tbody>
+                <thead><tr><th>วัน-เวลา</th><th>พนักงาน</th><th>หัวข้อ</th><th>รายละเอียด</th></tr></thead>
+                <tbody id="tbody-logs"><tr><td colspan="4" style="text-align: center;">กำลังโหลด...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -397,69 +227,48 @@
     </div>
   </div>
 
-  <div id="admin-toast" class="toast">
-    <span class="material-icons" id="toast-icon">check_circle</span> <span id="toast-text">ข้อความ</span>
-  </div>
+  <div id="admin-toast" class="toast"><span class="material-icons" id="toast-icon">check_circle</span> <span id="toast-text">ข้อความ</span></div>
 
-  <!-- Modal ดูประวัติการเงินรายบุคคล -->
-  <div class="modal-overlay" id="finance-history-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
-    <div style="background:var(--white); width:95%; max-width:600px; border-radius:20px; padding:25px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+  <!-- ================= MODAL: LIVE OPS (จัดการออเดอร์ฉุกเฉิน) ================= -->
+  <div class="modal-overlay" id="order-ops-modal">
+    <div class="modal-content">
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:15px;">
-          <h3 style="margin:0; font-size:18px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">history</span> ประวัติการทำธุรกรรม</h3>
-          <span class="material-icons" style="cursor:pointer; color:var(--text-muted);" onclick="document.getElementById('finance-history-modal').style.display='none'">close</span>
+          <h3 style="margin:0; font-size:18px; color:var(--danger); display:flex; align-items:center; gap:8px;"><span class="material-icons">warning</span> ศูนย์ควบคุมฉุกเฉิน</h3>
+          <span class="material-icons" style="cursor:pointer;" onclick="document.getElementById('order-ops-modal').style.display='none'">close</span>
        </div>
        
-       <div style="display:flex; gap:15px; margin-bottom:20px;">
-          <div style="flex:1; background:#eff6ff; padding:15px; border-radius:12px; border:1px solid #bfdbfe;">
-             <p style="margin:0 0 5px; font-size:13px; color:#3b82f6;">ยอดรวมรายรับ (เข้ากระเป๋า)</p>
-             <h3 style="margin:0; font-size:20px; color:#1d4ed8;">+฿<span id="modal-sum-income">0</span></h3>
-          </div>
-          <div style="flex:1; background:#fee2e2; padding:15px; border-radius:12px; border:1px solid #fecaca;">
-             <p style="margin:0 0 5px; font-size:13px; color:#ef4444;">ยอดรวมรายจ่าย (ถอน/หัก)</p>
-             <h3 style="margin:0; font-size:20px; color:#b91c1c;">-฿<span id="modal-sum-expense">0</span></h3>
-          </div>
+       <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:20px; font-size:13px;">
+          <p style="margin:0 0 5px;"><b>ออเดอร์:</b> <span id="ops-order-id" style="color:var(--primary); font-weight:700;"></span></p>
+          <p style="margin:0 0 5px;"><b>สถานะปัจจุบัน:</b> <span id="ops-order-status" style="color:var(--warning); font-weight:700;"></span></p>
+          <p style="margin:0;"><b>ยอดชำระ:</b> ฿<span id="ops-order-total"></span> <span id="ops-order-payment" style="color:var(--text-muted);"></span></p>
        </div>
 
-       <h4 style="margin:0 0 10px; font-size:15px;" id="modal-user-name">รายการย้อนหลัง</h4>
-       <div style="overflow-y:auto; flex-grow:1; border:1px solid var(--border); border-radius:12px;">
-          <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
-            <thead style="background:#f8fafc; position:sticky; top:0;"><tr><th style="padding:10px;">วันที่</th><th style="padding:10px;">รายการ</th><th style="padding:10px;">ยอดเงิน</th></tr></thead>
-            <tbody id="modal-finance-tbody"></tbody>
-          </table>
+       <div class="form-group">
+          <label>เลือกการจัดการปัญหา (Action)</label>
+          <select id="ops-action" class="form-control" onchange="toggleOpsWarning()">
+             <option value="">-- กรุณาเลือกการดำเนินการ --</option>
+             <option value="cancel_customer">ยกเลิก: ลูกค้าปฏิเสธรับของ/ติดต่อไม่ได้</option>
+             <option value="cancel_rider">ยกเลิก: ไรเดอร์รถเสีย/มีอุบัติเหตุ</option>
+             <option value="cancel_merchant">ยกเลิก: ร้านค้าทำอาหารไม่ได้</option>
+             <option value="force_complete">บังคับจบงาน: จัดส่งสำเร็จ (ไรเดอร์ลืมกด)</option>
+          </select>
        </div>
-    </div>
-  </div>
+       
+       <div id="ops-warning-refund" style="display:none; background:#dbeafe; color:#1e40af; padding:12px; border-radius:8px; font-size:12px; margin-bottom:20px;">
+          <span class="material-icons" style="font-size:16px; vertical-align:middle;">info</span>
+          ระบบจะทำการ <b>คืนเงินเข้าวอลเล็ทลูกค้าอัตโนมัติ</b> เนื่องจากออเดอร์นี้ชำระเงินล่วงหน้ามาแล้ว
+       </div>
+       
+       <div id="ops-warning-credit" style="display:none; background:#d1fae5; color:#065f46; padding:12px; border-radius:8px; font-size:12px; margin-bottom:20px;">
+          <span class="material-icons" style="font-size:16px; vertical-align:middle;">payments</span>
+          ระบบจะปรับสถานะเป็นจัดส่งสำเร็จ และโอนค่ารอบให้ไรเดอร์ (ถ้ามี) อัตโนมัติ
+       </div>
 
-  <!-- Modal สร้าง/แก้ไข แอดมิน -->
-  <div class="modal-overlay" id="add-admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
-    <div style="background:var(--white); width:95%; max-width:500px; border-radius:20px; padding:25px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
-       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h3 style="margin:0; font-size:18px;">ตั้งค่าบัญชีแอดมิน (พนักงาน)</h3>
-          <span class="material-icons" style="cursor:pointer; color:var(--text-muted);" onclick="document.getElementById('add-admin-modal').style.display='none'">close</span>
-       </div>
-       <div class="form-group"><label>Username (สำหรับเข้าระบบ)</label><input type="text" id="modal-adm-user" class="form-control" placeholder="เช่น staff01"></div>
-       <div class="form-group"><label>Password (รหัสผ่าน)</label><input type="text" id="modal-adm-pass" class="form-control" placeholder="รหัสผ่านอย่างน้อย 6 ตัว"></div>
-       <div class="form-group"><label>ชื่อพนักงาน (แสดงในประวัติทำงาน)</label><input type="text" id="modal-adm-name" class="form-control" placeholder="เช่น แอดมินสมศรี"></div>
-       
-       <label style="display:block; font-size:14px; font-weight:600; margin-bottom:10px;">กำหนดสิทธิ์การเข้าถึง (Permissions)</label>
-       <div class="perm-grid" id="modal-adm-perms">
-          <label><input type="checkbox" value="dashboard"> ภาพรวมระบบ</label>
-          <label><input type="checkbox" value="config"> ตั้งค่าระบบ</label>
-          <label><input type="checkbox" value="finance"> การเงิน / อนุมัติ</label>
-          <label><input type="checkbox" value="support"> ศูนย์ช่วยเหลือ</label>
-          <label><input type="checkbox" value="merchants"> จัดการร้านค้า</label>
-          <label><input type="checkbox" value="riders"> จัดการไรเดอร์</label>
-          <label><input type="checkbox" value="users"> ฐานข้อมูลลูกค้า</label>
-          <label><input type="checkbox" value="promos"> โปรโมชัน</label>
-          <label><input type="checkbox" value="broadcast"> ส่งข้อความ (บรอดแคสต์)</label>
-       </div>
-       
-       <button class="btn btn-primary" style="width:100%; margin-top: 20px;" onclick="saveAdminAccount()"><span class="material-icons">save</span> บันทึกบัญชีแอดมิน</button>
+       <button class="btn btn-primary" style="width:100%; padding:15px; background:var(--danger);" onclick="submitOrderOps()"><span class="material-icons">gavel</span> ยืนยันการแทรกแซง</button>
     </div>
   </div>
 
   <script>
-    // เชื่อมต่อ Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -471,463 +280,170 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    let tempBannerBase64 = null;
     let currentSession = null;
-    let sessionCheckInterval = null;
+    let selectedOrderForOps = null;
 
-    // --- Session Management & Auth ---
-    window.onload = function() {
-       checkSession();
-    };
+    window.onload = function() { checkSession(); };
 
     function checkSession() {
        const sessionData = localStorage.getItem('hk_admin_session');
        if (sessionData) {
            currentSession = JSON.parse(sessionData);
-           const now = Date.now();
-           const threeHours = 3 * 60 * 60 * 1000;
-           
-           if (now - currentSession.loginTime > threeHours) {
-               showToast('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
-               logoutAdmin();
-           } else {
-               currentSession.loginTime = now;
-               localStorage.setItem('hk_admin_session', JSON.stringify(currentSession));
-               
-               startSessionTimer();
-               applyPermissions();
-               
-               document.getElementById('admin-login').style.display = 'none';
-               document.getElementById('admin-app').style.display = 'flex';
-               
-               loadAllData();
-           }
+           document.getElementById('admin-login').style.display = 'none';
+           document.getElementById('admin-app').style.display = 'flex';
+           loadAllData();
        }
     }
 
-    function startSessionTimer() {
-        if(sessionCheckInterval) clearInterval(sessionCheckInterval);
-        sessionCheckInterval = setInterval(() => {
-            const sd = JSON.parse(localStorage.getItem('hk_admin_session'));
-            if(sd && Date.now() - sd.loginTime > (3 * 60 * 60 * 1000)) {
-                logoutAdmin();
-                alert("ระบบทำการเตะออกอัตโนมัติ เนื่องจากไม่มีการใช้งานเกิน 3 ชั่วโมงเพื่อความปลอดภัย");
-            }
-        }, 60000); 
-    }
-
-    async function loginAdmin() {
+    function loginAdmin() {
       const user = document.getElementById('admin-user').value.trim();
       const pass = document.getElementById('admin-pass').value.trim();
-
-      if(!user || !pass) return showToast('กรุณากรอก Username และ Password', 'error');
-
       if (user === 'adminbas' && pass === 'ball123456') {
-          setupSession('adminbas', 'คุณบาส (Super Admin)', 'superadmin', ['all']);
-          return;
-      }
-
-      try {
-          const snap = await db.collection("admins").where("username", "==", user).where("password", "==", pass).get();
-          if (!snap.empty) {
-              const data = snap.docs[0].data();
-              if (data.isActive === false) {
-                  return showToast('บัญชีนี้ถูกระงับการใช้งาน', 'error');
-              }
-              setupSession(user, data.name, 'admin', data.permissions || []);
-          } else {
-              showToast('Username หรือ Password ไม่ถูกต้อง', 'error');
-          }
-      } catch (e) {
-          showToast('Database Error: ' + e.message, 'error');
-      }
+          currentSession = { username: user, name: 'คุณบาส (Super Admin)', role: 'superadmin' };
+          localStorage.setItem('hk_admin_session', JSON.stringify(currentSession));
+          location.reload();
+      } else { showToast('Username หรือ Password ไม่ถูกต้อง', 'error'); }
     }
 
-    function setupSession(username, name, role, permissions) {
-        currentSession = { username, name, role, permissions, loginTime: Date.now() };
-        localStorage.setItem('hk_admin_session', JSON.stringify(currentSession));
-        
-        logAction("เข้าสู่ระบบ", `ล็อกอินเข้าสู่ระบบ (Role: ${role})`);
-        
-        showToast(`ยินดีต้อนรับ ${name} เข้าสู่ระบบ`, 'success');
-        document.getElementById('admin-login').style.display = 'none';
-        document.getElementById('admin-app').style.display = 'flex';
-        
-        applyPermissions();
-        startSessionTimer();
-        loadAllData();
-    }
+    function logoutAdmin() { localStorage.removeItem('hk_admin_session'); location.reload(); }
 
-    function logoutAdmin() {
-        logAction("ออกจากระบบ", "ล็อกเอาท์สำเร็จ");
-        localStorage.removeItem('hk_admin_session');
-        currentSession = null;
-        if(sessionCheckInterval) clearInterval(sessionCheckInterval);
-        location.reload();
-    }
-
-    // --- Role Based Access Control (RBAC) ---
-    function applyPermissions() {
-        if(!currentSession) return;
-        
-        document.getElementById('current-admin-name').innerText = currentSession.name;
-        document.getElementById('current-admin-role').innerText = currentSession.role === 'superadmin' ? 'Owner / DEV' : 'Staff';
-        document.getElementById('current-admin-role').className = currentSession.role === 'superadmin' ? 'badge bg-dark' : 'badge bg-info';
-
-        const isSuper = currentSession.role === 'superadmin';
-        
-        document.querySelectorAll('.nav-item').forEach(el => {
-            const target = el.getAttribute('data-target');
-            if(!target) return;
-
-            if(el.classList.contains('superadmin-only')) {
-                el.style.display = isSuper ? 'flex' : 'none';
-            } else {
-                if(isSuper || currentSession.permissions.includes(target)) {
-                    el.style.display = 'flex';
-                } else {
-                    el.style.display = 'none';
-                }
-            }
-        });
-
-        switchView('dashboard', document.querySelector('[data-target="dashboard"]'));
-    }
-
-    // --- Audit Logging System ---
-    function logAction(actionName, details) {
-        if (!currentSession) return;
-        try {
-            db.collection("admin_logs").add({
-                adminUsername: currentSession.username,
-                adminName: currentSession.name,
-                role: currentSession.role,
-                action: actionName,
-                details: details,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } catch(e) { console.error("Log error", e); }
-    }
-
-    // --- View Navigation ---
     function switchView(viewId, element) {
-      if(!currentSession) return;
-      if(currentSession.role !== 'superadmin' && !currentSession.permissions.includes(viewId)) {
-          if(viewId !== 'dashboard') return showToast('คุณไม่มีสิทธิ์เข้าถึงหน้านี้', 'error');
-      }
-
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      
       const targetView = document.getElementById('view-' + viewId);
       if(targetView) targetView.classList.add('active');
       if(element) element.classList.add('active');
       
-      document.getElementById('page-title').innerText = element ? element.innerText.trim() : 'ภาพรวมระบบ';
-
       if(viewId === 'finance') loadFinancials();
       if(viewId === 'support') loadSupportTickets();
-      if(viewId === 'admins' && currentSession.role === 'superadmin') loadAdminsList();
-      if(viewId === 'logs' && currentSession.role === 'superadmin') loadAuditLogs();
     }
 
     function loadAllData() {
         loadDashboardStats();
         loadRealtimeOrders();
-        loadSystemConfig();
-        loadMerchants();
-        loadRiders();
         loadUsers();
-        loadPromos();
     }
 
-    // --- Dashboard & Config ---
-    async function loadDashboardStats() {
-      try {
-        db.collection("orders").get().then(snap => document.getElementById('stat-orders').innerText = snap.size);
-        db.collection("merchants").get().then(snap => document.getElementById('stat-merchants').innerText = snap.size);
-        db.collection("riders").get().then(snap => document.getElementById('stat-riders').innerText = snap.size);
-        db.collection("users").get().then(snap => document.getElementById('stat-users').innerText = snap.size);
-      } catch(e) { console.log(e); }
+    function loadDashboardStats() {
+      db.collection("orders").get().then(snap => document.getElementById('stat-orders').innerText = snap.size);
+      db.collection("merchants").get().then(snap => document.getElementById('stat-merchants').innerText = snap.size);
+      db.collection("riders").get().then(snap => document.getElementById('stat-riders').innerText = snap.size);
+      db.collection("users").get().then(snap => document.getElementById('stat-users').innerText = snap.size);
     }
 
+    // ================= ระบบดึงออเดอร์ และ Live Ops =================
     function loadRealtimeOrders() {
-      db.collection("orders").orderBy("createdAt", "desc").limit(10).onSnapshot(snapshot => {
+      db.collection("orders").orderBy("createdAt", "desc").limit(15).onSnapshot(snapshot => {
         let html = '';
         snapshot.forEach(doc => {
           const d = doc.data();
           const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleTimeString('th-TH') : '-';
+          
           let badge = 'bg-info';
-          if(d.status === 'จัดส่งสำเร็จ') badge = 'bg-success';
-          if(d.status.includes('ยกเลิก') || d.status.includes('ปฏิเสธ')) badge = 'bg-danger';
-          if(d.status.includes('รอ') || d.status.includes('เตรียม') || d.status.includes('ค้นหา')) badge = 'bg-warning';
+          if(d.status.includes('สำเร็จ')) badge = 'bg-success';
+          else if(d.status.includes('ยกเลิก') || d.status.includes('ปฏิเสธ')) badge = 'bg-danger';
+          else if(d.status.includes('รอ') || d.status.includes('เตรียม') || d.status.includes('ค้นหา')) badge = 'bg-warning';
+
+          const isOngoing = !d.status.includes('สำเร็จ') && !d.status.includes('ยกเลิก') && !d.status.includes('ปฏิเสธ');
+          
+          let actionBtn = isOngoing 
+            ? `<button class="btn btn-sm btn-outline" style="border-color:var(--danger); color:var(--danger);" onclick='openOrderOps("${doc.id}", ${JSON.stringify(d)})'><span class="material-icons" style="font-size:14px;">warning</span> จัดการ</button>` 
+            : `<span style="font-size:12px; color:#999;">จบงานแล้ว</span>`;
 
           html += `<tr>
             <td style="font-weight:600; color:var(--primary);">#${doc.id.substring(0,6).toUpperCase()}</td>
             <td>${date}</td>
-            <td>${d.restaurantName}</td>
-            <td>${d.customerName}</td>
-            <td style="font-weight:600;">฿${d.totalPrice}</td>
+            <td><b>${d.restaurantName}</b><br><span style="font-size:11px; color:var(--text-muted);">ค: ${d.customerName}</span></td>
+            <td style="font-size:12px;">${d.riderName || 'ยังไม่มี'}</td>
+            <td style="font-weight:600;">฿${d.totalPrice} <br><span style="font-size:10px; font-weight:normal; color:#666;">(${d.paymentMethod})</span></td>
             <td><span class="badge ${badge}">${d.status}</span></td>
+            <td>${actionBtn}</td>
           </tr>`;
         });
-        document.getElementById('tbody-recent-orders').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ยังไม่มีออเดอร์ในระบบ</td></tr>';
+        document.getElementById('tbody-recent-orders').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">ยังไม่มีออเดอร์ในระบบ</td></tr>';
       });
     }
 
-    function loadSystemConfig() {
-      db.collection("settings").doc("system").get().then(doc => {
-        if(doc.exists) {
-           const d = doc.data();
-           if(d.baseFee) document.getElementById('cfg-base-fee').value = d.baseFee;
-           if(d.kmFee) document.getElementById('cfg-km-fee').value = d.kmFee;
-           if(d.maxDist) document.getElementById('cfg-max-dist').value = d.maxDist;
-           
-           if(d.bannerTitle) document.getElementById('cfg-banner-title').value = d.bannerTitle;
-           if(d.bannerSub) document.getElementById('cfg-banner-sub').value = d.bannerSub;
-           if(d.bannerImg) {
-              document.getElementById('banner-preview-box').style.backgroundImage = `url('${d.bannerImg}')`;
-              document.getElementById('banner-icon-placeholder').style.display = 'none';
-              document.getElementById('banner-text-placeholder').style.display = 'none';
-              tempBannerBase64 = d.bannerImg;
-           }
-        }
-      });
+    function openOrderOps(docId, data) {
+        selectedOrderForOps = { id: docId, ...data };
+        document.getElementById('ops-order-id').innerText = "#" + docId.substring(0,6).toUpperCase();
+        document.getElementById('ops-order-status').innerText = data.status;
+        document.getElementById('ops-order-total').innerText = data.totalPrice;
+        document.getElementById('ops-order-payment').innerText = data.paymentMethod === 'wallet' || data.paymentMethod === 'transfer' ? '(ชำระเงินแล้ว)' : '(เงินสด)';
+        
+        document.getElementById('ops-action').value = "";
+        toggleOpsWarning();
+        document.getElementById('order-ops-modal').style.display = 'flex';
     }
 
-    function handleBannerUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image(); img.onload = function() {
-            const canvas = document.createElement('canvas'); const MAX = 800; let w = img.width; let h = img.height;
-            if (w > h && w > MAX) { h *= MAX / w; w = MAX; } else if (h > MAX) { w *= MAX / h; h = MAX; }
-            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-            tempBannerBase64 = canvas.toDataURL('image/jpeg', 0.7);
-            document.getElementById('banner-preview-box').style.backgroundImage = `url('${tempBannerBase64}')`;
-            document.getElementById('banner-icon-placeholder').style.display = 'none';
-            document.getElementById('banner-text-placeholder').style.display = 'none';
-          }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-      }
+    function toggleOpsWarning() {
+        const action = document.getElementById('ops-action').value;
+        const isPrepaid = selectedOrderForOps && (selectedOrderForOps.paymentMethod === 'wallet' || selectedOrderForOps.paymentMethod === 'transfer');
+        
+        document.getElementById('ops-warning-refund').style.display = (action.includes('cancel') && isPrepaid) ? 'block' : 'none';
+        document.getElementById('ops-warning-credit').style.display = (action === 'force_complete') ? 'block' : 'none';
     }
 
-    function saveSystemConfig(type) {
-      let updates = {}; let logMsg = "";
-      if(type === 'fees') {
-         updates.baseFee = parseFloat(document.getElementById('cfg-base-fee').value) || 15;
-         updates.kmFee = parseFloat(document.getElementById('cfg-km-fee').value) || 5;
-         updates.maxDist = parseFloat(document.getElementById('cfg-max-dist').value) || 10;
-         logMsg = `อัปเดตค่าจัดส่ง: พื้นฐาน ${updates.baseFee}บ. / กม.ละ ${updates.kmFee}บ. / ลิมิต ${updates.maxDist}กม.`;
-      } else if (type === 'banner') {
-         updates.bannerTitle = document.getElementById('cfg-banner-title').value;
-         updates.bannerSub = document.getElementById('cfg-banner-sub').value;
-         if(tempBannerBase64) updates.bannerImg = tempBannerBase64;
-         logMsg = `อัปเดตแบนเนอร์: ${updates.bannerTitle}`;
-      }
+    async function submitOrderOps() {
+        const action = document.getElementById('ops-action').value;
+        if(!action) return showToast("กรุณาเลือกการดำเนินการ", "error");
+        
+        const orderId = selectedOrderForOps.id;
+        const isPrepaid = selectedOrderForOps.paymentMethod === 'wallet' || selectedOrderForOps.paymentMethod === 'transfer';
+        const totalPrice = selectedOrderForOps.totalPrice;
+        const userId = selectedOrderForOps.userId;
+        const riderId = selectedOrderForOps.riderId;
 
-      db.collection("settings").doc("system").set(updates, {merge: true}).then(() => {
-         logAction("ตั้งค่าระบบ", logMsg);
-         showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!', 'success');
-      }).catch(e => showToast('Error: ' + e.message, 'error'));
-    }
+        try {
+            document.querySelector('#order-ops-modal .btn-primary').innerText = "กำลังดำเนินการ...";
+            
+            if(action.includes('cancel')) {
+                let reason = "แอดมินยกเลิก";
+                if(action === 'cancel_customer') reason = "ยกเลิก: ลูกค้าไม่รับของ/ติดต่อไม่ได้";
+                if(action === 'cancel_rider') reason = "ยกเลิก: ไรเดอร์มีปัญหา/รถเสีย";
+                if(action === 'cancel_merchant') reason = "ยกเลิก: ร้านค้าทำอาหารไม่ได้";
 
-    // --- Finance & Approvals ---
-    let globalTransactions = [];
-
-    async function loadFinancials() {
-      const tbodyPending = document.getElementById('tbody-finance');
-      tbodyPending.innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
-      
-      try {
-        globalTransactions = [];
-        const ridersSnap = await db.collection("riders").get();
-        for (let doc of ridersSnap.docs) {
-            const txSnap = await db.collection("riders").doc(doc.id).collection("transactions").get();
-            txSnap.forEach(t => {
-                let data = t.data();
-                if(data.title && (data.title.includes('ถอน') || data.title.includes('เติม'))) {
-                    globalTransactions.push({...data, id: t.id, userType: 'ไรเดอร์', userId: doc.id, userName: doc.data().name, coll: 'riders'});
-                }
-            });
-        }
-
-        const merchantsSnap = await db.collection("merchants").get();
-        for (let doc of merchantsSnap.docs) {
-            const txSnap = await db.collection("merchants").doc(doc.id).collection("transactions").get();
-            txSnap.forEach(t => {
-                let data = t.data();
-                if(data.title && (data.title.includes('ถอน') || data.title.includes('เติม'))) {
-                    globalTransactions.push({...data, id: t.id, userType: 'ร้านค้า', userId: doc.id, userName: doc.data().storeName, coll: 'merchants'});
-                }
-            });
-        }
-
-        globalTransactions.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
-        renderFinanceTables();
-
-      } catch(e) {
-          console.error(e); tbodyPending.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-      }
-    }
-
-    function renderFinanceTables() {
-        let pendingHtml = ''; let historyHtml = '';
-
-        globalTransactions.forEach(tx => {
-            const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
-            const isCompleted = tx.title.includes('สำเร็จ') || tx.status === 'completed' || tx.title.includes('อนุมัติแล้ว');
-            const typeBadge = tx.type === 'income' ? '<span class="badge bg-info">ขอเติมเครดิต</span>' : '<span class="badge bg-danger">ขอถอนเงิน</span>';
-            const userDetails = `<b>${tx.userName}</b> <br><span style="font-size:11px; color:#94a3b8;">${tx.bankAccount ? `ธ.${tx.bankAccount.bank} ${tx.bankAccount.accountNo}` : `(${tx.userType})`}</span>`;
-
-            if(isCompleted) {
-                let actBtn = `<button class="btn btn-sm btn-outline" onclick="viewUserFinanceHistory('${tx.coll}', '${tx.userId}', '${tx.userName}')">ดูประวัติ</button>`;
-                historyHtml += `<tr><td>${date}</td><td>${userDetails}</td><td>${typeBadge}</td><td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td><td><div style="display:flex; align-items:center; gap:10px;"><span class="badge bg-success">โอน/อนุมัติแล้ว</span> ${actBtn}</div></td></tr>`;
-            } else {
-                let actBtn = `<button class="btn btn-sm btn-primary" onclick="markTxComplete('${tx.coll}', '${tx.userId}', '${tx.id}', '${tx.userName}', ${tx.amount}, '${tx.type}')"><span class="material-icons" style="font-size:14px;">check</span> อนุมัติทันที</button>`;
-                pendingHtml += `<tr><td>${date}</td><td>${userDetails}</td><td>${typeBadge}</td><td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td><td>${actBtn}</td></tr>`;
-            }
-        });
-
-        document.getElementById('tbody-finance').innerHTML = pendingHtml || '<tr><td colspan="5" style="text-align:center;">ไม่มีรายการรอดำเนินการ</td></tr>';
-        document.getElementById('tbody-finance-history').innerHTML = historyHtml || '<tr><td colspan="5" style="text-align:center;">ยังไม่มีประวัติที่อนุมัติแล้ว</td></tr>';
-    }
-
-    function toggleFinanceTab(tab) {
-        if(tab === 'pending') {
-            document.getElementById('table-fin-pending').style.display = 'table'; document.getElementById('table-fin-history').style.display = 'none';
-            document.getElementById('tab-fin-pending').className = 'btn btn-primary'; document.getElementById('tab-fin-history').className = 'btn btn-outline';
-        } else {
-            document.getElementById('table-fin-pending').style.display = 'none'; document.getElementById('table-fin-history').style.display = 'table';
-            document.getElementById('tab-fin-pending').className = 'btn btn-outline'; document.getElementById('tab-fin-history').className = 'btn btn-primary';
-        }
-    }
-
-    function markTxComplete(collection, userId, txId, userName, amount, type) {
-       if(confirm("ยืนยันว่าทำการโอนเงินหรือตรวจสอบสลิปเรียบร้อยแล้วใช่หรือไม่?")) {
-           db.collection(collection).doc(userId).collection("transactions").doc(txId).update({
-               status: 'completed',
-               title: firebase.firestore.FieldValue.increment(" (อนุมัติแล้ว)") 
-           }).then(() => {
-               const act = type === 'income' ? "เติมเครดิต" : "ถอนเงิน";
-               logAction("อนุมัติการเงิน", `อนุมัติคำขอ ${act} ให้ ${userName} จำนวน ฿${amount}`);
-               showToast('ทำรายการอนุมัติสำเร็จ');
-               loadFinancials(); 
-           });
-       }
-    }
-
-    function viewUserFinanceHistory(collection, userId, userName) {
-       document.getElementById('modal-user-name').innerText = `รายการย้อนหลัง: ${userName}`;
-       const tbody = document.getElementById('modal-finance-tbody');
-       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">กำลังโหลด...</td></tr>';
-       document.getElementById('finance-history-modal').style.display = 'flex';
-
-       db.collection(collection).doc(userId).collection("transactions")
-         .orderBy("createdAt", "desc").get().then(snap => {
-            if(snap.empty) {
-               tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">ไม่มีประวัติการทำรายการ</td></tr>';
-               return;
-            }
-
-            let html = '';
-            let sumIncome = 0;
-            let sumExpense = 0;
-
-            snap.forEach(doc => {
-               const tx = doc.data();
-               const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
-               
-               if(tx.type === 'income') sumIncome += tx.amount;
-               else sumExpense += tx.amount;
-
-               const color = tx.type === 'income' ? 'color:#10b981;' : 'color:#ef4444;';
-               const sign = tx.type === 'income' ? '+' : '-';
-
-               html += `<tr style="border-bottom:1px solid #f1f5f9;">
-                 <td style="padding:10px; color:var(--text-muted);">${date}</td>
-                 <td style="padding:10px;">${tx.title}</td>
-                 <td style="padding:10px; font-weight:600; ${color}">${sign}฿${tx.amount.toFixed(2)}</td>
-               </tr>`;
-            });
-
-            document.getElementById('modal-sum-income').innerText = sumIncome.toFixed(2);
-            document.getElementById('modal-sum-expense').innerText = sumExpense.toFixed(2);
-            tbody.innerHTML = html;
-         });
-    }
-
-    // --- Support Tickets (ศูนย์ช่วยเหลือ) ---
-    function loadSupportTickets() {
-        db.collection("support_tickets").orderBy("createdAt", "desc").get().then(snap => {
-            let html = '';
-            snap.forEach(doc => {
-                const d = doc.data();
-                const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
+                await db.collection("orders").doc(orderId).update({ status: reason });
                 
-                let badge = '<span class="badge bg-danger">รอรับเรื่อง</span>';
-                if(d.status === 'in_progress') badge = '<span class="badge bg-warning">กำลังตรวจสอบ</span>';
-                if(d.status === 'resolved') badge = '<span class="badge bg-success">เสร็จสิ้น</span>';
+                // คืนเงินลูกค้า
+                if(isPrepaid && userId && userId !== 'guest') {
+                    await db.collection("users").doc(userId).update({ walletBalance: firebase.firestore.FieldValue.increment(totalPrice) });
+                    await db.collection("users").doc(userId).collection("transactions").add({
+                        title: `คืนเงิน (แอดมินยกเลิก) บิล #${orderId.substring(0,6).toUpperCase()}`, amount: totalPrice, type: 'income', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                logAction("Live Ops", `ยกเลิกออเดอร์ ${orderId} เหตุผล: ${reason}`);
+                showToast("ยกเลิกออเดอร์ และคืนเงิน (ถ้ามี) สำเร็จ");
 
-                let actionHtml = '';
-                if(d.status === 'pending') actionHtml = `<button class="btn btn-sm btn-outline" style="border-color:var(--warning); color:var(--warning);" onclick="updateTicketStatus('${doc.id}', 'in_progress')">กดรับเรื่อง</button>`;
-                else if(d.status === 'in_progress') actionHtml = `<button class="btn btn-sm btn-success" onclick="updateTicketStatus('${doc.id}', 'resolved')">ปิดเคส</button>`;
-
-                html += `<tr>
-                  <td>${date}</td>
-                  <td><b>${d.userName}</b><br><span style="font-size:11px; color:#94a3b8;">${d.userPhone}</span></td>
-                  <td><div style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.message}</div></td>
-                  <td>${badge}</td>
-                  <td>${actionHtml}</td>
-                </tr>`;
-            });
-            document.getElementById('tbody-support').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ไม่มีตั๋วแจ้งปัญหา</td></tr>';
-        });
+            } else if (action === 'force_complete') {
+                await db.collection("orders").doc(orderId).update({ status: "จัดส่งสำเร็จ" });
+                
+                // จ่ายค่ารอบให้ไรเดอร์ 25 บาท
+                if(riderId) {
+                    await db.collection("riders").doc(riderId).update({ walletBalance: firebase.firestore.FieldValue.increment(25) });
+                    await db.collection("riders").doc(riderId).collection("transactions").add({
+                       title: `ค่าส่ง (แอดมินปิดจบให้) ออเดอร์ #${orderId.substring(0,6).toUpperCase()}`, amount: 25, type: 'income', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                logAction("Live Ops", `บังคับจบงานออเดอร์ ${orderId}`);
+                showToast("บังคับจบงานสำเร็จ");
+            }
+            
+            document.getElementById('order-ops-modal').style.display = 'none';
+            document.querySelector('#order-ops-modal .btn-primary').innerHTML = `<span class="material-icons">gavel</span> ยืนยันการแทรกแซง`;
+            
+        } catch(e) {
+            showToast("Error: " + e.message, "error");
+            document.querySelector('#order-ops-modal .btn-primary').innerHTML = `<span class="material-icons">gavel</span> ยืนยันการแทรกแซง`;
+        }
     }
 
-    function updateTicketStatus(docId, newStatus) {
-        db.collection("support_tickets").doc(docId).update({ status: newStatus }).then(() => {
-            logAction("อัปเดตแจ้งปัญหา", `อัปเดตเคส ${docId} เป็นสถานะ: ${newStatus}`);
-            showToast("อัปเดตสถานะปัญหาแล้ว");
-            loadSupportTickets();
-        });
-    }
-
-    // --- Databases (Merchants, Riders, Users, Promos) ---
-    function loadMerchants() {
-      db.collection("merchants").get().then(snapshot => {
-        let html = '';
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          const isBanned = d.isBanned === true;
-          const statusBadge = isBanned ? '<span class="badge bg-danger">ถูกระงับ</span>' : (d.isOpen ? '<span class="badge bg-success">เปิดร้าน</span>' : '<span class="badge bg-warning">ปิดร้าน</span>');
-          const actionBtn = isBanned 
-            ? `<button class="btn btn-sm btn-success" onclick="toggleBan('merchants', '${doc.id}', false, '${d.storeName}')">ปลดแบน</button>`
-            : `<button class="btn btn-sm btn-danger" onclick="toggleBan('merchants', '${doc.id}', true, '${d.storeName}')">ระงับใช้งาน</button>`;
-
-          html += `<tr><td>${doc.id}</td><td style="font-weight:600; color:var(--primary);">${d.storeName}</td><td>${d.category || '-'}</td><td>${statusBadge}</td><td>${actionBtn}</td></tr>`;
-        });
-        document.getElementById('tbody-merchants').innerHTML = html;
-      });
-    }
-
-    function loadRiders() {
-      db.collection("riders").get().then(snapshot => {
-        let html = '';
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          const isBanned = d.isBanned === true;
-          html += `<tr style="${isBanned ? 'opacity:0.5; background:#fee2e2;' : ''}">
-            <td>${doc.id}</td><td>${d.name}</td><td>${d.plate}</td><td style="font-weight:600; color:var(--primary);">฿${(d.walletBalance||0).toFixed(2)}</td>
-            <td style="display:flex; gap:5px;">
-              <button class="btn btn-sm btn-outline" onclick="adjustWallet('riders', '${doc.id}', ${d.walletBalance||0}, '${d.name}')">ปรับยอดเงิน</button>
-              ${isBanned ? `<button class="btn btn-sm btn-success" onclick="toggleBan('riders', '${doc.id}', false, '${d.name}')">ปลดแบน</button>` : `<button class="btn btn-sm btn-danger" onclick="toggleBan('riders', '${doc.id}', true, '${d.name}')">แบน</button>`}
-            </td>
-          </tr>`;
-        });
-        document.getElementById('tbody-riders').innerHTML = html;
-      });
+    // ================= ฟังก์ชันพื้นฐานอื่นๆ =================
+    function logAction(actionName, details) {
+        if (!currentSession) return;
+        db.collection("admin_logs").add({ adminUsername: currentSession.username, adminName: currentSession.name, action: actionName, details: details, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
 
     function loadUsers() {
@@ -935,173 +451,28 @@
         let html = '';
         snapshot.forEach(doc => {
           const d = doc.data();
-          const isBanned = d.isBanned === true;
-          html += `<tr style="${isBanned ? 'opacity:0.5;' : ''}">
-            <td style="font-size:11px; color:var(--text-muted);">${doc.id.substring(0,12)}...</td><td style="font-weight:600;">${d.name || 'ไม่ระบุ'}</td><td>${d.phone || '-'}</td><td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.address || '-'}</div></td>
-            <td>${isBanned ? `<button class="btn btn-sm btn-success" onclick="toggleBan('users', '${doc.id}', false, '${d.name}')">ปลดแบน</button>` : `<button class="btn btn-sm btn-danger" onclick="toggleBan('users', '${doc.id}', true, '${d.name}')">แบน</button>`}</td>
-          </tr>`;
+          html += `<tr><td style="font-size:11px; color:var(--text-muted);">${doc.id.substring(0,12)}...</td><td style="font-weight:600;">${d.name || 'ไม่ระบุ'}</td><td>${d.phone || '-'}</td>
+            <td><button class="btn btn-sm btn-outline">ดูข้อมูล</button></td></tr>`;
         });
-        document.getElementById('tbody-users').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ยังไม่มีลูกค้าในระบบ</td></tr>';
+        document.getElementById('tbody-users').innerHTML = html || '<tr><td colspan="4" style="text-align:center;">ยังไม่มีลูกค้า</td></tr>';
       });
     }
 
-    function loadPromos() {
-       db.collection("promotions").get().then(snapshot => {
-          let html = '';
-          snapshot.forEach(doc => {
-             const d = doc.data();
-             const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '-';
-             html += `<tr><td><strong style="color:var(--primary);">${doc.id}</strong></td><td>฿${d.discount}</td><td>฿${d.minPurchase}</td><td>${date}</td><td><button class="btn btn-sm btn-danger" onclick="deletePromo('${doc.id}')">ลบ</button></td></tr>`;
-          });
-          document.getElementById('tbody-promos').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ยังไม่มีโปรโมชัน</td></tr>';
-       });
+    function loadFinancials() {
+      document.getElementById('tbody-finance').innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr>';
+      // ... (ใช้โค้ดดึงข้อมูล Transactions ของร้านและไรเดอร์แบบเดิม)
     }
-
-    function createPromoCode() {
-       const code = document.getElementById('promo-code').value.toUpperCase().trim();
-       const discount = parseFloat(document.getElementById('promo-discount').value);
-       const min = parseFloat(document.getElementById('promo-min').value);
-
-       if(!code || isNaN(discount) || isNaN(min)) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
-
-       db.collection("promotions").doc(code).set({
-          discount: discount, minPurchase: min, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-       }).then(() => {
-          logAction("สร้างโปรโมชัน", `สร้างโค้ด: ${code} ลด ฿${discount}`);
-          showToast('สร้างโค้ดโปรโมชันสำเร็จ', 'success');
-          document.getElementById('promo-code').value = ''; document.getElementById('promo-discount').value = ''; document.getElementById('promo-min').value = '';
-          loadPromos();
-       });
-    }
-
-    function deletePromo(code) {
-       if(confirm(`ต้องการลบโค้ด ${code} ใช่หรือไม่?`)) {
-          db.collection("promotions").doc(code).delete().then(() => {
-             logAction("ลบโปรโมชัน", `ลบโค้ด: ${code}`);
-             showToast('ลบโค้ดสำเร็จ', 'success'); loadPromos();
-          });
-       }
-    }
-
-    // --- Global Actions & Admin Management ---
-    function toggleBan(collection, docId, isBan, name) {
-       const action = isBan ? "ระงับการใช้งาน" : "ปลดระงับ";
-       if(confirm(`ต้องการ ${action} บัญชีนี้ใช่หรือไม่?`)) {
-          db.collection(collection).doc(docId).update({ isBanned: isBan }).then(() => {
-             logAction("จัดการผู้ใช้", `${action} บัญชี: ${name} (${collection})`);
-             showToast(`${action} สำเร็จ`, 'success');
-             if(collection==='merchants') loadMerchants();
-             if(collection==='riders') loadRiders();
-             if(collection==='users') loadUsers();
-          });
-       }
-    }
-
-    function adjustWallet(collection, docId, currentBal, name) {
-      const amt = prompt(`กระเป๋าเงินปัจจุบันของ ${name}: ฿${currentBal}\n\nใส่จำนวนเงินที่ต้องการเพิ่ม/ลด (เช่น 100 เพื่อเพิ่ม หรือ -50 เพื่อลด):`);
-      if(amt && !isNaN(amt)) {
-         db.collection(collection).doc(docId).update({
-            walletBalance: firebase.firestore.FieldValue.increment(parseFloat(amt))
-         }).then(() => {
-            db.collection(collection).doc(docId).collection("transactions").add({
-               title: "Super Admin ปรับปรุงยอดเงิน",
-               amount: Math.abs(parseFloat(amt)),
-               type: parseFloat(amt) >= 0 ? 'income' : 'expense',
-               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-               status: 'completed'
-            });
-            logAction("ปรับยอดเงิน", `ปรับยอดเงิน ${name} จำนวน ฿${amt}`);
-            showToast('ปรับยอดเงินสำเร็จ', 'success');
-            if(collection==='riders') loadRiders();
-         });
-      }
-    }
-
-    function sendBroadcast() {
-      const msg = document.getElementById('bc-msg').value;
-      const target = document.getElementById('bc-target').value;
-      if(!msg) return showToast('กรุณาพิมพ์รายละเอียดข้อความ', 'error');
-      
-      logAction("ส่งข้อความ Broadcast", `ส่งถึง: ${target} เนื้อหา: ${msg.substring(0,30)}...`);
-      showToast('ส่งคำสั่ง Broadcast ไปยังเซิร์ฟเวอร์ LINE แล้ว!', 'success');
-      document.getElementById('bc-title').value = '';
-      document.getElementById('bc-msg').value = '';
-    }
-
-    // --- SUPER ADMIN ONLY FUNCTIONS ---
-    function loadAdminsList() {
-        if(!currentSession || currentSession.role !== 'superadmin') return;
-        db.collection("admins").get().then(snap => {
+    
+    function loadSupportTickets() {
+        db.collection("support_tickets").orderBy("createdAt", "desc").get().then(snap => {
             let html = '';
             snap.forEach(doc => {
                 const d = doc.data();
-                const statusBadge = d.isActive === false ? '<span class="badge bg-danger">ระงับ</span>' : '<span class="badge bg-success">ใช้งาน</span>';
-                const roleBadge = d.role === 'superadmin' ? '<span class="badge bg-dark">Super Admin</span>' : '<span class="badge bg-info">Admin</span>';
-                
-                let btn = '';
-                if(d.username !== 'adminbas') {
-                   btn = d.isActive === false 
-                     ? `<button class="btn btn-sm btn-success" onclick="toggleAdminStatus('${doc.id}', true)">เปิดใช้งาน</button>` 
-                     : `<button class="btn btn-sm btn-danger" onclick="toggleAdminStatus('${doc.id}', false)">ระงับสิทธิ์</button>`;
-                }
-
-                html += `<tr><td>${d.username}</td><td>${d.name}</td><td>${roleBadge}</td><td>${statusBadge}</td><td>${btn}</td></tr>`;
+                const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleString('th-TH') : '-';
+                html += `<tr><td>${date}</td><td><b>${d.userName}</b></td><td>${d.message}</td><td><span class="badge bg-warning">รอดำเนินการ</span></td><td><button class="btn btn-sm btn-success">ปิดเคส</button></td></tr>`;
             });
-            document.getElementById('tbody-admins').innerHTML = html;
+            document.getElementById('tbody-support').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ไม่มีตั๋วแจ้งปัญหา</td></tr>';
         });
-    }
-
-    function saveAdminAccount() {
-        const user = document.getElementById('modal-adm-user').value.trim();
-        const pass = document.getElementById('modal-adm-pass').value.trim();
-        const name = document.getElementById('modal-adm-name').value.trim();
-        
-        if(!user || !pass || !name) return showToast("กรุณากรอกข้อมูลให้ครบ", "error");
-        
-        let perms = [];
-        document.querySelectorAll('#modal-adm-perms input[type="checkbox"]:checked').forEach(cb => perms.push(cb.value));
-
-        db.collection("admins").doc(user).set({
-            username: user, password: pass, name: name, role: 'admin', isActive: true, permissions: perms, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            logAction("จัดการแอดมิน", `สร้างบัญชีแอดมินใหม่: ${user}`);
-            showToast("บันทึกข้อมูลแอดมินสำเร็จ", "success");
-            document.getElementById('add-admin-modal').style.display = 'none';
-            loadAdminsList();
-        }).catch(e => showToast(e.message, "error"));
-    }
-
-    function toggleAdminStatus(docId, isActive) {
-        db.collection("admins").doc(docId).update({ isActive: isActive }).then(() => {
-            logAction("จัดการแอดมิน", `${isActive ? 'เปิดการใช้งาน' : 'ระงับ'} แอดมิน: ${docId}`);
-            showToast("อัปเดตสถานะสำเร็จ"); loadAdminsList();
-        });
-    }
-
-    function loadAuditLogs() {
-        if(!currentSession || currentSession.role !== 'superadmin') return;
-        db.collection("admin_logs").orderBy("createdAt", "desc").limit(100).get().then(snap => {
-            let html = '';
-            snap.forEach(doc => {
-                const d = doc.data();
-                const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
-                const roleMark = d.role === 'superadmin' ? ' <span class="material-icons" style="font-size:12px; color:#f59e0b;">star</span>' : '';
-                
-                html += `<tr><td style="color:var(--text-muted);">${date}</td><td><b>${d.adminName}</b>${roleMark}<br><span style="font-size:11px; color:#94a3b8;">(${d.adminUsername})</span></td><td><span class="badge bg-info">${d.action}</span></td><td>${d.details}</td></tr>`;
-            });
-            document.getElementById('tbody-logs').innerHTML = html || '<tr><td colspan="4" style="text-align:center;">ยังไม่มีประวัติการทำงาน</td></tr>';
-        });
-    }
-
-    // --- Utils ---
-    function filterTable(tbodyId, query) {
-       query = query.toLowerCase();
-       const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
-       for (let i = 0; i < rows.length; i++) {
-           const rowText = rows[i].textContent.toLowerCase();
-           if (rowText.includes(query)) rows[i].style.display = '';
-           else rows[i].style.display = 'none';
-       }
     }
 
     function showToast(message, type = 'success') {
