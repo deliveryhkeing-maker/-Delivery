@@ -3,381 +3,234 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
+  <!-- Anti-Cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   
-  <title>Rider App - คนขับ</title>
+  <title>Rider App - ห้วยเกิ้ง Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <style>
     :root {
-      --rider-primary: #FF7300; --rider-dark: #cc5c00; --bg-color: #f0f2f5;
-      --text-dark: #1a1a1a; --text-light: #757575; --white: #ffffff;
-      --success: #00B900; --danger: #f44336;
+      --rider-primary: #f97316; /* สีส้มไรเดอร์ */
+      --rider-dark: #c2410c;
+      --bg-color: #f8fafc;
+      --white: #ffffff;
+      --text-dark: #0f172a;
+      --text-light: #64748b;
+      --success: #10b981;
+      --danger: #ef4444;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Prompt', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark); padding-bottom: 70px; }
+    * { box-sizing: border-box; font-family: 'Prompt', sans-serif; }
+    body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    .screen { display: none; min-height: 100vh; flex-direction: column; }
-    
-    .auth-screen { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); padding: 20px; }
-    .auth-card { background: var(--white); width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
-    .input-group { margin-bottom: 15px; text-align: left; }
-    .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-    .input-group input { width: 100%; padding: 14px; border: 1.5px solid #ddd; border-radius: 12px; font-family: 'Prompt'; font-size: 15px; outline: none; transition: 0.3s; }
-    .input-group input:focus { border-color: var(--rider-primary); }
-    
-    .btn-main { width: 100%; background-color: var(--rider-primary); color: white; border: none; border-radius: 12px; padding: 15px; font-family: 'Prompt'; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,115,0,0.3); transition: 0.2s;}
-    .btn-main:active { transform: scale(0.98); }
-    .btn-text { background: none; border: none; color: var(--rider-primary); font-family: 'Prompt'; font-weight: 500; cursor: pointer; margin-top: 15px; font-size: 14px; text-decoration: underline; }
+    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow: hidden; animation: fadeIn 0.3s ease; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 400; }
-    .rider-profile { display: flex; align-items: center; gap: 12px; }
-    .profile-img { width: 40px; height: 40px; border-radius: 50%; background-color: #eee; display: flex; justify-content: center; align-items: center; overflow: hidden; background-position: center; background-size: cover; }
+    .rider-header { background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(249, 115, 22, 0.2); z-index: 10; position: relative; }
     
-    .status-toggle { display: flex; align-items: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-    .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 8px rgba(0,185,0,0.5); transition: 0.3s; }
-    .status-toggle.offline { background: rgba(244,67,54,0.1); color: var(--danger); }
-    .status-toggle.offline .status-dot { background-color: var(--danger); box-shadow: 0 0 8px rgba(244,67,54,0.5); }
-
-    .map-container { flex-grow: 1; position: relative; background: #e0e0e0; }
-    #rider-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    
-    .gps-follow-btn { position: absolute; bottom: 100px; right: 20px; width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 50; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
-    .gps-follow-btn.active { border-color: #4285F4; color: #4285F4; }
-    
-    .order-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; justify-content: center; align-items: flex-end; }
-    .order-alert-content { background: var(--white); width: 100%; border-radius: 24px 24px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    
-    .job-details { background: var(--bg-color); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-    .location-row { display: flex; margin-bottom: 15px; position: relative; }
-    .loc-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 15px; z-index: 2; flex-shrink: 0; color: white; }
-    
-    .order-panel { background: var(--white); border-radius: 24px 24px 0 0; padding: 25px; position: absolute; bottom: 0px; left: 0; width: 100%; z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
-    .order-panel.collapsed { transform: translateY(85%); }
-    .drag-handle { width: 40px; height: 5px; background: #ccc; border-radius: 5px; margin: 0 auto 15px; cursor: pointer; }
-    .total-collect { background: var(--bg-color); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-left: 5px solid var(--rider-primary); }
-
-    .btn-nav-map { display: flex; align-items: center; justify-content: center; gap: 8px; background: #4285F4; color: white; padding: 12px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-bottom: 10px; width: 100%; border: none; font-family: 'Prompt'; font-size: 15px; }
-    .btn-call { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0,185,0,0.1); color: var(--success); padding: 12px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-bottom: 15px; width: 100%; border: none; font-family: 'Prompt'; font-size: 15px;}
-
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--white); display: flex; justify-content: space-around; padding: 10px 0 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 400; border-top: 1px solid #eee; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; color: #b0b0b0; font-size: 11px; gap: 4px; cursor: pointer; width: 33.33%; transition: 0.2s; }
-    .nav-item.active { color: var(--rider-primary); }
-    
-    .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; transform: translateX(-50%); bottom: 90px; font-size: 15px; opacity: 0; transition: 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .toast.show { visibility: visible; opacity: 1; }
-
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 600; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-    .modal-content { background: var(--white); width: 90%; max-width: 320px; border-radius: 16px; padding: 25px; text-align: center; }
-    
-    .chat-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 700; justify-content: center; align-items: flex-end; }
-    .chat-sheet { background: var(--bg-color); width: 100%; height: 80vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; }
-    .chat-header { background: white; padding: 15px 20px; border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; }
-    .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .chat-input-area { background: white; padding: 15px 20px; display: flex; gap: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-    .chat-input-area input { flex-grow: 1; background: #f1f5f9; border: none; border-radius: 20px; padding: 10px 15px; font-family: 'Prompt'; outline: none; }
-    .btn-send { background: var(--rider-primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-    
-    /* 🌟 ทำให้ไอคอน GPS ไรเดอร์และลูกค้าไหลแบบสมูท (Real-time Glide) */
+    #rider-map { flex-grow: 1; width: 100%; z-index: 1; }
     .leaflet-marker-icon { transition: transform 2s ease-in-out !important; }
+    
+    /* เมนูด้านล่าง */
+    .bottom-nav { background: var(--white); display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid #e2e8f0; z-index: 10; position: relative; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-light); font-size: 12px; cursor: pointer; position: relative; }
+    .nav-item.active { color: var(--rider-primary); }
+    .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
+    .nav-badge { position: absolute; top: -5px; right: 10%; background: var(--danger); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; display: none; }
 
-    /* CSS สำหรับกระเป๋าเงินและสถิติไรเดอร์ */
-    .wallet-card-rider { background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); border-radius: 20px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(255, 115, 0, 0.2); }
-    .tx-item { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .tx-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center; margin-right: 12px; }
-    .tx-icon.income { background: rgba(0, 185, 0, 0.1); color: var(--success); }
-    .tx-icon.expense { background: rgba(244, 67, 54, 0.1); color: var(--danger); }
-
-    /* CRM Stats */
+    .btn-main { background: var(--rider-primary); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(249,115,22,0.3); transition: 0.2s; }
+    .btn-main:active { transform: scale(0.98); }
+    
+    /* Wallet */
+    .wallet-card-rider { background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); border-radius: 20px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2); }
+    .tx-item { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
+    
+    /* CRM Grid */
     .crm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
     .crm-box { background: var(--white); border-radius: 12px; padding: 15px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
     .crm-title { font-size: 11px; color: var(--text-light); margin-bottom: 5px; }
     .crm-value { font-size: 16px; font-weight: 700; color: var(--rider-primary); }
-    
-    .qr-box { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .qr-image { width: 180px; height: 180px; margin: 15px auto; background: #f0f0f0; border-radius: 8px; padding: 10px; }
 
-    /* CSS สำหรับหน้าโปรไฟล์ */
-    .card-box { background: var(--white); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .image-upload-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-    .image-preview { width: 100px; height: 100px; border-radius: 50%; background-color: #e2e8f0; border: 2px dashed #cbd5e1; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 10px; position: relative; cursor: pointer; background-size: cover; background-position: center; transition: 0.3s; }
-    .image-preview.rect { border-radius: 12px; width: 100%; height: 160px; }
-    .image-preview .material-icons { font-size: 30px; color: #94a3b8; }
-    .file-input { display: none; }
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
+    .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; text-align: left; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: 'Prompt'; outline: none; }
+
+    /* Chat */
+    .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+    .chat-bubble { max-width: 75%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
+    .chat-bubble.me { background: var(--rider-primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-bubble.other { background: white; color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
+
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; z-index: 10000; display: none; white-space: nowrap; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .toast.show { display: block; animation: fadeUp 0.3s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
   </style>
 </head>
 <body>
 
-  <div id="login-screen" class="screen auth-screen" style="display: flex;">
-    <div class="auth-card">
-      <div style="font-size: 48px; color: var(--rider-primary); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">sports_motorsports</span></div>
-      <h2 style="margin: 0 0 5px;">Rider App</h2>
-      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">เข้าสู่ระบบคนขับ</p>
-      <div class="input-group"><label>เบอร์โทรศัพท์</label><input type="tel" id="login-phone" placeholder="08X-XXX-XXXX"></div>
-      <button class="btn-main" onclick="riderLogin()">เข้าสู่ระบบ / รับงาน</button>
-      <button class="btn-text" onclick="showAuthScreen('register-screen')">สมัครเป็นคนขับ</button>
-    </div>
-  </div>
-
-  <div id="register-screen" class="screen auth-screen">
-    <div class="auth-card">
-      <h2 style="margin: 0 0 20px;">สมัครคนขับใหม่</h2>
-      <div class="input-group"><label>ชื่อ - นามสกุล</label><input type="text" id="reg-name" placeholder="ชื่อ นามสกุล"></div>
-      <div class="input-group"><label>เบอร์โทรศัพท์ (ใช้เข้าระบบ)</label><input type="tel" id="reg-phone" placeholder="08X-XXX-XXXX"></div>
-      <div class="input-group"><label>ทะเบียนรถ</label><input type="text" id="reg-plate" placeholder="เช่น 1กข 1234 อด"></div>
-      <button class="btn-main" onclick="riderRegister()">สร้างบัญชีคนขับ</button>
-      <button class="btn-text" style="color: var(--text-light);" onclick="showAuthScreen('login-screen')">กลับไปเข้าสู่ระบบ</button>
-    </div>
-  </div>
-
-  <div id="map-screen" class="screen">
+  <!-- ================= MAP SCREEN (รับงาน) ================= -->
+  <div id="map-screen" class="screen active">
     <div class="rider-header">
-      <div class="rider-profile">
-        <div class="profile-img" id="map-profile-img"><span class="material-icons" style="color: #999;" id="map-profile-icon">person</span></div>
-        <div><div style="font-weight: 600; font-size: 15px;" id="display-rider-name">กำลังโหลด...</div><div style="font-size: 12px; color: var(--text-light);" id="display-rider-plate">ทะเบียน</div></div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:40px; height:40px; background:#fff; border-radius:50%; overflow:hidden; display:flex; justify-content:center; align-items:center;">
+          <span class="material-icons" style="color:var(--rider-primary);">sports_motorsports</span>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:15px;" id="display-rider-name">กำลังโหลด...</h3>
+          <p style="margin:0; font-size:12px; opacity:0.9;" id="display-rider-plate">-</p>
+        </div>
       </div>
-      <div class="status-toggle" id="status-btn" onclick="toggleOnlineStatus()">
-        <div class="status-dot"></div> <span id="status-text">ออนไลน์</span>
+      <div>
+        <label style="display:flex; align-items:center; gap:5px; font-size:13px; font-weight:600; cursor:pointer;">
+          <input type="checkbox" id="online-toggle" style="width:18px; height:18px; accent-color:#10b981;" onchange="toggleOnlineStatus()">
+          <span id="online-status-text">ปิดรับงาน</span>
+        </label>
       </div>
     </div>
-
-    <div class="map-container">
-      <div id="rider-map"></div>
-      
-      <div class="gps-follow-btn active" id="gps-follow-btn" onclick="toggleGPSFollow()">
-        <span class="material-icons">my_location</span>
-      </div>
-      
-      <!-- Panel รับงาน -->
-      <div class="order-panel collapsed" id="active-order-panel" style="display:none;">
-        <div class="drag-handle" onclick="togglePanel()"></div>
-        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
-          <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="profile-img" style="background:var(--rider-primary); color:white;"><span class="material-icons">receipt</span></div>
-            <div>
-               <div style="font-weight: 600; font-size: 16px;" id="active-res-name">ร้านอาหาร</div>
-               <div style="font-size: 13px; color: var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</div>
-            </div>
-          </div>
-        </div>
-        
-        <div style="display: flex; gap:10px; flex-wrap: wrap; margin-bottom: 15px;">
-          <a href="#" id="nav-btn" target="_blank" class="btn-nav-map" style="flex: 1 1 100%; margin-bottom: 0;"><span class="material-icons">navigation</span> นำทางไปร้าน</a>
-          
-          <button id="chat-cus-btn" onclick="openChatModal()" class="btn-call" style="position:relative; background:rgba(33, 150, 243, 0.1); color:#2196F3; flex: 1; margin-bottom: 0;">
-            <span class="material-icons">chat</span> แชท
-            <span id="chat-badge" style="display:none; position:absolute; top:-5px; right:-5px; background:var(--danger); border-radius:50%; width:14px; height:14px; border:2px solid white;"></span>
+    
+    <div id="rider-map"></div>
+    
+    <!-- Active Order Panel (แสดงเมื่อมีงาน) -->
+    <div id="active-order-panel" style="display:none; position:absolute; bottom:15px; left:15px; right:15px; background:white; border-radius:20px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:1000;">
+       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+         <div>
+            <h3 style="margin:0 0 5px; color:var(--rider-primary); font-size:16px;">ออเดอร์ปัจจุบัน</h3>
+            <p style="margin:0; font-size:13px; font-weight:600;" id="active-res-name">ชื่อร้าน</p>
+            <p style="margin:0; font-size:12px; color:var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</p>
+         </div>
+         <div style="text-align:right;">
+            <h2 style="margin:0; font-size:22px; color:var(--rider-primary);">฿<span id="active-total">0</span></h2>
+            <p style="margin:0; font-size:11px; color:var(--text-light);" id="active-pay-method">(เก็บเงินสด)</p>
+         </div>
+       </div>
+       <div style="display:flex; gap:10px;">
+          <button class="btn-main" id="job-action-btn" onclick="updateOrderStatus()">ไปรับอาหาร</button>
+          <button style="background:var(--bg-color); border:1px solid #e2e8f0; border-radius:12px; width:50px; display:flex; justify-content:center; align-items:center; position:relative;" onclick="openChatModal()">
+             <span class="material-icons" style="color:var(--text-dark);">chat</span>
+             <div id="chat-badge" style="display:none; position:absolute; top:-5px; right:-5px; width:12px; height:12px; background:var(--danger); border-radius:50%; border:2px solid white;"></div>
           </button>
-          
-          <a href="#" id="call-cus-btn" class="btn-call" style="flex: 1; margin-bottom: 0;"><span class="material-icons">call</span> โทรหาลูกค้า</a>
-        </div>
-        
-        <div style="flex-grow: 1; max-height: 120px; overflow-y:auto; margin-bottom: 15px;">
-          <h3 style="margin: 0 0 10px 0; font-size: 14px;">รายการ:</h3>
-          <ul id="active-items" style="padding-left: 20px; font-size: 13px; margin: 0; color:var(--text-light);"></ul>
-        </div>
-        <div class="total-collect">
-          <div><p style="margin: 0; color: var(--text-dark); font-weight: 600;">ยอดที่ต้องเก็บลูกค้า</p><span style="font-size: 12px; color: var(--text-light);" id="active-pay-method">(เงินสด)</span></div>
-          <h2 style="margin: 0; color: var(--rider-primary); font-size: 20px;">฿<span id="active-total">0</span></h2>
-        </div>
-        
-        <button class="btn-main" id="action-btn" onclick="updateOrderStatus()"></button>
-      </div>
+          <a id="call-cus-btn" href="#" style="background:var(--success); color:white; border-radius:12px; width:50px; display:flex; justify-content:center; align-items:center; text-decoration:none;">
+             <span class="material-icons">call</span>
+          </a>
+       </div>
     </div>
   </div>
 
+  <!-- ================= WALLET SCREEN ================= -->
   <div id="wallet-screen" class="screen">
-    <div class="rider-header">
-      <h2 style="margin:0; font-size:18px; width:100%; text-align:center;">กระเป๋าเงิน และ สถิติ</h2>
-    </div>
+    <div class="rider-header"><h2 style="margin:0; font-size:18px; width:100%; text-align:center;">กระเป๋าเงิน และ สถิติ</h2></div>
     <div style="padding: 20px; flex-grow: 1; overflow-y: auto;">
       <div class="wallet-card-rider">
-        <p style="margin: 0 0 5px; font-size: 14px; opacity: 0.9;">เครดิตคงเหลือ / ถอนได้ (บาท)</p>
+        <p style="margin: 0 0 5px; font-size: 14px; opacity: 0.9;">เครดิตคงเหลือ / ถอนได้</p>
         <h1 style="margin: 0 0 15px; font-size: 40px;">฿<span id="rider-wallet-balance">0.00</span></h1>
         <div style="display: flex; gap: 10px; justify-content: center;">
-          <button class="btn-main" style="background: white; color: var(--rider-primary); padding: 8px 15px; font-size: 14px; box-shadow: none;" onclick="openTopupModal()"><span class="material-icons" style="font-size: 16px; vertical-align: middle;">add_circle</span> เติมเครดิต</button>
-          <button class="btn-main" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; font-size: 14px; box-shadow: none;" onclick="openWithdrawModal()"><span class="material-icons" style="font-size: 16px; vertical-align: middle;">account_balance</span> แจ้งถอน</button>
+          <button class="btn-main" style="background: white; color: var(--rider-primary); padding: 8px 15px; font-size: 14px;" onclick="openWithdrawModal()">
+            <span class="material-icons" style="font-size:16px;">account_balance</span> แจ้งถอนเงิน
+          </button>
         </div>
       </div>
       
-      <!-- CRM สรุปรายได้ -->
-      <h3 style="margin: 0 0 10px; font-size: 15px;">สรุปรายได้ (เฉพาะค่าส่ง)</h3>
+      <h3 style="margin: 0 0 10px; font-size: 15px;">สรุปรายได้ (ค่าส่ง)</h3>
       <div class="crm-grid">
         <div class="crm-box"><div class="crm-title">วันนี้</div><div class="crm-value">฿<span id="sum-today">0</span></div></div>
-        <div class="crm-box"><div class="crm-title">7 วันย้อนหลัง</div><div class="crm-value">฿<span id="sum-7d">0</span></div></div>
-        <div class="crm-box"><div class="crm-title">30 วันย้อนหลัง</div><div class="crm-value">฿<span id="sum-30d">0</span></div></div>
+        <div class="crm-box"><div class="crm-title">7 วัน</div><div class="crm-value">฿<span id="sum-7d">0</span></div></div>
+        <div class="crm-box"><div class="crm-title">30 วัน</div><div class="crm-value">฿<span id="sum-30d">0</span></div></div>
       </div>
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 15px;">ประวัติรายการล่าสุด</h3>
-      </div>
-      <div id="rider-tx-list">
-        <p style="text-align: center; color: var(--text-light); margin-top: 20px;">กำลังโหลดข้อมูล...</p>
-      </div>
+      <h3 style="margin: 0 0 15px; font-size: 15px;">ประวัติรายการล่าสุด</h3>
+      <div id="rider-tx-list"><p style="text-align: center; color: var(--text-light);">กำลังโหลดข้อมูล...</p></div>
     </div>
   </div>
 
+  <!-- ================= PROFILE SCREEN (ฉัน) ================= -->
   <div id="profile-screen" class="screen">
-    <div class="rider-header">
-      <h2 style="margin:0; font-size:18px; width:100%; text-align:center;">โปรไฟล์ของฉัน</h2>
-    </div>
+    <div class="rider-header"><h2 style="margin:0; font-size:18px; width:100%; text-align:center;">บัญชีของฉัน</h2></div>
     <div style="padding: 20px; flex-grow: 1; overflow-y: auto;">
-      
-      <div class="image-upload-wrapper">
-        <div class="image-preview" id="profile-preview-container" onclick="document.getElementById('profile-upload').click()">
-          <span class="material-icons" id="profile-placeholder-icon">add_a_photo</span>
-        </div>
-        <span style="font-size: 12px; color: var(--text-light);">แตะเพื่อเปลี่ยนรูปโปรไฟล์</span>
-        <input type="file" id="profile-upload" class="file-input" accept="image/*" onchange="previewImage(event, 'profile-preview-container', 'profile-placeholder-icon', 'profile')">
-      </div>
-
-      <div class="card-box" style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="margin: 0 0 5px; font-size: 15px;">สถานะรับงาน</h3>
-          <p style="margin: 0; font-size: 12px; color: var(--text-light);">เปิดเพื่อรับออเดอร์จากระบบ</p>
-        </div>
-        <div class="status-toggle" id="prof-status-btn" onclick="toggleOnlineStatus()">
-          <div class="status-dot"></div> <span id="prof-status-text">ออนไลน์</span>
-        </div>
-      </div>
-
-      <div class="card-box">
-        <h3 style="margin: 0 0 15px; font-size: 16px;">ข้อมูลส่วนตัว</h3>
-        <div class="input-group">
-          <label>ชื่อ - นามสกุล</label>
-          <input type="text" id="prof-name" disabled style="background: #f8fafc; color: #64748b; border-color: #e2e8f0;">
-        </div>
-        <div class="input-group">
-          <label>เบอร์โทรศัพท์</label>
-          <input type="text" id="prof-phone" disabled style="background: #f8fafc; color: #64748b; border-color: #e2e8f0;">
-        </div>
-        <div class="input-group">
-          <label>ทะเบียนรถ (แก้ไขได้)</label>
-          <input type="text" id="prof-plate" placeholder="เช่น 1กข 1234 กทม">
-        </div>
-      </div>
-
-      <div class="card-box">
-        <h3 style="margin: 0 0 15px; font-size: 16px;">เอกสารยืนยันตัวตน</h3>
-        <div class="image-upload-wrapper" style="margin-bottom: 0;">
-          <div class="image-preview rect" id="license-preview-container" onclick="document.getElementById('license-upload').click()">
-            <span class="material-icons" id="license-placeholder-icon">badge</span>
+       <div style="background:white; padding:20px; border-radius:16px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div style="width:80px; height:80px; background:#eee; border-radius:50%; margin:0 auto 10px; display:flex; justify-content:center; align-items:center;">
+             <span class="material-icons" style="font-size:40px; color:#aaa;">person</span>
           </div>
-          <span style="font-size: 12px; color: var(--text-light); margin-top: 10px;">รูปถ่ายใบอนุญาตขับขี่ (เห็นชัดเจน)</span>
-          <input type="file" id="license-upload" class="file-input" accept="image/*" onchange="previewImage(event, 'license-preview-container', 'license-placeholder-icon', 'license')">
-        </div>
-      </div>
-
-      <button class="btn-main" onclick="saveRiderProfile()">บันทึกข้อมูลโปรไฟล์</button>
-      <button class="btn-main" style="background: #fee2e2; color: var(--danger); box-shadow: none; margin-top: 15px;" onclick="promptLogout()">
-        <span class="material-icons" style="vertical-align: middle; font-size: 20px;">logout</span> ออกจากระบบ
-      </button>
-      <div style="height: 30px;"></div>
+          <h3 style="margin:0 0 5px;" id="profile-name">ชื่อคนขับ</h3>
+          <p style="margin:0; color:var(--text-light); font-size:14px;" id="profile-phone">เบอร์โทร</p>
+       </div>
+       
+       <div style="background:white; padding:20px; border-radius:16px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div class="input-group">
+             <label>ป้ายทะเบียนรถ</label>
+             <input type="text" id="edit-plate" placeholder="เช่น กท 1234 อุดรธานี">
+          </div>
+          <button class="btn-main" onclick="saveProfile()"><span class="material-icons">save</span> บันทึกข้อมูล</button>
+       </div>
+       
+       <button class="btn-main" style="background:transparent; border:1px solid var(--danger); color:var(--danger); box-shadow:none;" onclick="logout()">ออกจากระบบ</button>
     </div>
   </div>
 
-  <div class="order-alert-overlay" id="order-alert">
-    <div class="order-alert-content">
-      <h3 style="font-size: 20px; font-weight: 700; color: var(--rider-primary); margin: 0 0 15px; display: flex; align-items: center; gap: 10px;"><span class="material-icons">notifications_active</span> งานใหม่เข้า!</h3>
-      <div class="job-details">
-        <div class="location-row"><div class="loc-icon" style="background: var(--rider-primary);"><span class="material-icons" style="font-size:14px;">storefront</span></div><div><h4 style="margin:0;" id="alert-res-name">ร้านอาหาร</h4><p style="margin:0; font-size:12px; color:#777;">รับอาหารที่นี่</p></div></div>
-        <div class="location-row" style="margin-top: 10px;"><div class="loc-icon" style="background: var(--success);"><span class="material-icons" style="font-size:14px;">person</span></div><div><h4 style="margin:0;" id="alert-cus-name">ลูกค้า</h4><p style="margin:0; font-size:12px; color:#777;">จุดจัดส่ง</p></div></div>
-        
-        <div style="margin-top: 15px; padding: 10px; background: rgba(66, 133, 244, 0.1); border-radius: 8px; color: #4285F4; display: flex; align-items: center; gap: 8px; font-weight: 600;">
-           <span class="material-icons" style="font-size: 18px;">route</span> <span id="alert-distance">คำนวณระยะทาง...</span>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 1px dashed #ccc; font-weight: 700;"><span>ยอดจัดเก็บรวม</span><span style="color: var(--rider-primary); font-size: 20px;">฿<span id="alert-total">0</span></span></div>
-      </div>
-      <button class="btn-main" onclick="acceptJob()">กดเพื่อรับงานนี้</button>
-      <div style="text-align: center; margin-top: 15px;"><span style="color: var(--text-light); font-size: 14px; cursor: pointer;" onclick="document.getElementById('order-alert').style.display = 'none';">ปิดหน้าต่าง</span></div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="custom-confirm-modal">
-    <div class="modal-content">
-      <h3 style="margin-top: 0;">โปรดยืนยัน</h3>
-      <p id="confirm-message" style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">แน่ใจหรือไม่?</p>
-      <div style="display: flex; gap: 10px;">
-        <button style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeConfirmModal()">ยกเลิก</button>
-        <button id="confirm-yes-btn" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';">ตกลง</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ป๊อปอัปแจ้งถอนเงิน -->
+  <!-- ================= MODALS ================= -->
+  
+  <!-- Withdraw Modal -->
   <div class="modal-overlay" id="withdraw-modal">
     <div class="modal-content">
-      <h3 style="margin-top: 0; color: var(--rider-primary);">แจ้งถอนเงินเข้าบัญชี</h3>
-      <p style="color: var(--text-light); font-size: 13px; margin-bottom: 15px;">เงินจะถูกโอนเข้าบัญชีที่ลงทะเบียนไว้ภายใน 24 ชม.</p>
-      <div class="input-group">
-        <label>ระบุจำนวนเงินที่ต้องการถอน (บาท)</label>
-        <input type="number" id="withdraw-amount" placeholder="เช่น 100">
-      </div>
+      <h3 style="margin-top: 0; color: var(--rider-primary); text-align: center;">แจ้งถอนเงิน</h3>
+      <div class="input-group"><label>ธนาคาร/พร้อมเพย์</label><input type="text" id="wd-bank" placeholder="เช่น กสิกรไทย"></div>
+      <div class="input-group"><label>เลขบัญชี</label><input type="text" id="wd-acc" placeholder="ระบุเลขบัญชี"></div>
+      <div class="input-group"><label>จำนวนเงิน (บาท)</label><input type="number" id="withdraw-amount" placeholder="เช่น 100"></div>
       <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button style="flex:1; padding:12px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeWithdrawModal()">ยกเลิก</button>
-        <button style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';" onclick="submitWithdraw()">ยืนยันการถอน</button>
+        <button style="flex:1; padding:12px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="document.getElementById('withdraw-modal').style.display='none'">ยกเลิก</button>
+        <button style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';" onclick="submitWithdraw()">ยืนยัน</button>
       </div>
     </div>
   </div>
 
-  <!-- ป๊อปอัปเติมเครดิต -->
-  <div class="modal-overlay" id="topup-modal">
-    <div class="modal-content qr-box" style="width: 90%; max-width: 320px; padding: 25px;">
-      <h3 style="margin-top: 0; color: var(--rider-primary);">เติมเครดิตรับงาน</h3>
-      <p style="color: var(--text-light); font-size: 12px; margin-bottom: 5px;">สแกน QR Code เพื่อเติมเครดิตสำหรับรับงานเก็บเงินปลายทาง (COD)</p>
-      
-      <img id="rider-promptpay-qr" class="qr-image" src="https://promptpay.io/1410400401805/100.png" alt="QR Code">
-      
-      <div class="input-group" style="margin-bottom: 15px;">
-        <label>จำนวนเงินที่ต้องการเติม:</label>
-        <input type="number" id="topup-rider-amount" value="100" onkeyup="updateRiderQRCode()" onchange="updateRiderQRCode()" style="text-align: center; font-size: 16px;">
-      </div>
-      
-      <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button style="flex:1; padding:12px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeTopupModal()">ยกเลิก</button>
-        <button class="btn-main" style="flex:1; padding:12px; border-radius:12px; font-size: 14px;" onclick="submitRiderTopup()"><span class="material-icons" style="font-size: 16px; margin-right: 5px;">upload_file</span> แนบสลิป</button>
-      </div>
+  <!-- Chat Modal -->
+  <div class="modal-overlay" id="chat-modal" style="background: white; z-index: 99999;">
+    <div style="display:flex; flex-direction:column; height:100%; width:100%;">
+       <div class="rider-header" style="border-radius:0;">
+          <span class="material-icons" style="cursor:pointer;" onclick="document.getElementById('chat-modal').style.display='none'">arrow_back</span>
+          <h3 style="margin:0; font-size:16px;">แชทกับลูกค้า</h3>
+          <div style="width:24px;"></div>
+       </div>
+       <div class="chat-messages" id="chat-messages-container"></div>
+       <div style="padding:15px; background:white; border-top:1px solid #eee; display:flex; gap:10px; padding-bottom:calc(15px + env(safe-area-inset-bottom));">
+          <input type="text" id="chat-input" placeholder="พิมพ์ข้อความ..." style="flex:1; padding:12px 15px; border-radius:20px; border:1px solid #ccc; outline:none; font-family:'Prompt';">
+          <button style="background:var(--rider-primary); color:white; border:none; border-radius:50%; width:45px; height:45px; display:flex; justify-content:center; align-items:center;" onclick="sendChatMessage()">
+             <span class="material-icons">send</span>
+          </button>
+       </div>
     </div>
   </div>
 
-  <div class="chat-overlay" id="chat-modal">
-    <div class="chat-sheet">
-      <div class="chat-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-           <span class="material-icons" style="color: var(--rider-primary);">person</span>
-           <h3 style="margin:0; font-size:16px;" id="chat-cus-title">แชทกับลูกค้า</h3>
-        </div>
-        <span class="material-icons" style="cursor:pointer;" onclick="closeChatModal()">close</span>
-      </div>
-      <div class="chat-messages" id="chat-messages-container"></div>
-      <div class="chat-input-area">
-        <input type="text" id="chat-input-text" placeholder="พิมพ์ข้อความที่นี่..." onkeypress="if(event.key === 'Enter') sendChatMessage('rider')">
-        <button class="btn-send" onclick="sendChatMessage('rider')"><span class="material-icons">send</span></button>
-      </div>
-    </div>
-  </div>
-
+  <!-- Bottom Navigation -->
   <div class="bottom-nav">
-    <div class="nav-item active" id="nav-map" onclick="showScreen('map-screen')"><span class="material-icons">sports_motorsports</span><span>รับงาน</span></div>
+    <div class="nav-item active" id="nav-map" onclick="showScreen('map-screen')">
+       <span class="material-icons">sports_motorsports</span><span>รับงาน</span>
+       <div id="nav-badge" class="nav-badge">0</div>
+    </div>
     <div class="nav-item" id="nav-wallet" onclick="showScreen('wallet-screen')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
     <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">person</span><span>ฉัน</span></div>
   </div>
 
   <div id="custom-toast" class="toast">ข้อความ</div>
 
+  <!-- ================= SCRIPTS ================= -->
   <script>
+    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
+
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -386,284 +239,89 @@
       messagingSenderId: "901130815996",
       appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 👇 นำ URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
-    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec";
-
-    let currentRiderId = null;
-    let riderData = null;
-    let isOnline = true;
-    let isFollowingGPS = true; 
-    let incomingOrderId = null;
+    let currentRiderId = "rider001"; // ในระบบจริงควรดึงจาก Auth/Login
+    let riderData = {};
+    let riderMap, riderMarker;
+    let riderLat = 17.1593, riderLng = 102.9737; // ห้วยเกิ้ง
+    
     let activeOrderId = null;
-    let currentOrderStatus = "";
-    let findJobListener = null;
-    let activeJobListener = null;
-    let confirmCallback = null;
     let activeOrderData = null;
-    
-    let riderMap = null; let riderMarker = null; let resMarker = null; let cusMarker = null; let routeLine = null; let watchId = null;
-    let currentRiderLat = 17.15; let currentRiderLng = 102.95;
-    let previousChatCount = 0; 
-    
-    // สำหรับอัปโหลดรูป
-    let tempProfileBase64 = null;
-    let tempLicenseBase64 = null;
+    let activeJobListener = null;
+    let previousChatCount = 0;
+    let currentOrderStatus = "";
 
     window.onload = function() {
-      currentRiderId = localStorage.getItem('hk_rider_id');
-      if(currentRiderId) { document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile(); }
+       initMap();
+       loadRiderProfile();
+       checkActiveJob();
     };
 
-    function showAuthScreen(id) { document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
+    function initMap() {
+       riderMap = L.map('rider-map', { zoomControl: false }).setView([riderLat, riderLng], 15);
+       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OS' }).addTo(riderMap);
+       
+       const riderIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--rider-primary); width:30px; height:30px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><span class="material-icons" style="color:white; font-size:18px;">sports_motorsports</span></div>`, iconSize: [30, 30], iconAnchor: [15, 15] });
+       riderMarker = L.marker([riderLat, riderLng], { icon: riderIcon }).addTo(riderMap);
 
-    function riderRegister() {
-      const phone = document.getElementById('reg-phone').value; const name = document.getElementById('reg-name').value; const plate = document.getElementById('reg-plate').value;
-      if(!phone || !name) { showToast("กรุณากรอกข้อมูลให้ครบ"); return; }
-      db.collection("riders").doc(phone).set({ name: name, phone: phone, plate: plate, walletBalance: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
-        showToast("สมัครสำเร็จ"); localStorage.setItem('hk_rider_id', phone); currentRiderId = phone;
-        document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile();
-      }).catch(err => showToast("Error: " + err.message));
+       if (navigator.geolocation) {
+           navigator.geolocation.watchPosition(pos => {
+               riderLat = pos.coords.latitude; riderLng = pos.coords.longitude;
+               const newLatLng = new L.LatLng(riderLat, riderLng);
+               riderMarker.setLatLng(newLatLng);
+               if(riderData.isOnline && !activeOrderId) {
+                   db.collection("riders").doc(currentRiderId).update({ lat: riderLat, lng: riderLng });
+               }
+           }, e => console.log(e), { enableHighAccuracy: true, maximumAge: 10000 });
+       }
     }
-
-    function riderLogin() {
-      const phone = document.getElementById('login-phone').value;
-      if(!phone) { showToast("กรุณากรอกเบอร์โทรศัพท์"); return; }
-      db.collection("riders").doc(phone).get().then(doc => {
-        if(doc.exists) { showToast("เข้าสู่ระบบสำเร็จ"); localStorage.setItem('hk_rider_id', phone); currentRiderId = phone; document.querySelectorAll('.auth-screen').forEach(s => s.style.display = 'none'); loadRiderProfile(); }
-        else { showToast("ไม่พบบัญชีนี้ กรุณาสมัครใหม่"); }
-      }).catch(err => showToast("Error: " + err.message));
-    }
-
-    function promptLogout() { openConfirm("ต้องการออกจากระบบหรือไม่?", () => { localStorage.removeItem('hk_rider_id'); location.reload(); }); }
 
     function loadRiderProfile() {
       db.collection("riders").doc(currentRiderId).onSnapshot(doc => {
         if(doc.exists) { 
           riderData = doc.data(); 
+          document.getElementById('display-rider-name').innerText = riderData.name || "คนขับ"; 
+          document.getElementById('display-rider-plate').innerText = riderData.plate || "-"; 
+          document.getElementById('profile-name').innerText = riderData.name || "คนขับ";
+          document.getElementById('profile-phone').innerText = currentRiderId;
+          document.getElementById('edit-plate').value = riderData.plate || "";
           
-          // โชว์ในหน้า Map
-          document.getElementById('display-rider-name').innerText = riderData.name; 
-          document.getElementById('display-rider-plate').innerText = riderData.plate; 
+          document.getElementById('rider-wallet-balance').innerText = (riderData.walletBalance || 0).toFixed(2);
           
-          // นำรูปมาแสดงในหน้า Map
-          if (riderData.profileImg) {
-              document.getElementById('map-profile-img').style.backgroundImage = `url('${riderData.profileImg}')`;
-              document.getElementById('map-profile-icon').style.display = 'none';
-          }
-          
-          // โชว์ในหน้า Profile
-          document.getElementById('prof-name').value = riderData.name || '';
-          document.getElementById('prof-phone').value = riderData.phone || '';
-          document.getElementById('prof-plate').value = riderData.plate || '';
-          if (riderData.profileImg) {
-              document.getElementById('profile-preview-container').style.backgroundImage = `url('${riderData.profileImg}')`;
-              document.getElementById('profile-placeholder-icon').style.display = 'none';
-          }
-          if (riderData.licenseImg) {
-              document.getElementById('license-preview-container').style.backgroundImage = `url('${riderData.licenseImg}')`;
-              document.getElementById('license-placeholder-icon').style.display = 'none';
-          }
-          
-          // โชว์ยอดเงิน
-          const balance = riderData.walletBalance || 0;
-          document.getElementById('rider-wallet-balance').innerText = balance.toFixed(2);
-          
-          if(sessionStorage.getItem('activeScreen') !== 'profile-screen' && sessionStorage.getItem('activeScreen') !== 'wallet-screen') {
-              showScreen('map-screen'); 
-          }
-          initRiderMap(); 
-          checkActiveJob(); 
+          document.getElementById('online-toggle').checked = riderData.isOnline || false;
+          document.getElementById('online-status-text').innerText = riderData.isOnline ? "รับงานอยู่" : "ปิดรับงาน";
+          document.getElementById('online-status-text').style.color = riderData.isOnline ? "var(--success)" : "white";
+
           loadRiderTransactions();
         }
       });
     }
 
-    function previewImage(event, containerId, iconId, type) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image(); img.onload = function() {
-            const canvas = document.createElement('canvas'); const MAX = 500; let w = img.width; let h = img.height;
-            if (w > h && w > MAX) { h *= MAX / w; w = MAX; } else if (h > MAX) { w *= MAX / h; h = MAX; }
-            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-            const b64 = canvas.toDataURL('image/jpeg', 0.6);
-            document.getElementById(containerId).style.backgroundImage = `url('${b64}')`;
-            document.getElementById(iconId).style.display = 'none';
-            if(type === 'profile') tempProfileBase64 = b64;
-            if(type === 'license') tempLicenseBase64 = b64;
-          }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-      }
-    }
-
-    function saveRiderProfile() {
-      const newPlate = document.getElementById('prof-plate').value;
-      if(!newPlate) { showToast("กรุณากรอกทะเบียนรถ"); return; }
-      
-      let updates = { plate: newPlate };
-      if(tempProfileBase64) updates.profileImg = tempProfileBase64;
-      if(tempLicenseBase64) updates.licenseImg = tempLicenseBase64;
-      
-      db.collection("riders").doc(currentRiderId).update(updates).then(() => {
-          showToast("อัปเดตโปรไฟล์สำเร็จแล้ว!");
-      }).catch(e => showToast("Error: " + e.message));
-    }
-
-    function loadRiderTransactions() {
-       // โหลดข้อมูลย้อนหลัง 30 วันเพื่อมาคำนวณ CRM
-       const thirtyDaysAgo = new Date();
-       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-       db.collection("riders").doc(currentRiderId).collection("transactions")
-         .where("createdAt", ">=", thirtyDaysAgo)
-         .orderBy("createdAt", "desc")
-         .onSnapshot(snapshot => {
-            const list = document.getElementById('rider-tx-list');
-            
-            let sumToday = 0, sum7 = 0, sum30 = 0;
-            const now = new Date();
-            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            const sevenDaysAgoTime = startOfToday - (7 * 24 * 60 * 60 * 1000);
-
-            if(snapshot.empty) {
-               list.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติทำรายการ</p>';
-               document.getElementById('sum-today').innerText = "0";
-               document.getElementById('sum-7d').innerText = "0";
-               document.getElementById('sum-30d').innerText = "0";
-               return;
-            }
-
-            let html = '';
-            let count = 0;
-
-            snapshot.forEach(doc => {
-               const tx = doc.data();
-               const isIncome = tx.type === 'income';
-               
-               // คำนวณ CRM เฉพาะรายได้ (ค่าส่ง)
-               if(tx.createdAt && isIncome && !tx.title.includes('เติมเครดิต')) {
-                   const txTime = tx.createdAt.toMillis();
-                   if (txTime >= startOfToday) sumToday += tx.amount;
-                   if (txTime >= sevenDaysAgoTime) sum7 += tx.amount;
-                   sum30 += tx.amount; 
-               }
-
-               // แสดงประวัติแค่ 20 รายการล่าสุด
-               if (count < 20) {
-                 const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
-                 html += `
-                   <div class="tx-item">
-                     <div style="display:flex; align-items:center;">
-                       <div class="tx-icon ${isIncome ? 'income' : 'expense'}"><span class="material-icons">${isIncome ? 'payments' : (tx.title.includes('เติมเครดิต') ? 'account_balance_wallet' : 'account_balance')}</span></div>
-                       <div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div>
-                     </div>
-                     <div style="font-weight:700; color:${isIncome ? 'var(--success)' : 'var(--text-dark)'};">
-                       ${isIncome ? '+' : (tx.title.includes('เติมเครดิต') ? '+' : '-')}฿${tx.amount.toFixed(2)}
-                     </div>
-                   </div>
-                 `;
-                 count++;
-               }
-            });
-            
-            list.innerHTML = html;
-            
-            // อัปเดตตัวเลข CRM
-            document.getElementById('sum-today').innerText = sumToday;
-            document.getElementById('sum-7d').innerText = sum7;
-            document.getElementById('sum-30d').innerText = sum30;
-         });
-    }
-
     function toggleOnlineStatus() {
-      isOnline = !isOnline;
-      const btnMap = document.getElementById('status-btn'); const textMap = document.getElementById('status-text');
-      const btnProf = document.getElementById('prof-status-btn'); const textProf = document.getElementById('prof-status-text');
-      
-      if(isOnline) { 
-         btnMap.classList.remove('offline'); textMap.innerText = 'ออนไลน์'; 
-         btnProf.classList.remove('offline'); textProf.innerText = 'ออนไลน์'; 
-         startFindingJobs(); showToast('คุณออนไลน์แล้ว รอรับงานได้เลย'); 
-      } 
-      else { 
-         btnMap.classList.add('offline'); textMap.innerText = 'ออฟไลน์'; 
-         btnProf.classList.add('offline'); textProf.innerText = 'ออฟไลน์'; 
-         if(findJobListener) findJobListener(); showToast('คุณออฟไลน์แล้ว ระบบจะไม่ส่งงานให้'); 
-      }
+       const isOnline = document.getElementById('online-toggle').checked;
+       db.collection("riders").doc(currentRiderId).update({ isOnline: isOnline }).then(() => {
+           showToast(isOnline ? "เปิดรับงานแล้ว ระบบจะค้นหางานให้อัตโนมัติ" : "ปิดรับงานเรียบร้อย");
+       });
     }
 
-    function initRiderMap() {
-      if(riderMap !== null) return;
-      riderMap = L.map('rider-map', { zoomControl: false }).setView([currentRiderLat, currentRiderLng], 15);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(riderMap);
-      
-      const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--rider-primary); width:28px; height:28px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:18px; color:white;">sports_motorsports</span></div>` });
-      riderMarker = L.marker([currentRiderLat, currentRiderLng], {icon: riderIcon}).addTo(riderMap);
-
-      if (navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition((position) => {
-          currentRiderLat = position.coords.latitude; currentRiderLng = position.coords.longitude;
-          riderMarker.setLatLng([currentRiderLat, currentRiderLng]);
-          if(isFollowingGPS && riderMap) { riderMap.setView([currentRiderLat, currentRiderLng]); }
-          
-          if(activeOrderId) { db.collection("orders").doc(activeOrderId).update({ riderLat: currentRiderLat, riderLng: currentRiderLng }); }
-        }, (err) => console.log(err), { enableHighAccuracy: true });
-      }
-
-      riderMap.on('dragstart', () => { isFollowingGPS = false; document.getElementById('gps-follow-btn').classList.remove('active'); });
+    function saveProfile() {
+       const plate = document.getElementById('edit-plate').value.trim();
+       db.collection("riders").doc(currentRiderId).update({ plate: plate }).then(() => showToast("บันทึกข้อมูลสำเร็จ"));
     }
 
-    function toggleGPSFollow() {
-      isFollowingGPS = !isFollowingGPS;
-      const btn = document.getElementById('gps-follow-btn');
-      if(isFollowingGPS) { btn.classList.add('active'); if(riderMap) riderMap.setView([currentRiderLat, currentRiderLng], 16); } 
-      else { btn.classList.remove('active'); }
-    }
-
+    // --- ระบบงาน ---
     function checkActiveJob() {
-      db.collection("orders").where("riderId", "==", currentRiderId).where("status", "in", ["ไรเดอร์กำลังไปรับอาหาร", "ไรเดอร์ถึงร้านแล้ว", "ร้านเตรียมอาหารเสร็จแล้ว", "กำลังจัดส่ง"]).get().then(snapshot => {
-        if(!snapshot.empty) { const doc = snapshot.docs[0]; activeOrderId = doc.id; listenToActiveJob(); } 
-        else { startFindingJobs(); }
+      db.collection("orders").where("riderId", "==", currentRiderId).where("status", "in", ["ค้นหาไรเดอร์", "ไรเดอร์กำลังไปรับอาหาร", "กำลังเตรียมอาหาร", "ไรเดอร์กำลังไปส่งอาหาร"]).onSnapshot(snapshot => {
+        if(!snapshot.empty) {
+          activeOrderId = snapshot.docs[0].id;
+          listenToActiveJob();
+        } else {
+          activeOrderId = null;
+          document.getElementById('active-order-panel').style.display = 'none';
+        }
       });
-    }
-
-    function getDistance(lat1, lon1, lat2, lon2) {
-      if(!lat1 || !lon1 || !lat2 || !lon2) return 0;
-      const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function startFindingJobs() {
-      if(findJobListener) findJobListener();
-      findJobListener = db.collection("orders").where("status", "==", "กำลังค้นหาไรเดอร์").onSnapshot(snapshot => {
-        if(!snapshot.empty && isOnline && !activeOrderId) {
-           const doc = snapshot.docs[0]; incomingOrderId = doc.id; const data = doc.data();
-           
-           document.getElementById('alert-res-name').innerText = data.restaurantName;
-           document.getElementById('alert-cus-name').innerText = data.customerName;
-           document.getElementById('alert-total').innerText = data.totalPrice;
-           
-           const distStr = (getDistance(data.resLat, data.resLng, data.cusLat, data.cusLng) + getDistance(currentRiderLat, currentRiderLng, data.resLat, data.resLng)).toFixed(1);
-           document.getElementById('alert-distance').innerHTML = `ระยะทางจัดส่งประมาณ <b>${distStr}</b> กม.`;
-           
-           document.getElementById('order-alert').style.display = 'flex';
-           if ('speechSynthesis' in window) { const msg = new SpeechSynthesisUtterance("มีงานใหม่เข้าครับ"); msg.lang = 'th-TH'; window.speechSynthesis.speak(msg); }
-        } else { document.getElementById('order-alert').style.display = 'none'; incomingOrderId = null; }
-      });
-    }
-
-    function acceptJob() {
-      if(!incomingOrderId) return;
-      db.collection("orders").doc(incomingOrderId).update({ riderId: currentRiderId, riderName: riderData.name, riderPhone: riderData.phone, riderPlate: riderData.plate, status: "ไรเดอร์กำลังไปรับอาหาร" }).then(() => {
-        document.getElementById('order-alert').style.display = 'none'; activeOrderId = incomingOrderId; incomingOrderId = null;
-        if(findJobListener) { findJobListener(); findJobListener = null; }
-        listenToActiveJob();
-      }).catch(err => { showToast("ไม่สามารถรับงานได้ อาจมีคนรับไปแล้ว"); document.getElementById('order-alert').style.display = 'none'; });
     }
 
     function listenToActiveJob() {
@@ -672,247 +330,158 @@
         if(doc.exists) {
           activeOrderData = doc.data(); currentOrderStatus = activeOrderData.status;
           
-          document.getElementById('active-order-panel').style.display = 'block'; setTimeout(() => document.getElementById('active-order-panel').classList.remove('collapsed'), 100);
+          document.getElementById('active-order-panel').style.display = 'block';
           document.getElementById('active-res-name').innerText = activeOrderData.restaurantName;
           document.getElementById('active-cus-name').innerText = `ส่งให้: ${activeOrderData.customerName}`;
-          document.getElementById('active-items').innerHTML = activeOrderData.items.map(item => `<li>${item}</li>`).join('');
           document.getElementById('active-total').innerText = activeOrderData.totalPrice;
           document.getElementById('active-pay-method').innerText = activeOrderData.paymentMethod === 'transfer' ? '(โอนเงินแล้ว)' : '(เก็บเงินสด)';
           document.getElementById('call-cus-btn').href = `tel:${activeOrderData.customerPhone || ''}`;
 
-          if(activeOrderData.chatMessages) { 
-            renderChatMessages(activeOrderData.chatMessages, 'rider'); 
-            if(activeOrderData.chatMessages.length > previousChatCount) {
-                const lastMsg = activeOrderData.chatMessages[activeOrderData.chatMessages.length - 1];
-                if(lastMsg.sender === 'customer' && document.getElementById('chat-modal').style.display !== 'flex') {
-                    document.getElementById('chat-badge').style.display = 'block';
-                    showToast("💬 มีข้อความใหม่จากลูกค้า");
-                    if ('speechSynthesis' in window) {
-                        const msg = new SpeechSynthesisUtterance("มีข้อความใหม่จากลูกค้าครับ");
-                        msg.lang = 'th-TH'; window.speechSynthesis.speak(msg);
-                    }
-                }
-                previousChatCount = activeOrderData.chatMessages.length;
-            }
-          }
-          
-          drawJobMap(activeOrderData); updateButtonUI();
+          updateButtonUI();
+          handleChatUpdates(activeOrderData.chatMessages);
         }
       });
     }
 
-    function drawJobMap(data) {
-      if(!riderMap) return;
-      if(resMarker) riderMap.removeLayer(resMarker); if(cusMarker) riderMap.removeLayer(cusMarker); if(routeLine) riderMap.removeLayer(routeLine);
-      
-      const resIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:#2196F3; width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:14px; color:white;">storefront</span></div>` });
-      const cusIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--success); width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:14px; color:white;">person</span></div>` });
-      
-      resMarker = L.marker([data.resLat, data.resLng], {icon: resIcon}).addTo(riderMap);
-      cusMarker = L.marker([data.cusLat, data.cusLng], {icon: cusIcon}).addTo(riderMap);
-      
-      let latlngs = [[currentRiderLat, currentRiderLng], [data.resLat, data.resLng]];
-      if(currentOrderStatus === "กำลังจัดส่ง") latlngs = [[currentRiderLat, currentRiderLng], [data.cusLat, data.cusLng]];
-      routeLine = L.polyline(latlngs, {color: '#4285F4', weight: 4, dashArray: '5, 10'}).addTo(riderMap);
-    }
-
     function updateButtonUI() {
-      const btn = document.getElementById('action-btn'); 
-      const navBtn = document.getElementById('nav-btn');
-      
-      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") { 
-        btn.innerHTML = "ฉันเดินทางถึงร้านอาหารแล้ว"; btn.style.background = "var(--rider-primary)"; btn.disabled = false;
-        if(activeOrderData.resLat && activeOrderData.resLng) {
-          navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.resLat},${activeOrderData.resLng}`;
-          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปร้าน`; 
-          navBtn.style.background = "#4285F4"; navBtn.style.display = "flex";
-        }
-      } 
-      else if(currentOrderStatus === "ไรเดอร์ถึงร้านแล้ว") { 
-        btn.innerHTML = "รอร้านทำอาหาร... (รับอาหารแล้วกดที่นี่)"; btn.style.background = "#999"; btn.disabled = true; 
-        navBtn.style.display = "none";
-      }
-      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") { 
-        btn.innerHTML = "อาหารเสร็จแล้ว! กดเพื่อยืนยันรับอาหาร"; btn.style.background = "#2196F3"; btn.disabled = false; 
-        navBtn.style.display = "none";
-      }
-      else if(currentOrderStatus === "กำลังจัดส่ง") { 
-        btn.innerHTML = "จัดส่งสำเร็จ! (กดเมื่อส่งให้ลูกค้าแล้ว)"; btn.style.background = "var(--success)"; btn.disabled = false;
-        if(activeOrderData.cusLat && activeOrderData.cusLng) {
-          navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${activeOrderData.cusLat},${activeOrderData.cusLng}`;
-          navBtn.innerHTML = `<span class="material-icons">navigation</span> นำทางไปหาลูกค้า`; 
-          navBtn.style.background = "var(--success)"; navBtn.style.display = "flex";
-        }
-      }
-      else if(currentOrderStatus.includes("ยกเลิก") || currentOrderStatus.includes("ปฏิเสธ")) {
-        showToast("ออเดอร์นี้ถูกยกเลิกแล้ว"); finishJobLocally();
-      }
-    }
-
-    function notifyCustomerLINE(userId, title, message, color, details) {
-      if(!userId || userId.startsWith("guest")) return;
-      fetch(LINE_BOT_API_URL, {
-        method: "POST", mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          userId: userId, isFlex: true, title: title, message: message, color: color, details: details
-        })
-      }).catch(e => console.log("Notify Error", e));
+        const btn = document.getElementById('job-action-btn');
+        if(currentOrderStatus === "ค้นหาไรเดอร์") { btn.innerText = "รับงานนี้"; btn.style.background = "var(--rider-primary)"; }
+        else if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร" || currentOrderStatus === "กำลังเตรียมอาหาร") { btn.innerText = "รับอาหารแล้ว / ไปส่ง"; btn.style.background = "var(--warning)"; }
+        else if(currentOrderStatus === "ไรเดอร์กำลังไปส่งอาหาร") { btn.innerText = "จัดส่งสำเร็จ"; btn.style.background = "var(--success)"; }
     }
 
     function updateOrderStatus() {
-      if(!activeOrderId) return; let nextStatus = "";
-      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร") nextStatus = "ไรเดอร์ถึงร้านแล้ว";
-      else if(currentOrderStatus === "ร้านเตรียมอาหารเสร็จแล้ว") nextStatus = "กำลังจัดส่ง";
-      else if(currentOrderStatus === "กำลังจัดส่ง") nextStatus = "จัดส่งสำเร็จ";
-      
-      if(nextStatus) {
-        openConfirm(`ยืนยันเปลี่ยนสถานะเป็น: ${nextStatus} ?`, () => {
-          db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
-            showToast("อัปเดตสถานะสำเร็จ!"); 
-            
-            if(nextStatus === "ไรเดอร์ถึงร้านแล้ว") {
-               notifyCustomerLINE(activeOrderData.userId, "📍 ไรเดอร์ถึงร้านแล้ว", "ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ กำลังรอรับอาหาร", "#3b82f6", {
-                  "ร้านอาหาร": activeOrderData.restaurantName,
-                  "ชื่อไรเดอร์": riderData.name
-               });
-            } else if (nextStatus === "กำลังจัดส่ง") {
-               notifyCustomerLINE(activeOrderData.userId, "🛵 กำลังเดินทางไปส่ง!", "อาหารอยู่บนรถแล้ว! ไรเดอร์กำลังเดินทางไปส่งให้คุณครับ", "#3b82f6", {
-                  "ไรเดอร์": riderData.name,
-                  "ทะเบียนรถ": riderData.plate,
-                  "เบอร์ติดต่อ": riderData.phone
-               });
-            } else if (nextStatus === "จัดส่งสำเร็จ") {
-               notifyCustomerLINE(activeOrderData.userId, "🎉 จัดส่งสำเร็จ!", "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการห้วยเกิ้ง Delivery", "#10b981", {
-                  "ร้านอาหาร": activeOrderData.restaurantName,
-                  "ยอดชำระ": "฿" + activeOrderData.totalPrice
-               });
-               
-               // 🔥 ให้เงินค่ารอบไรเดอร์ (จำลอง 25 บาท)
-               const earnings = 25;
-               db.collection("riders").doc(currentRiderId).update({
-                  walletBalance: firebase.firestore.FieldValue.increment(earnings)
-               });
-               db.collection("riders").doc(currentRiderId).collection("transactions").add({
-                  title: `ค่าส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`,
-                  amount: earnings,
-                  type: 'income',
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-               });
-            }
+      let nextStatus = "";
+      if(currentOrderStatus === "ค้นหาไรเดอร์") nextStatus = "ไรเดอร์กำลังไปรับอาหาร";
+      else if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร" || currentOrderStatus === "กำลังเตรียมอาหาร") nextStatus = "ไรเดอร์กำลังไปส่งอาหาร";
+      else if(currentOrderStatus === "ไรเดอร์กำลังไปส่งอาหาร") nextStatus = "จัดส่งสำเร็จ";
 
-            if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
-          });
-        });
+      if(nextStatus) {
+         db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
+            if(nextStatus === "จัดส่งสำเร็จ") {
+                // เพิ่มเงินค่ารอบจำลอง 25 บาท
+                db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(25) });
+                db.collection("riders").doc(currentRiderId).collection("transactions").add({
+                   title: `ค่าส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`, amount: 25, type: 'income', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast("จัดส่งสำเร็จ! รับรายได้เข้ากระเป๋า");
+                setTimeout(() => { document.getElementById('active-order-panel').style.display = 'none'; }, 2000);
+            } else {
+                showToast(`อัปเดตสถานะเป็น: ${nextStatus}`);
+            }
+         });
       }
     }
 
-    function finishJobLocally() {
-      activeOrderId = null; previousChatCount = 0; if(activeJobListener) activeJobListener();
-      document.getElementById('active-order-panel').classList.add('collapsed'); setTimeout(() => document.getElementById('active-order-panel').style.display='none', 300);
-      if(resMarker) riderMap.removeLayer(resMarker); if(cusMarker) riderMap.removeLayer(cusMarker); if(routeLine) riderMap.removeLayer(routeLine);
-      startFindingJobs();
+    // --- กระเป๋าเงิน ---
+    function loadRiderTransactions() {
+       const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+       db.collection("riders").doc(currentRiderId).collection("transactions")
+         .where("createdAt", ">=", thirtyDaysAgo).orderBy("createdAt", "desc").onSnapshot(snapshot => {
+            const list = document.getElementById('rider-tx-list');
+            let sumToday = 0, sum7 = 0, sum30 = 0;
+            const now = new Date(); const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const sevenDaysAgoTime = startOfToday - (7 * 24 * 60 * 60 * 1000);
+
+            if(snapshot.empty) { list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ยังไม่มีประวัติรายได้</p>'; return; }
+            let html = ''; let count = 0;
+
+            snapshot.forEach(doc => {
+               const tx = doc.data(); const isIncome = tx.type === 'income';
+               if(tx.createdAt && isIncome) {
+                   const txTime = tx.createdAt.toMillis();
+                   if (txTime >= startOfToday) sumToday += tx.amount;
+                   if (txTime >= sevenDaysAgoTime) sum7 += tx.amount;
+                   sum30 += tx.amount;
+               }
+               if (count < 20) {
+                 const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
+                 html += `<div class="tx-item">
+                   <div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div>
+                   <div style="font-weight:700; color:${isIncome ? 'var(--success)' : 'var(--text-dark)'};">${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}</div>
+                 </div>`; count++;
+               }
+            });
+            list.innerHTML = html;
+            document.getElementById('sum-today').innerText = sumToday; document.getElementById('sum-7d').innerText = sum7; document.getElementById('sum-30d').innerText = sum30;
+         });
     }
 
-    function openWithdrawModal() {
-       document.getElementById('withdraw-amount').value = '';
-       document.getElementById('withdraw-modal').style.display = 'flex';
-    }
-    function closeWithdrawModal() { document.getElementById('withdraw-modal').style.display = 'none'; }
+    function openWithdrawModal() { document.getElementById('withdraw-amount').value = ''; document.getElementById('withdraw-modal').style.display = 'flex'; }
+    
     function submitWithdraw() {
+       const bank = document.getElementById('wd-bank').value.trim();
+       const acc = document.getElementById('wd-acc').value.trim();
        const amount = parseFloat(document.getElementById('withdraw-amount').value);
        const currentBalance = riderData.walletBalance || 0;
        
-       if(isNaN(amount) || amount <= 0) { showToast("กรุณาระบุจำนวนเงินที่ถูกต้อง"); return; }
-       if(amount > currentBalance) { showToast("ยอดเงินในกระเป๋าไม่เพียงพอ"); return; }
-       if(amount < 100) { showToast("ขั้นต่ำในการถอนคือ 100 บาท"); return; }
+       if(!bank || !acc) return showToast("กรุณากรอกธนาคารและเลขบัญชี");
+       if(isNaN(amount) || amount <= 0) return showToast("จำนวนเงินไม่ถูกต้อง");
+       if(amount > currentBalance) return showToast("ยอดเงินไม่พอ");
+       if(amount < 100) return showToast("ถอนขั้นต่ำ 100 บาท");
 
-       const btn = document.querySelector('#withdraw-modal .btn-main'); // Disable btn temporarily
-       db.collection("riders").doc(currentRiderId).update({
-          walletBalance: firebase.firestore.FieldValue.increment(-amount)
-       }).then(() => {
+       db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(-amount) }).then(() => {
           db.collection("riders").doc(currentRiderId).collection("transactions").add({
-             title: "ถอนเงินเข้าบัญชีธนาคาร",
-             amount: amount,
-             type: 'expense',
-             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+             title: "ถอนเงิน (รอตรวจสอบ)", amount: amount, type: 'expense', bankAccount: { bank: bank, accountNo: acc }, createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           showToast(`ทำรายการแจ้งถอน ฿${amount} สำเร็จ`);
-          closeWithdrawModal();
-       }).catch(e => showToast("Error: " + e.message));
+          document.getElementById('withdraw-modal').style.display = 'none';
+       });
     }
 
-    // --- ระบบเติมเครดิตไรเดอร์ ---
-    function openTopupModal() { document.getElementById('topup-rider-amount').value = '100'; updateRiderQRCode(); document.getElementById('topup-modal').style.display = 'flex'; }
-    function closeTopupModal() { document.getElementById('topup-modal').style.display = 'none'; }
-    function updateRiderQRCode() {
-      const amt = document.getElementById('topup-rider-amount').value;
-      if(amt && amt > 0) document.getElementById('rider-promptpay-qr').src = `https://promptpay.io/1410400401805/${amt}.png`; // ใส่เลขพร้อมเพย์แอดมินตรงนี้
-    }
-    function submitRiderTopup() {
-       const amount = parseFloat(document.getElementById('topup-rider-amount').value);
-       if(isNaN(amount) || amount <= 0) { showToast("กรุณาระบุจำนวนเงินที่ถูกต้อง"); return; }
-       
-       const btn = document.querySelector('#topup-modal .btn-main');
-       btn.innerText = "กำลังดำเนินการ..."; btn.disabled = true;
-
-       db.collection("riders").doc(currentRiderId).update({
-          walletBalance: firebase.firestore.FieldValue.increment(amount)
-       }).then(() => {
-          db.collection("riders").doc(currentRiderId).collection("transactions").add({
-             title: "เติมเครดิตรับงาน (รอแอดมินตรวจสอบสลิป)",
-             amount: amount,
-             type: 'income', 
-             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          showToast(`เติมเครดิตสำเร็จ ฿${amount} เข้าสู่กระเป๋าแล้ว!`);
-          closeTopupModal();
-          btn.innerHTML = `<span class="material-icons" style="font-size: 16px; margin-right: 5px;">upload_file</span> แนบสลิป`; btn.disabled = false;
-       }).catch(e => showToast("Error: " + e.message));
+    // --- แชท ---
+    function handleChatUpdates(chatMessages) {
+       if(!chatMessages) return;
+       renderChatMessages(chatMessages);
+       if(chatMessages.length > previousChatCount) {
+          const lastMsg = chatMessages[chatMessages.length - 1];
+          if(lastMsg.sender === 'customer' && document.getElementById('chat-modal').style.display !== 'flex') {
+              document.getElementById('chat-badge').style.display = 'block';
+              document.getElementById('nav-badge').style.display = 'flex';
+              document.getElementById('nav-badge').innerText = (parseInt(document.getElementById('nav-badge').innerText) || 0) + 1;
+              showToast("💬 มีข้อความใหม่จากลูกค้า");
+          }
+          previousChatCount = chatMessages.length;
+       }
     }
 
-    function togglePanel() { document.getElementById('active-order-panel').classList.toggle('collapsed'); }
-    
-    // อัปเดตเมนูล่างให้ไฮไลต์ถูกต้อง
-    function showScreen(screenId) { 
-      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); 
-      document.getElementById(screenId).style.display = 'flex'; 
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      const activeNavId = 'nav-' + screenId.replace('-screen', '');
-      if (document.getElementById(activeNavId)) document.getElementById(activeNavId).classList.add('active');
-      if(screenId === 'map-screen' && riderMap) setTimeout(() => riderMap.invalidateSize(), 300); 
+    function renderChatMessages(messages) {
+        const container = document.getElementById('chat-messages-container');
+        container.innerHTML = messages.map(msg => {
+            const isMe = msg.sender === 'rider';
+            return `<div class="chat-bubble ${isMe ? 'me' : 'other'}">${msg.text}<div style="font-size:10px; opacity:0.7; text-align:right; margin-top:4px;">${msg.time}</div></div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
     }
-    
-    function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
-    function openConfirm(message, callback) { document.getElementById('confirm-message').innerText = message; confirmCallback = callback; document.getElementById('custom-confirm-modal').style.display = 'flex'; }
-    function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
-    document.getElementById('confirm-yes-btn').addEventListener('click', () => { if (confirmCallback) confirmCallback(); closeConfirmModal(); });
-    
+
     function openChatModal() { 
         document.getElementById('chat-modal').style.display = 'flex'; 
         document.getElementById('chat-badge').style.display = 'none';
+        document.getElementById('nav-badge').style.display = 'none';
+        document.getElementById('nav-badge').innerText = '0';
         const container = document.getElementById('chat-messages-container');
-        if(container) { container.scrollTop = container.scrollHeight; }
-    }
-    function closeChatModal() { document.getElementById('chat-modal').style.display = 'none'; }
-    
-    function sendChatMessage(sender) {
-      const input = document.getElementById('chat-input-text'); const text = input.value.trim();
-      if (!text || !activeOrderId) return;
-      const message = { sender: sender, text: text, time: new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) };
-      db.collection("orders").doc(activeOrderId).update({ chatMessages: firebase.firestore.FieldValue.arrayUnion(message) });
-      input.value = '';
+        if(container) container.scrollTop = container.scrollHeight;
     }
 
-    function renderChatMessages(messages, currentUserType) {
-        const container = document.getElementById('chat-messages-container'); if(!container) return; container.innerHTML = '';
-        if(!messages || messages.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; font-size:13px; margin-top:20px;">เริ่มการสนทนากับลูกค้า...</p>'; return; }
-        messages.forEach(msg => {
-            const isMe = msg.sender === currentUserType;
-            container.innerHTML += `<div style="display:flex; justify-content: ${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:10px;"><div style="background: ${isMe ? 'var(--rider-primary)' : '#f1f5f9'}; color: ${isMe ? 'white' : '#333'}; padding:10px 15px; border-radius:16px; max-width:80%; font-size:14px; position:relative;">${msg.text}<span style="font-size:10px; color:${isMe ? 'rgba(255,255,255,0.7)' : '#999'}; display:block; text-align:right; margin-top:4px;">${msg.time}</span></div></div>`;
-        });
-        container.scrollTop = container.scrollHeight;
+    function sendChatMessage() {
+        const input = document.getElementById('chat-input'); const text = input.value.trim();
+        if(!text || !activeOrderId) return;
+        const msgData = { sender: 'rider', text: text, time: new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) };
+        db.collection("orders").doc(activeOrderId).update({ chatMessages: firebase.firestore.FieldValue.arrayUnion(msgData) });
+        input.value = '';
     }
+
+    // --- Navigation ---
+    function showScreen(screenId) { 
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+      document.getElementById(screenId).classList.add('active'); 
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      document.getElementById('nav-' + screenId.replace('-screen','')).classList.add('active');
+      if (screenId === 'map-screen') { document.getElementById('nav-badge').style.display = 'none'; document.getElementById('nav-badge').innerText = '0'; if(riderMap) riderMap.invalidateSize(); }
+    }
+    
+    function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+    function logout() { alert('ออกจากระบบสำเร็จ'); location.reload(); }
   </script>
 </body>
 </html>

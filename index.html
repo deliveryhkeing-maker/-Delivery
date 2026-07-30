@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
+  <!-- Anti-Cache: บังคับโหลดโค้ดใหม่เสมอ -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -147,7 +148,7 @@
     .star-group .material-icons.active { color: #ff9800; }
     
     .modal-common { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 400; justify-content: center; align-items: center; }
-    .modal-common-content { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; animation: scaleUp 0.2s ease-out; }
+    .modal-common-content { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; animation: scaleUp 0.2s ease-out; }
     
     .chat-sheet { background: var(--bg-color); width: 100%; height: 80vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; position: absolute; bottom: 0; }
     .chat-header { background: white; padding: 15px 20px; border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; }
@@ -185,10 +186,10 @@
     </div>
 
     <div class="banner-container">
-      <div class="promo-banner">
+      <div class="promo-banner" id="main-banner-container" style="background-size: cover; background-position: center; background-blend-mode: multiply; background-color: rgba(255,152,0,0.8);">
         <div style="z-index: 2;">
-          <h3 style="margin: 0 0 5px; font-size: 18px; font-weight: 700;">🔥 โค้ดลดชุมชน</h3>
-          <p style="margin: 0; font-size: 13px; opacity: 0.9;">ใส่โค้ด <b>LOCAL50</b> ลดทันที 50.-</p>
+          <h3 id="main-banner-title" style="margin: 0 0 5px; font-size: 18px; font-weight: 700;">🔥 โค้ดลดชุมชน</h3>
+          <p id="main-banner-sub" style="margin: 0; font-size: 13px; opacity: 0.9;">ใส่โค้ด <b>LOCAL50</b> ลดทันที 50.-</p>
         </div>
         <span class="material-icons" style="font-size: 48px; opacity: 0.8; z-index: 2;">local_offer</span>
       </div>
@@ -218,33 +219,38 @@
       <div style="width: 100px; height: 100px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; overflow: hidden; display: flex; justify-content: center; align-items: center;" id="profile-image-container">
         <span class="material-icons" style="font-size: 50px; color: #fff;">person</span>
       </div>
-      <h2 id="profile-name" style="margin: 0 0 5px; font-size: 20px;">ลูกค้าทั่วไป</h2>
-      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 13px;">สะสมพอยท์เพื่อแลกส่วนลด</p>
+      <h2 id="profile-name" style="margin: 0 0 5px; font-size: 20px;">ลูกค้าทั่วไป (Guest)</h2>
+      <p id="profile-desc" style="color: var(--text-light); margin-bottom: 20px; font-size: 13px;">กรุณาเข้าสู่ระบบเพื่อใช้งานเต็มรูปแบบ</p>
       
       <button id="btn-line-login" class="btn-line" onclick="loginWithLine()">เข้าสู่ระบบด้วย LINE</button>
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
 
-    <div style="display: flex; background: white; margin-bottom: 15px; padding: 15px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-      <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
-        <p style="margin:0; font-size: 13px; color: var(--text-light);">ห้วยเกิ้ง วอลเล็ท</p>
-        <h3 style="margin: 5px 0 0; color: var(--primary-color); font-size: 20px;">฿<span id="wallet-balance">0.00</span></h3>
+    <div id="auth-features" style="display: none;">
+      <div style="display: flex; background: white; margin-bottom: 15px; padding: 15px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
+          <p style="margin:0; font-size: 13px; color: var(--text-light);">ห้วยเกิ้ง วอลเล็ท</p>
+          <h3 style="margin: 5px 0 0; color: var(--primary-color); font-size: 20px;">฿<span id="wallet-balance">0.00</span></h3>
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <p style="margin:0; font-size: 13px; color: var(--text-light);">พอยท์สะสม</p>
+          <h3 style="margin: 5px 0 0; color: #ff9800; font-size: 20px;"><span id="reward-points">0</span> P</h3>
+        </div>
       </div>
-      <div style="flex: 1; text-align: center;">
-        <p style="margin:0; font-size: 13px; color: var(--text-light);">พอยท์สะสม</p>
-        <h3 style="margin: 5px 0 0; color: #ff9800; font-size: 20px;"><span id="reward-points">120</span> P</h3>
+
+      <div style="background: var(--white); margin-bottom: 15px;">
+        <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('edit-profile-screen')">
+          <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว / ที่อยู่
+        </div>
+        <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('topup-screen')">
+          <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท
+        </div>
       </div>
     </div>
-
-    <div style="background: var(--white); margin-top: 15px;">
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('edit-profile-screen')">
-        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">manage_accounts</span> แก้ไขข้อมูลส่วนตัว / ที่อยู่
-      </div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="showScreen('topup-screen')">
-        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">account_balance_wallet</span> เติมเงินเข้าวอลเล็ท
-      </div>
-      <div style="padding: 18px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="document.getElementById('help-modal').style.display='flex'">
-        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">support_agent</span> ช่วยเหลือ / ติดต่อแอดมิน
+    
+    <div style="background: var(--white);">
+      <div style="padding: 18px 20px; display: flex; align-items: center; font-size: 15px; cursor: pointer;" onclick="document.getElementById('help-modal').style.display='flex'">
+        <span class="material-icons" style="margin-right: 15px; color: var(--text-light);">support_agent</span> ศูนย์ช่วยเหลือ / แจ้งปัญหา
       </div>
     </div>
   </div>
@@ -330,8 +336,9 @@
     </div>
 
     <div style="background: var(--white); margin: 15px 20px; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; gap: 10px;">
-      <input type="text" id="promo-input" placeholder="ใส่โค้ดส่วนลดที่นี่..." style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Prompt'; outline: none; text-transform: uppercase;">
-      <button class="btn-primary" style="width: auto; padding: 12px 20px; border-radius: 8px;" onclick="applyPromoCode()">ใช้โค้ด</button>
+      <input type="text" id="promo-input" placeholder="กรอกโค้ดลด..." style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Prompt'; outline: none; text-transform: uppercase;">
+      <button class="btn-outline" style="width: auto; padding: 12px; border-radius: 8px; border-color:var(--primary-color); color:var(--primary-color);" onclick="openPromoListModal()"><span class="material-icons">local_offer</span></button>
+      <button class="btn-primary" style="width: auto; padding: 12px 15px; border-radius: 8px;" onclick="applyPromoCode()">ตกลง</button>
     </div>
 
     <div class="summary-card" style="border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
@@ -477,15 +484,36 @@
   </div>
 
   <div class="modal-common" id="help-modal">
-    <div class="modal-common-content">
-      <div style="font-size: 40px; color: var(--primary-color); margin-bottom: 10px;"><span class="material-icons" style="font-size: inherit;">support_agent</span></div>
-      <h3 style="margin: 0 0 10px;">ศูนย์ช่วยเหลือ</h3>
-      <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">หากพบปัญหาการใช้งาน สั่งอาหาร หรือเติมเงิน ติดต่อแอดมินได้ตลอด 24 ชม.</p>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="btn-line" onclick="window.open('https://line.me/ti/p/~@847anvnn', '_blank')"><span class="material-icons">chat</span> แชทกับแอดมิน (LINE)</button>
-        <a href="tel:0800000000" class="btn-outline" style="text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px;"><span class="material-icons">call</span> โทรด่วน (080-000-0000)</a>
+    <div class="modal-common-content" style="max-width: 350px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary-color);">support_agent</span> ศูนย์ช่วยเหลือ</h3>
+        <span class="material-icons" style="cursor:pointer; color:var(--text-light);" onclick="document.getElementById('help-modal').style.display='none'">close</span>
       </div>
-      <div style="margin-top: 15px; cursor: pointer; color: var(--text-light); font-size: 14px;" onclick="document.getElementById('help-modal').style.display='none'">ปิดหน้าต่าง</div>
+      
+      <p style="color: var(--text-light); font-size: 13px; margin-bottom: 20px;">พบปัญหาการใช้งาน สั่งอาหาร หรือเติมเงิน? ส่งเรื่องให้แอดมินหรือติดต่อโดยตรงได้เลยครับ</p>
+      
+      <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+         <label style="font-size:13px; font-weight:600; margin-bottom:5px; display:block;">ส่งเรื่องแจ้งปัญหา (Ticket)</label>
+         <textarea id="ticket-msg" rows="3" placeholder="อธิบายปัญหาของคุณที่นี่..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-family:'Prompt'; font-size:13px; outline:none; margin-bottom:10px;"></textarea>
+         <button class="btn-primary" style="padding:10px; font-size:14px;" onclick="submitSupportTicket()">ส่งข้อความหาแอดมิน</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-line" onclick="window.open('https://line.me/ti/p/~@847anvnn', '_blank')" style="padding:12px;"><span class="material-icons">chat</span> แอดไลน์แอดมิน (@847anvnn)</button>
+        <a href="tel:0834955515" class="btn-outline" style="padding:12px; text-decoration:none; display:flex; justify-content:center; align-items:center; gap:8px; color:var(--text-dark); border-color:#ccc;"><span class="material-icons">call</span> โทรด่วน (083-495-5515)</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="topping-overlay" id="promo-list-modal">
+    <div class="topping-sheet">
+       <div class="topping-header">
+         <h3 style="margin:0; font-size:18px;">เลือกโค้ดส่วนลด</h3>
+         <span class="material-icons" style="cursor:pointer;" onclick="document.getElementById('promo-list-modal').style.display='none'">close</span>
+       </div>
+       <div class="topping-content" id="promo-list-container">
+          <p style="text-align:center; color:#999;">กำลังโหลด...</p>
+       </div>
     </div>
   </div>
 
@@ -579,7 +607,7 @@
       messagingSenderId: "901130815996",
       appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
     const LIFF_ID = "2010799042-aNBObgM9"; 
@@ -591,7 +619,7 @@
     let guestId = localStorage.getItem('hk_guest_id');
     if (!guestId) { guestId = "guest_" + Date.now(); localStorage.setItem('hk_guest_id', guestId); }
     let currentUserId = guestId; 
-    let currentUserName = "ลูกค้าทั่วไป";
+    let currentUserName = "ลูกค้าทั่วไป (Guest)";
     
     let userProfileData = { phone: "", address: "" };
     let cartItems = []; 
@@ -627,11 +655,51 @@
         document.getElementById('edit-address').value = userProfileData.address || "";
       }
       
+      syncSystemBanner();
+      
+      // จัดการหน้าโปรไฟล์ Guest
+      if (currentUserId.startsWith('guest')) {
+         document.getElementById('auth-features').style.display = 'none';
+      } else {
+         document.getElementById('auth-features').style.display = 'block';
+      }
+
       fetchOrderHistory();
       await initializeLiff(); 
       await getLocation(); 
       checkActiveOrder();
     };
+
+    function syncSystemBanner() {
+       db.collection("settings").doc("system").get().then(doc => {
+          if(doc.exists) {
+             const d = doc.data();
+             if(d.bannerImg) document.getElementById('main-banner-container').style.backgroundImage = `url('${d.bannerImg}')`;
+             if(d.bannerTitle) document.getElementById('main-banner-title').innerText = d.bannerTitle;
+             if(d.bannerSub) document.getElementById('main-banner-sub').innerText = d.bannerSub;
+          }
+       });
+    }
+
+    function submitSupportTicket() {
+        const msg = document.getElementById('ticket-msg').value.trim();
+        if(!msg) return showToast("กรุณาพิมพ์รายละเอียดปัญหาก่อนส่งครับ");
+        
+        const phone = userProfileData.phone || "ไม่ระบุเบอร์";
+        
+        db.collection("support_tickets").add({
+            userId: currentUserId,
+            userName: currentUserName,
+            userPhone: phone,
+            message: msg,
+            status: 'pending', // pending, in_progress, resolved
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            showToast("ส่งเรื่องเรียบร้อยแล้ว แอดมินจะรีบตรวจสอบครับ!");
+            document.getElementById('ticket-msg').value = '';
+            document.getElementById('help-modal').style.display = 'none';
+        }).catch(e => showToast("Error: " + e.message));
+    }
 
     function updateWalletUI() {
       document.getElementById('wallet-balance').innerText = userWallet.toFixed(2);
@@ -652,6 +720,7 @@
           
           document.getElementById('btn-line-login').style.display = 'none';
           document.getElementById('btn-line-logout').style.display = 'block';
+          document.getElementById('auth-features').style.display = 'block'; // โชว์ระบบเงินตอนล็อกอินแล้ว
           
           loadUserProfileFromDB();
           fetchOrderHistory(); 
@@ -938,6 +1007,35 @@
     let appliedDiscount = 0;
     let appliedPromoCodeStr = "";
 
+    function openPromoListModal() {
+        document.getElementById('promo-list-modal').style.display = 'flex';
+        const container = document.getElementById('promo-list-container');
+        
+        db.collection("promotions").get().then(snap => {
+            if(snap.empty) { container.innerHTML = '<p style="text-align:center; color:#999;">ยังไม่มีโค้ดส่วนลดในขณะนี้</p>'; return; }
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                html += `
+                  <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                     <div>
+                        <h4 style="margin:0 0 5px; color:var(--primary-color);">${doc.id}</h4>
+                        <p style="margin:0; font-size:12px; color:var(--text-light);">ลด ฿${d.discount} (ขั้นต่ำ ฿${d.minPurchase})</p>
+                     </div>
+                     <button class="btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="selectPromoFromList('${doc.id}')">ใช้โค้ด</button>
+                  </div>
+                `;
+            });
+            container.innerHTML = html;
+        });
+    }
+
+    function selectPromoFromList(code) {
+        document.getElementById('promo-input').value = code;
+        document.getElementById('promo-list-modal').style.display = 'none';
+        applyPromoCode();
+    }
+
     function goToPayment() {
       if(!userProfileData.phone) {
          showToast("กรุณาเพิ่มเบอร์โทรศัพท์ก่อนสั่งอาหาร เพื่อให้ไรเดอร์ติดต่อได้ครับ");
@@ -945,10 +1043,12 @@
          return;
       }
       
+      // รีเซ็ตส่วนลดเมื่อเข้ามาหน้าชำระเงินใหม่
       appliedDiscount = 0; appliedPromoCodeStr = "";
       document.getElementById('promo-input').value = "";
       document.getElementById('discount-row').style.display = 'none';
 
+      // จัดกลุ่มอาหารที่ชื่อซ้ำกัน เพื่อแสดงจำนวน
       const groupedCart = {};
       cartItems.forEach(item => {
          if(!groupedCart[item.name]) groupedCart[item.name] = { ...item, qty: 1 };
@@ -1020,9 +1120,7 @@
     function toggleTransferBox(show) { 
       const box = document.getElementById('transfer-box');
       box.style.display = show ? 'block' : 'none'; 
-      if(show) {
-          document.getElementById('payment-qr-img').style.display = 'block';
-      }
+      if(show) { document.getElementById('payment-qr-img').style.display = 'block'; }
       
       tempSlipBase64 = null; 
       document.getElementById('slip-preview-name').innerText = ""; 
@@ -1085,7 +1183,7 @@
           cusLat: userLat, cusLng: userLng,
           customerPhone: userProfileData.phone,
           customerAddressNote: userProfileData.address,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          createdAt: firebase.firestore.FieldValue.serverTimestamp() // ใช้ Timestamp ของ Server
         };
         
         db.collection("orders").add(orderData).then((docRef) => {
@@ -1330,22 +1428,13 @@
       }
 
       function updateTimerDisplay() {
-        const currentOrder = JSON.parse(localStorage.getItem('activeOrder'));
-        if(!currentOrder || !currentOrder.docId) return;
-        
-        let startTime = 0;
-        if (window.currentActiveOrderData && window.currentActiveOrderData.createdAt) {
-            startTime = window.currentActiveOrderData.createdAt.toMillis();
-        } else {
-            const timerKey = 'hk_timer_' + currentOrder.docId;
-            startTime = localStorage.getItem(timerKey);
-            if(!startTime) {
-                startTime = Date.now();
-                localStorage.setItem(timerKey, startTime);
-            }
+        if (!window.currentActiveOrderData || !window.currentActiveOrderData.createdAt) {
+             btnCancel.innerText = "กำลังตรวจสอบเวลา...";
+             return;
         }
 
-        const elapsedSeconds = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+        const serverStartTime = window.currentActiveOrderData.createdAt.toMillis();
+        const elapsedSeconds = Math.floor((Date.now() - serverStartTime) / 1000);
         let timeLeft = 120 - elapsedSeconds; 
 
         if (timeLeft > 0) {

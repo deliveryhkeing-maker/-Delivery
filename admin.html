@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Anti-Cache -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <title>Super Admin - ห้วยเกิ้ง Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -113,8 +118,8 @@
       </div>
       <h2 style="margin: 0 0 10px; color: var(--text-dark);">Super Admin</h2>
       <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">ระบบจัดการสูงสุด ห้วยเกิ้ง Delivery</p>
-      <input type="text" id="admin-user" placeholder="Username">
-      <input type="password" id="admin-pass" placeholder="Password" onkeypress="if(event.key === 'Enter') loginAdmin()">
+      <input type="text" id="admin-user" placeholder="Username (adminbas)">
+      <input type="password" id="admin-pass" placeholder="Password (ball123456)" onkeypress="if(event.key === 'Enter') loginAdmin()">
       <button onclick="loginAdmin()">เข้าสู่ระบบจัดการ</button>
     </div>
   </div>
@@ -128,6 +133,7 @@
         <li class="nav-item active" data-target="dashboard" onclick="switchView('dashboard', this)"><span class="material-icons">dashboard</span> ภาพรวมระบบ</li>
         <li class="nav-item" data-target="config" onclick="switchView('config', this)"><span class="material-icons">tune</span> ตั้งค่าระบบ & โฆษณา</li>
         <li class="nav-item" data-target="finance" onclick="switchView('finance', this)"><span class="material-icons">account_balance</span> ธุรกรรม & เบิกถอน</li>
+        <li class="nav-item" data-target="support" onclick="switchView('support', this)"><span class="material-icons">support_agent</span> ศูนย์ช่วยเหลือลูกค้า</li>
         <li class="nav-item" data-target="merchants" onclick="switchView('merchants', this)"><span class="material-icons">storefront</span> จัดการร้านค้า</li>
         <li class="nav-item" data-target="riders" onclick="switchView('riders', this)"><span class="material-icons">sports_motorsports</span> จัดการไรเดอร์</li>
         <li class="nav-item" data-target="users" onclick="switchView('users', this)"><span class="material-icons">group</span> ฐานข้อมูลลูกค้า</li>
@@ -215,7 +221,7 @@
                   <span class="material-icons" id="banner-icon-placeholder">add_photo_alternate</span>
                   <span id="banner-text-placeholder">คลิกเพื่ออัปโหลดรูปภาพ (แนวนอน)</span>
                 </div>
-                <input type="file" id="banner-upload-input" accept="image/*" onchange="handleBannerUpload(event)">
+                <input type="file" id="banner-upload-input" accept="image/*" onchange="handleBannerUpload(event)" style="display:none;">
               </div>
             </div>
           </div>
@@ -224,18 +230,46 @@
         <!-- === VIEW: FINANCE === -->
         <div id="view-finance" class="view-section">
           <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><span class="material-icons">account_balance</span> ธุรกรรมแจ้งถอน / เติมเครดิต (รอดำเนินการ)</h3>
+            <div class="card-header" style="margin-bottom: 10px;">
+              <h3 class="card-title"><span class="material-icons">account_balance</span> ธุรกรรมแจ้งถอน / เติมเครดิต</h3>
               <button class="btn btn-outline" onclick="loadFinancials()"><span class="material-icons">refresh</span> โหลดใหม่</button>
             </div>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+               <button class="btn btn-primary" id="tab-fin-pending" onclick="toggleFinanceTab('pending')" style="flex:1;">รอดำเนินการ</button>
+               <button class="btn btn-outline" id="tab-fin-history" onclick="toggleFinanceTab('history')" style="flex:1;">ประวัติที่สำเร็จแล้ว</button>
+            </div>
+
             <div class="table-responsive">
-              <table>
-                <thead><tr><th>วันที่</th><th>ผู้ทำรายการ (ร้าน/ไรเดอร์)</th><th>ประเภท</th><th>จำนวนเงิน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <table id="table-fin-pending">
+                <thead><tr><th>วันที่</th><th>ผู้ทำรายการ (พร้อมเพย์/ธนาคาร)</th><th>ประเภท</th><th>ยอดเงิน</th><th>การจัดการ</th></tr></thead>
                 <tbody id="tbody-finance">
-                  <tr><td colspan="6" style="text-align: center;">กำลังสแกนหาข้อมูลการทำธุรกรรมทั้งหมด...</td></tr>
+                  <tr><td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr>
+                </tbody>
+              </table>
+              <table id="table-fin-history" style="display:none;">
+                <thead><tr><th>วันที่อนุมัติ</th><th>ผู้ทำรายการ</th><th>ประเภท</th><th>ยอดเงิน</th><th>สถานะ</th></tr></thead>
+                <tbody id="tbody-finance-history">
+                  <tr><td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- === VIEW: SUPPORT (ศูนย์ช่วยเหลือ) === -->
+        <div id="view-support" class="view-section">
+          <div class="card">
+             <div class="card-header">
+                <h3 class="card-title"><span class="material-icons">support_agent</span> ศูนย์ช่วยเหลือ (Support Tickets)</h3>
+                <button class="btn btn-outline" onclick="loadSupportTickets()"><span class="material-icons">refresh</span> โหลดใหม่</button>
+             </div>
+             <div class="table-responsive">
+               <table>
+                 <thead><tr><th>วันที่แจ้ง</th><th>ผู้แจ้ง (เบอร์โทร)</th><th>รายละเอียดปัญหา</th><th>สถานะ</th><th>อัปเดตสถานะ</th></tr></thead>
+                 <tbody id="tbody-support"><tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
+               </table>
+             </div>
           </div>
         </div>
 
@@ -374,6 +408,7 @@
           <h3 style="margin:0; font-size:18px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">history</span> ประวัติการทำธุรกรรม</h3>
           <span class="material-icons" style="cursor:pointer; color:var(--text-muted);" onclick="document.getElementById('finance-history-modal').style.display='none'">close</span>
        </div>
+       
        <div style="display:flex; gap:15px; margin-bottom:20px;">
           <div style="flex:1; background:#eff6ff; padding:15px; border-radius:12px; border:1px solid #bfdbfe;">
              <p style="margin:0 0 5px; font-size:13px; color:#3b82f6;">ยอดรวมรายรับ (เข้ากระเป๋า)</p>
@@ -384,6 +419,7 @@
              <h3 style="margin:0; font-size:20px; color:#b91c1c;">-฿<span id="modal-sum-expense">0</span></h3>
           </div>
        </div>
+
        <h4 style="margin:0 0 10px; font-size:15px;" id="modal-user-name">รายการย้อนหลัง</h4>
        <div style="overflow-y:auto; flex-grow:1; border:1px solid var(--border); border-radius:12px;">
           <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
@@ -410,6 +446,7 @@
           <label><input type="checkbox" value="dashboard"> ภาพรวมระบบ</label>
           <label><input type="checkbox" value="config"> ตั้งค่าระบบ</label>
           <label><input type="checkbox" value="finance"> การเงิน / อนุมัติ</label>
+          <label><input type="checkbox" value="support"> ศูนย์ช่วยเหลือ</label>
           <label><input type="checkbox" value="merchants"> จัดการร้านค้า</label>
           <label><input type="checkbox" value="riders"> จัดการไรเดอร์</label>
           <label><input type="checkbox" value="users"> ฐานข้อมูลลูกค้า</label>
@@ -422,7 +459,7 @@
   </div>
 
   <script>
-    /* STREAMING_CHUNK:Initializing Firebase and Globals... */
+    // เชื่อมต่อ Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -438,7 +475,7 @@
     let currentSession = null;
     let sessionCheckInterval = null;
 
-    /* STREAMING_CHUNK:Session Management and Auth... */
+    // --- Session Management & Auth ---
     window.onload = function() {
        checkSession();
     };
@@ -454,7 +491,6 @@
                showToast('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
                logoutAdmin();
            } else {
-               // ต่ออายุถ้าทำรายการเรื่อยๆ
                currentSession.loginTime = now;
                localStorage.setItem('hk_admin_session', JSON.stringify(currentSession));
                
@@ -477,7 +513,7 @@
                 logoutAdmin();
                 alert("ระบบทำการเตะออกอัตโนมัติ เนื่องจากไม่มีการใช้งานเกิน 3 ชั่วโมงเพื่อความปลอดภัย");
             }
-        }, 60000); // Check every minute
+        }, 60000); 
     }
 
     async function loginAdmin() {
@@ -486,13 +522,11 @@
 
       if(!user || !pass) return showToast('กรุณากรอก Username และ Password', 'error');
 
-      // 1. ตรวจสอบบัญชี Root (Super Admin สูงสุดของระบบ)
       if (user === 'adminbas' && pass === 'ball123456') {
           setupSession('adminbas', 'คุณบาส (Super Admin)', 'superadmin', ['all']);
           return;
       }
 
-      // 2. ตรวจสอบบัญชีลูกข่ายที่สร้างใน DB
       try {
           const snap = await db.collection("admins").where("username", "==", user).where("password", "==", pass).get();
           if (!snap.empty) {
@@ -532,7 +566,7 @@
         location.reload();
     }
 
-    /* STREAMING_CHUNK:Role Based Access Control (RBAC)... */
+    // --- Role Based Access Control (RBAC) ---
     function applyPermissions() {
         if(!currentSession) return;
         
@@ -542,7 +576,6 @@
 
         const isSuper = currentSession.role === 'superadmin';
         
-        // จัดการเมนู Sidebar
         document.querySelectorAll('.nav-item').forEach(el => {
             const target = el.getAttribute('data-target');
             if(!target) return;
@@ -558,11 +591,10 @@
             }
         });
 
-        // ดันไปหน้า Dashboard เสมอตอนล็อกอิน
         switchView('dashboard', document.querySelector('[data-target="dashboard"]'));
     }
 
-    /* STREAMING_CHUNK:Audit Logging System... */
+    // --- Audit Logging System ---
     function logAction(actionName, details) {
         if (!currentSession) return;
         try {
@@ -577,7 +609,7 @@
         } catch(e) { console.error("Log error", e); }
     }
 
-    // ควบคุมเมนู Sidebar
+    // --- View Navigation ---
     function switchView(viewId, element) {
       if(!currentSession) return;
       if(currentSession.role !== 'superadmin' && !currentSession.permissions.includes(viewId)) {
@@ -594,6 +626,7 @@
       document.getElementById('page-title').innerText = element ? element.innerText.trim() : 'ภาพรวมระบบ';
 
       if(viewId === 'finance') loadFinancials();
+      if(viewId === 'support') loadSupportTickets();
       if(viewId === 'admins' && currentSession.role === 'superadmin') loadAdminsList();
       if(viewId === 'logs' && currentSession.role === 'superadmin') loadAuditLogs();
     }
@@ -608,7 +641,7 @@
         loadPromos();
     }
 
-    /* STREAMING_CHUNK:Dashboard & Config... */
+    // --- Dashboard & Config ---
     async function loadDashboardStats() {
       try {
         db.collection("orders").get().then(snap => document.getElementById('stat-orders').innerText = snap.size);
@@ -700,20 +733,22 @@
       }).catch(e => showToast('Error: ' + e.message, 'error'));
     }
 
-    /* STREAMING_CHUNK:Finance & Approvals... */
+    // --- Finance & Approvals ---
+    let globalTransactions = [];
+
     async function loadFinancials() {
-      const tbody = document.getElementById('tbody-finance');
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">กำลังสแกนหาข้อมูลการทำธุรกรรมทั้งหมด...</td></tr>';
+      const tbodyPending = document.getElementById('tbody-finance');
+      tbodyPending.innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>';
       
       try {
-        let allTx = [];
+        globalTransactions = [];
         const ridersSnap = await db.collection("riders").get();
         for (let doc of ridersSnap.docs) {
             const txSnap = await db.collection("riders").doc(doc.id).collection("transactions").get();
             txSnap.forEach(t => {
                 let data = t.data();
                 if(data.title && (data.title.includes('ถอน') || data.title.includes('เติม'))) {
-                    allTx.push({...data, id: t.id, userType: 'ไรเดอร์', userId: doc.id, userName: doc.data().name, coll: 'riders'});
+                    globalTransactions.push({...data, id: t.id, userType: 'ไรเดอร์', userId: doc.id, userName: doc.data().name, coll: 'riders'});
                 }
             });
         }
@@ -724,36 +759,49 @@
             txSnap.forEach(t => {
                 let data = t.data();
                 if(data.title && (data.title.includes('ถอน') || data.title.includes('เติม'))) {
-                    allTx.push({...data, id: t.id, userType: 'ร้านค้า', userId: doc.id, userName: doc.data().storeName, coll: 'merchants'});
+                    globalTransactions.push({...data, id: t.id, userType: 'ร้านค้า', userId: doc.id, userName: doc.data().storeName, coll: 'merchants'});
                 }
             });
         }
 
-        allTx.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+        globalTransactions.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+        renderFinanceTables();
 
-        let html = '';
-        allTx.forEach(tx => {
+      } catch(e) {
+          console.error(e); tbodyPending.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+      }
+    }
+
+    function renderFinanceTables() {
+        let pendingHtml = ''; let historyHtml = '';
+
+        globalTransactions.forEach(tx => {
             const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
             const isCompleted = tx.title.includes('สำเร็จ') || tx.status === 'completed' || tx.title.includes('อนุมัติแล้ว');
-            const badge = isCompleted ? 'bg-success' : 'bg-warning';
-            const statusText = isCompleted ? 'เสร็จสิ้น' : 'รอดำเนินการ';
-            const typeBadge = tx.type === 'income' ? '<span class="badge bg-info">แจ้งเติมเครดิต</span>' : '<span class="badge bg-danger">แจ้งถอนเงิน</span>';
-            const actionBtn = isCompleted ? `<button class="btn btn-sm btn-outline" onclick="viewUserFinanceHistory('${tx.coll}', '${tx.userId}', '${tx.userName}')">ดูประวัติทั้งหมด</button>` : `<button class="btn btn-sm btn-primary" onclick="markTxComplete('${tx.coll}', '${tx.userId}', '${tx.id}', '${tx.userName}', ${tx.amount}, '${tx.type}')"><span class="material-icons" style="font-size:14px;">check</span> อนุมัติ</button>`;
+            const typeBadge = tx.type === 'income' ? '<span class="badge bg-info">ขอเติมเครดิต</span>' : '<span class="badge bg-danger">ขอถอนเงิน</span>';
+            const userDetails = `<b>${tx.userName}</b> <br><span style="font-size:11px; color:#94a3b8;">${tx.bankAccount ? `ธ.${tx.bankAccount.bank} ${tx.bankAccount.accountNo}` : `(${tx.userType})`}</span>`;
 
-            html += `<tr>
-              <td>${date}</td>
-              <td><b>${tx.userName}</b> <span style="color:var(--text-muted); font-size:12px;">(${tx.userType})</span></td>
-              <td>${typeBadge}</td>
-              <td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td>
-              <td><span class="badge ${badge}">${statusText}</span></td>
-              <td><div style="display:flex; gap:5px;">${actionBtn}</div></td>
-            </tr>`;
+            if(isCompleted) {
+                let actBtn = `<button class="btn btn-sm btn-outline" onclick="viewUserFinanceHistory('${tx.coll}', '${tx.userId}', '${tx.userName}')">ดูประวัติ</button>`;
+                historyHtml += `<tr><td>${date}</td><td>${userDetails}</td><td>${typeBadge}</td><td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td><td><div style="display:flex; align-items:center; gap:10px;"><span class="badge bg-success">โอน/อนุมัติแล้ว</span> ${actBtn}</div></td></tr>`;
+            } else {
+                let actBtn = `<button class="btn btn-sm btn-primary" onclick="markTxComplete('${tx.coll}', '${tx.userId}', '${tx.id}', '${tx.userName}', ${tx.amount}, '${tx.type}')"><span class="material-icons" style="font-size:14px;">check</span> อนุมัติทันที</button>`;
+                pendingHtml += `<tr><td>${date}</td><td>${userDetails}</td><td>${typeBadge}</td><td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td><td>${actBtn}</td></tr>`;
+            }
         });
 
-        tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ไม่มีรายการธุรกรรมรอดำเนินการ</td></tr>';
-      } catch(e) {
-          console.error(e); tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-      }
+        document.getElementById('tbody-finance').innerHTML = pendingHtml || '<tr><td colspan="5" style="text-align:center;">ไม่มีรายการรอดำเนินการ</td></tr>';
+        document.getElementById('tbody-finance-history').innerHTML = historyHtml || '<tr><td colspan="5" style="text-align:center;">ยังไม่มีประวัติที่อนุมัติแล้ว</td></tr>';
+    }
+
+    function toggleFinanceTab(tab) {
+        if(tab === 'pending') {
+            document.getElementById('table-fin-pending').style.display = 'table'; document.getElementById('table-fin-history').style.display = 'none';
+            document.getElementById('tab-fin-pending').className = 'btn btn-primary'; document.getElementById('tab-fin-history').className = 'btn btn-outline';
+        } else {
+            document.getElementById('table-fin-pending').style.display = 'none'; document.getElementById('table-fin-history').style.display = 'table';
+            document.getElementById('tab-fin-pending').className = 'btn btn-outline'; document.getElementById('tab-fin-history').className = 'btn btn-primary';
+        }
     }
 
     function markTxComplete(collection, userId, txId, userName, amount, type) {
@@ -778,17 +826,30 @@
 
        db.collection(collection).doc(userId).collection("transactions")
          .orderBy("createdAt", "desc").get().then(snap => {
-            if(snap.empty) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">ไม่มีประวัติการทำรายการ</td></tr>'; return; }
-            let html = ''; let sumIncome = 0; let sumExpense = 0;
+            if(snap.empty) {
+               tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">ไม่มีประวัติการทำรายการ</td></tr>';
+               return;
+            }
+
+            let html = '';
+            let sumIncome = 0;
+            let sumExpense = 0;
 
             snap.forEach(doc => {
                const tx = doc.data();
                const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
-               if(tx.type === 'income') sumIncome += tx.amount; else sumExpense += tx.amount;
+               
+               if(tx.type === 'income') sumIncome += tx.amount;
+               else sumExpense += tx.amount;
+
                const color = tx.type === 'income' ? 'color:#10b981;' : 'color:#ef4444;';
                const sign = tx.type === 'income' ? '+' : '-';
 
-               html += `<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px; color:var(--text-muted);">${date}</td><td style="padding:10px;">${tx.title}</td><td style="padding:10px; font-weight:600; ${color}">${sign}฿${tx.amount.toFixed(2)}</td></tr>`;
+               html += `<tr style="border-bottom:1px solid #f1f5f9;">
+                 <td style="padding:10px; color:var(--text-muted);">${date}</td>
+                 <td style="padding:10px;">${tx.title}</td>
+                 <td style="padding:10px; font-weight:600; ${color}">${sign}฿${tx.amount.toFixed(2)}</td>
+               </tr>`;
             });
 
             document.getElementById('modal-sum-income').innerText = sumIncome.toFixed(2);
@@ -797,7 +858,43 @@
          });
     }
 
-    /* STREAMING_CHUNK:Databases (Merchants, Riders, Users, Promos)... */
+    // --- Support Tickets (ศูนย์ช่วยเหลือ) ---
+    function loadSupportTickets() {
+        db.collection("support_tickets").orderBy("createdAt", "desc").get().then(snap => {
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
+                
+                let badge = '<span class="badge bg-danger">รอรับเรื่อง</span>';
+                if(d.status === 'in_progress') badge = '<span class="badge bg-warning">กำลังตรวจสอบ</span>';
+                if(d.status === 'resolved') badge = '<span class="badge bg-success">เสร็จสิ้น</span>';
+
+                let actionHtml = '';
+                if(d.status === 'pending') actionHtml = `<button class="btn btn-sm btn-outline" style="border-color:var(--warning); color:var(--warning);" onclick="updateTicketStatus('${doc.id}', 'in_progress')">กดรับเรื่อง</button>`;
+                else if(d.status === 'in_progress') actionHtml = `<button class="btn btn-sm btn-success" onclick="updateTicketStatus('${doc.id}', 'resolved')">ปิดเคส</button>`;
+
+                html += `<tr>
+                  <td>${date}</td>
+                  <td><b>${d.userName}</b><br><span style="font-size:11px; color:#94a3b8;">${d.userPhone}</span></td>
+                  <td><div style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.message}</div></td>
+                  <td>${badge}</td>
+                  <td>${actionHtml}</td>
+                </tr>`;
+            });
+            document.getElementById('tbody-support').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ไม่มีตั๋วแจ้งปัญหา</td></tr>';
+        });
+    }
+
+    function updateTicketStatus(docId, newStatus) {
+        db.collection("support_tickets").doc(docId).update({ status: newStatus }).then(() => {
+            logAction("อัปเดตแจ้งปัญหา", `อัปเดตเคส ${docId} เป็นสถานะ: ${newStatus}`);
+            showToast("อัปเดตสถานะปัญหาแล้ว");
+            loadSupportTickets();
+        });
+    }
+
+    // --- Databases (Merchants, Riders, Users, Promos) ---
     function loadMerchants() {
       db.collection("merchants").get().then(snapshot => {
         let html = '';
@@ -886,7 +983,7 @@
        }
     }
 
-    /* STREAMING_CHUNK:Global Actions & Admin Management... */
+    // --- Global Actions & Admin Management ---
     function toggleBan(collection, docId, isBan, name) {
        const action = isBan ? "ระงับการใช้งาน" : "ปลดระงับ";
        if(confirm(`ต้องการ ${action} บัญชีนี้ใช่หรือไม่?`)) {
@@ -996,7 +1093,7 @@
         });
     }
 
-    /* STREAMING_CHUNK:Utils... */
+    // --- Utils ---
     function filterTable(tbodyId, query) {
        query = query.toLowerCase();
        const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
@@ -1018,4 +1115,3 @@
   </script>
 </body>
 </html>
-```eof
