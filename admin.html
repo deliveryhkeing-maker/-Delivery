@@ -15,10 +15,10 @@
   <style>
     /* ================= CSS VARIABLES & RESET ================= */
     :root {
-      --sidebar-bg: #0f172a; --sidebar-hover: #1e293b; --sidebar-active: #2563eb;
-      --bg-color: #f8fafc; --white: #ffffff;
+      --sidebar-bg: #0f172a; --sidebar-hover: #1e293b; --sidebar-active: #3b82f6;
+      --bg-color: #f1f5f9; --white: #ffffff;
       --text-dark: #0f172a; --text-muted: #64748b;
-      --primary: #2563eb; --primary-hover: #1d4ed8;
+      --primary: #3b82f6; --primary-hover: #2563eb;
       --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
       --border: #e2e8f0;
     }
@@ -27,71 +27,84 @@
 
     /* ================= LOGIN SCREEN ================= */
     #admin-login { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-    .login-box { background: var(--white); padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-    .login-box input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; font-family: 'Prompt'; outline: none; }
-    .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Prompt'; }
+    .login-box { background: var(--white); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+    .login-box input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; font-family: 'Prompt'; font-size: 16px; outline: none; background: #f8fafc; }
+    .login-box input:focus { border-color: var(--primary); background: var(--white); }
+    .login-box button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .login-box button:hover { background: var(--primary-hover); }
 
     /* ================= LAYOUT ================= */
     #admin-app { display: none; width: 100%; height: 100%; }
-    .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-    .sidebar-header { padding: 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
-    .nav-list { list-style: none; overflow-y: auto; flex-grow: 1; padding: 10px 0; }
-    .nav-item { padding: 15px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #94a3b8; font-size: 14px; transition: 0.2s; border-left: 4px solid transparent; }
+    .sidebar { width: 280px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+    .sidebar-header { padding: 25px 20px; font-size: 20px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; color: #60a5fa; }
+    .nav-list { list-style: none; overflow-y: auto; flex-grow: 1; padding: 15px 0; }
+    .nav-item { padding: 16px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: #94a3b8; font-size: 15px; font-weight: 500; transition: 0.2s; border-left: 4px solid transparent; margin-bottom: 5px; }
     .nav-item:hover { background: var(--sidebar-hover); color: white; }
-    .nav-item.active { background: var(--sidebar-active); color: white; border-left-color: white; }
+    .nav-item.active { background: var(--sidebar-hover); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+    .nav-item .material-icons { font-size: 22px; }
 
     .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { background: var(--white); height: 70px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .topbar { background: var(--white); height: 75px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); z-index: 5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
     .content-area { padding: 30px; overflow-y: auto; flex-grow: 1; }
 
     /* ================= COMPONENTS ================= */
-    .view-section { display: none; animation: fadeIn 0.3s ease; }
+    .view-section { display: none; animation: fadeIn 0.4s ease; }
     .view-section.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .stat-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .stat-card h3 { color: var(--text-muted); font-size: 14px; margin-bottom: 10px; font-weight: 500; }
-    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--text-dark); }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 20px; }
+    .stat-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 28px; }
+    .stat-card h3 { color: var(--text-muted); font-size: 14px; margin-bottom: 5px; font-weight: 500; }
+    .stat-card .value { font-size: 32px; font-weight: 700; color: var(--text-dark); line-height: 1; }
 
-    .card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card { background: white; border-radius: 16px; border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .card-title { font-size: 16px; font-weight: 600; margin: 0; }
+    .card-title { font-size: 18px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 10px; }
 
     /* Forms */
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
-    .form-control { width: 100%; padding: 10px 15px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Prompt'; outline: none; }
-    .form-control:focus { border-color: var(--primary); }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-dark); margin-bottom: 8px; }
+    .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Prompt'; outline: none; background: #f8fafc; transition: 0.3s; }
+    .form-control:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    
+    /* Image Upload (Banner) */
+    .banner-preview { width: 100%; height: 150px; border-radius: 12px; border: 2px dashed #cbd5e1; background-color: #f8fafc; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; background-size: cover; background-position: center; transition: 0.3s; position: relative; overflow: hidden; }
+    .banner-preview:hover { border-color: var(--primary); background-color: #eff6ff; }
+    .banner-preview .material-icons { font-size: 40px; color: #94a3b8; margin-bottom: 10px; }
+    .banner-preview span { font-size: 14px; color: #64748b; font-weight: 500; }
+    #banner-upload-input { display: none; }
 
     /* Tables */
-    .table-responsive { overflow-x: auto; }
+    .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-    th { background: #f8fafc; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    th, td { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    th { background: #f8fafc; color: var(--text-muted); font-weight: 600; white-space: nowrap; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+    tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f8fafc; }
     
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; text-align: center; }
     .bg-success { background: #d1fae5; color: #065f46; }
     .bg-warning { background: #fef3c7; color: #92400e; }
     .bg-danger { background: #fee2e2; color: #991b1b; }
+    .bg-info { background: #dbeafe; color: #1e40af; }
 
     /* Buttons */
-    .btn { padding: 8px 16px; border-radius: 8px; font-family: 'Prompt'; font-size: 14px; cursor: pointer; border: none; font-weight: 500; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
+    .btn { padding: 10px 20px; border-radius: 10px; font-family: 'Prompt'; font-size: 14px; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(59,130,246,0.2); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-dark); }
-    .btn-outline:hover { background: var(--bg-color); }
-    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-outline:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
     .btn-danger { background: var(--danger); color: white; }
+    .btn-success { background: var(--success); color: white; }
 
     /* Toast */
-    .toast { position: fixed; bottom: -100px; right: 30px; background: #334155; color: white; padding: 15px 25px; border-radius: 8px; transition: 0.3s; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .toast { position: fixed; bottom: -100px; right: 30px; background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); font-weight: 500; }
     .toast.show { bottom: 30px; }
     
-    /* Loading Skeleton */
-    .skeleton { background: #e2e8f0; height: 20px; border-radius: 4px; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .search-box { display: flex; align-items: center; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 8px 15px; width: 300px; }
+    .search-box input { border: none; background: transparent; outline: none; width: 100%; font-family: 'Prompt'; font-size: 14px; margin-left: 8px; }
   </style>
 </head>
 <body>
@@ -99,11 +112,13 @@
   <!-- ================= 1. LOGIN SCREEN ================= -->
   <div id="admin-login">
     <div class="login-box">
-      <span class="material-icons" style="font-size: 48px; color: var(--primary);">admin_panel_settings</span>
-      <h2 style="margin: 15px 0;">Super Admin</h2>
-      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">เฉพาะนักพัฒนาและผู้ดูแลระบบ</p>
+      <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 20px; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px;">
+        <span class="material-icons" style="font-size: 48px; color: var(--primary);">admin_panel_settings</span>
+      </div>
+      <h2 style="margin: 0 0 10px; color: var(--text-dark);">Super Admin</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">ศูนย์ควบคุมระบบ ห้วยเกิ้ง Delivery</p>
       <input type="password" id="admin-pin" placeholder="Enter Master PIN (ลองใส่ 1234)" onkeypress="if(event.key === 'Enter') loginAdmin()">
-      <button onclick="loginAdmin()">เข้าสู่ระบบ</button>
+      <button onclick="loginAdmin()">เข้าสู่ระบบจัดการ</button>
     </div>
   </div>
 
@@ -113,26 +128,28 @@
     <div class="sidebar">
       <div class="sidebar-header"><span class="material-icons">rocket_launch</span> DEV Control</div>
       <ul class="nav-list">
-        <li class="nav-item active" onclick="switchView('dashboard', this)"><span class="material-icons">dashboard</span> แดชบอร์ด (Overview)</li>
-        <li class="nav-item" onclick="switchView('config', this)"><span class="material-icons">settings</span> ตั้งค่าระบบ & โฆษณา</li>
-        <li class="nav-item" onclick="switchView('finance', this)"><span class="material-icons">payments</span> ธุรกรรม & อนุมัติถอนเงิน</li>
+        <li class="nav-item active" onclick="switchView('dashboard', this)"><span class="material-icons">dashboard</span> ภาพรวมระบบ</li>
+        <li class="nav-item" onclick="switchView('config', this)"><span class="material-icons">tune</span> ตั้งค่าระบบ & โฆษณา</li>
+        <li class="nav-item" onclick="switchView('finance', this)"><span class="material-icons">account_balance</span> ธุรกรรม & เบิกถอน</li>
         <li class="nav-item" onclick="switchView('merchants', this)"><span class="material-icons">storefront</span> จัดการร้านค้า</li>
         <li class="nav-item" onclick="switchView('riders', this)"><span class="material-icons">sports_motorsports</span> จัดการไรเดอร์</li>
         <li class="nav-item" onclick="switchView('users', this)"><span class="material-icons">group</span> ฐานข้อมูลลูกค้า</li>
-        <li class="nav-item" onclick="switchView('promos', this)"><span class="material-icons">local_offer</span> จัดการโปรโมชัน</li>
-        <li class="nav-item" onclick="switchView('broadcast', this)"><span class="material-icons">campaign</span> ส่งแจ้งเตือน Broadcast</li>
+        <li class="nav-item" onclick="switchView('promos', this)"><span class="material-icons">local_offer</span> โปรโมชันโค้ด</li>
+        <li class="nav-item" onclick="switchView('broadcast', this)"><span class="material-icons">campaign</span> ส่ง Broadcast</li>
       </ul>
-      <div style="padding: 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
-        <button class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.2); width: 100%; justify-content: center;" onclick="location.reload()">ออกจากระบบ</button>
+      <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <button class="btn btn-outline" style="color: #94a3b8; border-color: #334155; width: 100%;" onclick="location.reload()"><span class="material-icons" style="font-size: 18px;">logout</span> ออกจากระบบ</button>
       </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-wrapper">
       <div class="topbar">
-        <h2 style="font-size: 18px; font-weight: 600;" id="page-title">แดชบอร์ดภาพรวม</h2>
-        <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500;">
-          <div style="width: 35px; height: 35px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">AD</div>
+        <h2 style="font-size: 20px; font-weight: 700; color: var(--text-dark);" id="page-title">ภาพรวมระบบ (Dashboard)</h2>
+        <div style="display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 600; color: var(--text-dark);">
+          <div style="width: 40px; height: 40px; background: #eff6ff; color: var(--primary); border-radius: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid #bfdbfe;">
+            <span class="material-icons">admin_panel_settings</span>
+          </div>
           Super Admin
         </div>
       </div>
@@ -142,17 +159,29 @@
         <!-- === VIEW: DASHBOARD === -->
         <div id="view-dashboard" class="view-section active">
           <div class="grid-4">
-            <div class="stat-card"><h3>ออเดอร์ทั้งหมด</h3><div class="value" id="stat-orders">...</div></div>
-            <div class="stat-card"><h3>ร้านค้าในระบบ</h3><div class="value" id="stat-merchants">...</div></div>
-            <div class="stat-card"><h3>ไรเดอร์ในระบบ</h3><div class="value" id="stat-riders">...</div></div>
-            <div class="stat-card"><h3>ลูกค้าที่ลงทะเบียน</h3><div class="value" id="stat-users">...</div></div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><span class="material-icons">receipt_long</span></div>
+              <div><h3>ออเดอร์ทั้งหมด</h3><div class="value" id="stat-orders">...</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: #fef3c7; color: #f59e0b;"><span class="material-icons">storefront</span></div>
+              <div><h3>ร้านค้าในระบบ</h3><div class="value" id="stat-merchants">...</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: #d1fae5; color: #10b981;"><span class="material-icons">sports_motorsports</span></div>
+              <div><h3>ไรเดอร์ในระบบ</h3><div class="value" id="stat-riders">...</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: #f3e8ff; color: #a855f7;"><span class="material-icons">group</span></div>
+              <div><h3>ลูกค้าที่ลงทะเบียน</h3><div class="value" id="stat-users">...</div></div>
+            </div>
           </div>
           <div class="card">
-            <div class="card-header"><h3 class="card-title">ออเดอร์ล่าสุด (Real-time)</h3></div>
+            <div class="card-header"><h3 class="card-title"><span class="material-icons" style="color: var(--primary);">radar</span> ออเดอร์ล่าสุด (Real-time)</h3></div>
             <div class="table-responsive">
               <table id="table-recent-orders">
-                <thead><tr><th>รหัสออเดอร์</th><th>ร้านค้า</th><th>ลูกค้า</th><th>ยอดรวม</th><th>สถานะ</th></tr></thead>
-                <tbody id="tbody-recent-orders"><tr><td colspan="5">กำลังโหลดข้อมูล...</td></tr></tbody>
+                <thead><tr><th>รหัสบิล</th><th>เวลา</th><th>ร้านค้า</th><th>ลูกค้า</th><th>ยอดรวม</th><th>สถานะ</th></tr></thead>
+                <tbody id="tbody-recent-orders"><tr><td colspan="6" style="text-align: center;">กำลังโหลดข้อมูล...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -161,33 +190,47 @@
         <!-- === VIEW: CONFIG === -->
         <div id="view-config" class="view-section">
           <div class="card">
-            <h3 class="card-title" style="margin-bottom: 20px;">ตั้งค่าตัวแปรระบบ (System Config)</h3>
-            <div class="grid-4" style="grid-template-columns: 1fr 1fr;">
-              <div class="form-group"><label>ค่าจัดส่งเริ่มต้น (บาท)</label><input type="number" id="cfg-base-fee" class="form-control" value="15"></div>
-              <div class="form-group"><label>ค่าส่งกิโลเมตรถัดไป (บาท/กม.)</label><input type="number" id="cfg-km-fee" class="form-control" value="5"></div>
+            <div class="card-header"><h3 class="card-title"><span class="material-icons">tune</span> ตั้งค่าตัวแปรระบบ (System Config)</h3></div>
+            <div class="grid-4" style="grid-template-columns: 1fr 1fr 1fr;">
+              <div class="form-group"><label>ค่าจัดส่งเริ่มต้น (บาท)</label><input type="number" id="cfg-base-fee" class="form-control" placeholder="15"></div>
+              <div class="form-group"><label>ค่าส่งกิโลเมตรถัดไป (บาท/กม.)</label><input type="number" id="cfg-km-fee" class="form-control" placeholder="5"></div>
+              <div class="form-group"><label>ลิมิตระยะทางจัดส่ง (กม.)</label><input type="number" id="cfg-max-dist" class="form-control" placeholder="10"></div>
             </div>
-            <div class="form-group"><label>ลิมิตระยะทางจัดส่งสูงสุด (กม.)</label><input type="number" id="cfg-max-dist" class="form-control" value="10"></div>
-            <button class="btn btn-primary" onclick="saveSystemConfig()">บันทึกค่าระบบ</button>
+            <button class="btn btn-primary" onclick="saveSystemConfig('fees')"><span class="material-icons">save</span> บันทึกค่าระบบ</button>
           </div>
           
           <div class="card">
-            <h3 class="card-title" style="margin-bottom: 20px;">จัดการป้ายโฆษณา (App Banners)</h3>
-            <div class="form-group"><label>ข้อความโปรโมตหลัก</label><input type="text" id="cfg-banner-title" class="form-control" value="โค้ดลดชุมชน"></div>
-            <div class="form-group"><label>ข้อความรอง</label><input type="text" id="cfg-banner-sub" class="form-control" value="ใส่โค้ด LOCAL50 ลดทันที 50.-"></div>
-            <div class="form-group"><label>URL รูปภาพพื้นหลังแบนเนอร์ (ถ้ามี)</label><input type="text" id="cfg-banner-img" class="form-control" placeholder="https://..."></div>
-            <button class="btn btn-primary" onclick="saveSystemConfig()">อัปเดตแบนเนอร์ลูกค้า</button>
+            <div class="card-header"><h3 class="card-title"><span class="material-icons">panorama</span> ป้ายโฆษณาหน้าแอป (App Banner)</h3></div>
+            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 300px;">
+                <div class="form-group"><label>ข้อความโปรโมตหลัก (บรรทัดแรก)</label><input type="text" id="cfg-banner-title" class="form-control" placeholder="เช่น โค้ดลดชุมชน"></div>
+                <div class="form-group"><label>ข้อความรอง (บรรทัดสอง)</label><input type="text" id="cfg-banner-sub" class="form-control" placeholder="เช่น ใส่โค้ด LOCAL50 ลดทันที 50.-"></div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="saveSystemConfig('banner')"><span class="material-icons">cloud_upload</span> อัปเดตแบนเนอร์ให้ลูกค้า</button>
+              </div>
+              <div style="flex: 1; min-width: 300px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px;">อัปโหลดรูปพื้นหลังแบนเนอร์</label>
+                <div class="banner-preview" id="banner-preview-box" onclick="document.getElementById('banner-upload-input').click()">
+                  <span class="material-icons" id="banner-icon-placeholder">add_photo_alternate</span>
+                  <span id="banner-text-placeholder">คลิกเพื่ออัปโหลดรูปภาพ (แนวนอน)</span>
+                </div>
+                <input type="file" id="banner-upload-input" accept="image/*" onchange="handleBannerUpload(event)">
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- === VIEW: FINANCE === -->
         <div id="view-finance" class="view-section">
           <div class="card">
-            <div class="card-header"><h3 class="card-title">คำขอถอนเงิน / เติมเงิน (รอดำเนินการ)</h3></div>
+            <div class="card-header">
+              <h3 class="card-title"><span class="material-icons">account_balance</span> ธุรกรรมแจ้งถอน / เติมเครดิต (รอดำเนินการ)</h3>
+              <button class="btn btn-outline" onclick="loadFinancials()"><span class="material-icons">refresh</span> โหลดใหม่</button>
+            </div>
             <div class="table-responsive">
               <table>
-                <thead><tr><th>วันที่</th><th>ชื่อบัญชี/ผู้ขอ</th><th>ประเภท</th><th>จำนวนเงิน</th><th>สลิปอ้างอิง</th><th>จัดการ</th></tr></thead>
+                <thead><tr><th>วันที่</th><th>ผู้ทำรายการ (ร้าน/ไรเดอร์)</th><th>ประเภท</th><th>จำนวนเงิน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
                 <tbody id="tbody-finance">
-                  <tr><td colspan="6">กำลังดึงข้อมูลจาก Database...</td></tr>
+                  <tr><td colspan="6" style="text-align: center;">ระบบกำลังสแกนหาธุรกรรม...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -197,11 +240,14 @@
         <!-- === VIEW: MERCHANTS === -->
         <div id="view-merchants" class="view-section">
           <div class="card">
-            <div class="card-header"><h3 class="card-title">ฐานข้อมูลร้านค้า</h3> <button class="btn btn-outline"><span class="material-icons">refresh</span> รีเฟรช</button></div>
+            <div class="card-header">
+              <h3 class="card-title"><span class="material-icons">storefront</span> ฐานข้อมูลร้านค้า</h3> 
+              <div class="search-box"><span class="material-icons" style="color:var(--text-muted);">search</span><input type="text" placeholder="ค้นหาชื่อร้าน, เบอร์โทร..." onkeyup="filterTable('tbody-merchants', this.value)"></div>
+            </div>
             <div class="table-responsive">
               <table>
                 <thead><tr><th>รหัส (เบอร์)</th><th>ชื่อร้าน</th><th>หมวดหมู่</th><th>สถานะร้าน</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-merchants"><tr><td colspan="5">กำลังดึงข้อมูล...</td></tr></tbody>
+                <tbody id="tbody-merchants"><tr><td colspan="5" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -210,11 +256,14 @@
         <!-- === VIEW: RIDERS === -->
         <div id="view-riders" class="view-section">
           <div class="card">
-            <div class="card-header"><h3 class="card-title">ฐานข้อมูลไรเดอร์</h3></div>
+            <div class="card-header">
+              <h3 class="card-title"><span class="material-icons">sports_motorsports</span> ฐานข้อมูลไรเดอร์</h3>
+              <div class="search-box"><span class="material-icons" style="color:var(--text-muted);">search</span><input type="text" placeholder="ค้นหาชื่อ, ทะเบียนรถ..." onkeyup="filterTable('tbody-riders', this.value)"></div>
+            </div>
             <div class="table-responsive">
               <table>
                 <thead><tr><th>เบอร์โทร</th><th>ชื่อ-สกุล</th><th>ทะเบียนรถ</th><th>เครดิต (Wallet)</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-riders"><tr><td colspan="5">กำลังดึงข้อมูล...</td></tr></tbody>
+                <tbody id="tbody-riders"><tr><td colspan="5" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -223,11 +272,14 @@
         <!-- === VIEW: USERS === -->
         <div id="view-users" class="view-section">
           <div class="card">
-            <div class="card-header"><h3 class="card-title">ฐานข้อมูลลูกค้า (Users)</h3></div>
+            <div class="card-header">
+              <h3 class="card-title"><span class="material-icons">group</span> ฐานข้อมูลลูกค้า (Users)</h3>
+              <div class="search-box"><span class="material-icons" style="color:var(--text-muted);">search</span><input type="text" placeholder="ค้นหาชื่อ, เบอร์โทร..." onkeyup="filterTable('tbody-users', this.value)"></div>
+            </div>
             <div class="table-responsive">
               <table>
-                <thead><tr><th>รหัส (UID)</th><th>ชื่อลูกค้า</th><th>เบอร์โทร</th><th>ที่อยู่หลัก</th><th>จัดการ</th></tr></thead>
-                <tbody id="tbody-users"><tr><td colspan="5">กำลังดึงข้อมูล...</td></tr></tbody>
+                <thead><tr><th>รหัส (UID)</th><th>ชื่อลูกค้า (LINE)</th><th>เบอร์โทร</th><th>ที่อยู่หลัก</th><th>จัดการ</th></tr></thead>
+                <tbody id="tbody-users"><tr><td colspan="5" style="text-align: center;">กำลังดึงข้อมูล...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -236,36 +288,39 @@
         <!-- === VIEW: PROMOS === -->
         <div id="view-promos" class="view-section">
           <div class="card">
-            <div class="card-header"><h3 class="card-title">โค้ดส่วนลดทั้งหมด</h3></div>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-               <input type="text" class="form-control" placeholder="ชื่อโค้ด (เช่น SALE50)">
-               <input type="number" class="form-control" placeholder="ส่วนลด (บาท)">
-               <button class="btn btn-primary" style="white-space: nowrap;" onclick="showToast('สร้างโค้ดส่วนลดสำเร็จ (Demo)')">+ สร้างโค้ด</button>
+            <div class="card-header"><h3 class="card-title"><span class="material-icons">local_offer</span> สร้างโค้ดส่วนลด</h3></div>
+            <div style="display: flex; gap: 15px; margin-bottom: 25px; align-items: flex-end; flex-wrap: wrap;">
+               <div style="flex:1; min-width:150px;"><label style="font-size:12px; font-weight:600;">รหัสโค้ด (Code)</label><input type="text" id="promo-code" class="form-control" placeholder="เช่น SALE50" style="text-transform: uppercase;"></div>
+               <div style="flex:1; min-width:150px;"><label style="font-size:12px; font-weight:600;">ส่วนลด (บาท)</label><input type="number" id="promo-discount" class="form-control" placeholder="เช่น 50"></div>
+               <div style="flex:1; min-width:150px;"><label style="font-size:12px; font-weight:600;">ขั้นต่ำ (บาท)</label><input type="number" id="promo-min" class="form-control" placeholder="เช่น 150"></div>
+               <button class="btn btn-primary" style="height: 46px;" onclick="createPromoCode()"><span class="material-icons">add</span> สร้างโค้ด</button>
             </div>
-            <table>
-              <thead><tr><th>Code</th><th>ส่วนลด</th><th>เงื่อนไข</th><th>สถานะ</th><th>ลบ</th></tr></thead>
-              <tbody>
-                <tr><td><strong>LOCAL50</strong></td><td>50 บาท</td><td>ขั้นต่ำ 150 บาท</td><td><span class="badge bg-success">ใช้งานได้</span></td><td><button class="btn btn-sm btn-danger">ลบ</button></td></tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>รหัสโค้ด</th><th>ส่วนลด</th><th>ขั้นต่ำ</th><th>สร้างเมื่อ</th><th>ลบ</th></tr></thead>
+                <tbody id="tbody-promos"><tr><td colspan="5" style="text-align:center;">กำลังโหลดโปรโมชัน...</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         <!-- === VIEW: BROADCAST === -->
         <div id="view-broadcast" class="view-section">
-          <div class="card" style="max-width: 600px;">
-            <h3 class="card-title" style="margin-bottom: 20px;">ส่งข้อความ Push Notification</h3>
+          <div class="card" style="max-width: 700px; margin: 0 auto;">
+            <div class="card-header"><h3 class="card-title"><span class="material-icons">campaign</span> ส่งข้อความแจ้งเตือน (Broadcast)</h3></div>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">* ฟีเจอร์นี้ต้องเชื่อมต่อกับ LINE Messaging API แบบ Broadcast</p>
+            
             <div class="form-group">
               <label>กลุ่มเป้าหมาย (Target)</label>
               <select class="form-control" id="bc-target">
                 <option value="all">ทุกคน (Customer, Merchant, Rider)</option>
-                <option value="customer">ลูกค้าทั้งหมด</option>
-                <option value="merchant">ร้านค้าทั้งหมด</option>
+                <option value="customer">เฉพาะลูกค้าทั้งหมด</option>
+                <option value="merchant">เฉพาะร้านค้าทั้งหมด</option>
               </select>
             </div>
-            <div class="form-group"><label>หัวข้อ (Title)</label><input type="text" id="bc-title" class="form-control" placeholder="เช่น ระบบมีการอัปเดต"></div>
-            <div class="form-group"><label>ข้อความ (Message)</label><textarea id="bc-msg" class="form-control" rows="4" placeholder="พิมพ์ข้อความ..."></textarea></div>
-            <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="sendBroadcast()"><span class="material-icons">send</span> ส่งข้อความไปยัง LINE</button>
+            <div class="form-group"><label>หัวข้อ (Title)</label><input type="text" id="bc-title" class="form-control" placeholder="เช่น ข่าวสารสำคัญจากแอดมิน"></div>
+            <div class="form-group"><label>รายละเอียดข้อความ (Message)</label><textarea id="bc-msg" class="form-control" rows="5" placeholder="พิมพ์ข้อความที่ต้องการประกาศ..."></textarea></div>
+            <button class="btn btn-primary" style="width: 100%; font-size: 16px; padding: 15px;" onclick="sendBroadcast()"><span class="material-icons">send</span> ยิง Broadcast ไปยัง LINE</button>
           </div>
         </div>
 
@@ -290,23 +345,27 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    let tempBannerBase64 = null;
+
     // 2. ระบบ Login
     function loginAdmin() {
       const pin = document.getElementById('admin-pin').value;
-      if (pin === '1234') { // กำหนดรหัสผ่าน Master PIN ตรงนี้
+      if (pin === '1234') { // รหัส Master PIN
         document.getElementById('admin-login').style.display = 'none';
         document.getElementById('admin-app').style.display = 'flex';
-        showToast('ยินดีต้อนรับ Super Admin', 'success');
+        showToast('ยินดีต้อนรับ Super Admin เข้าสู่ระบบ', 'success');
         
         // โหลดข้อมูลทุกอย่างเมื่อเข้าสู่ระบบ
         loadDashboardStats();
         loadRealtimeOrders();
+        loadSystemConfig();
         loadMerchants();
         loadRiders();
         loadUsers();
-        loadFinancials();
+        loadPromos();
+        // loadFinancials() จะถูกเรียกเมื่อกดเปิดแท็บ เพื่อประหยัดการสแกนข้อมูล
       } else {
-        alert('รหัสผ่านไม่ถูกต้อง เฉพาะ DEV เท่านั้น');
+        alert('รหัสผ่านไม่ถูกต้อง เฉพาะ DEV และ Admin เท่านั้น');
       }
     }
 
@@ -318,11 +377,13 @@
       document.getElementById('view-' + viewId).classList.add('active');
       element.classList.add('active');
       document.getElementById('page-title').innerText = element.innerText.trim();
+
+      if(viewId === 'finance') loadFinancials();
     }
 
-    // 4. ดึงข้อมูลจากฐานข้อมูล Firebase (CRUD Operations)
+    // 4. การจัดการข้อมูล (CRUD Operations)
 
-    // 4.1 แดชบอร์ด
+    // 4.1 แดชบอร์ด (Overview)
     async function loadDashboardStats() {
       try {
         db.collection("orders").get().then(snap => document.getElementById('stat-orders').innerText = snap.size);
@@ -333,99 +394,333 @@
     }
 
     function loadRealtimeOrders() {
-      db.collection("orders").orderBy("createdAt", "desc").limit(5).onSnapshot(snapshot => {
+      db.collection("orders").orderBy("createdAt", "desc").limit(10).onSnapshot(snapshot => {
         let html = '';
         snapshot.forEach(doc => {
           const d = doc.data();
-          let badge = 'bg-warning';
+          const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleTimeString('th-TH') : '-';
+          let badge = 'bg-info';
           if(d.status === 'จัดส่งสำเร็จ') badge = 'bg-success';
-          if(d.status.includes('ยกเลิก')) badge = 'bg-danger';
-          html += `<tr><td>#${doc.id.substring(0,6).toUpperCase()}</td><td>${d.restaurantName}</td><td>${d.customerName}</td><td>฿${d.totalPrice}</td><td><span class="badge ${badge}">${d.status}</span></td></tr>`;
+          if(d.status.includes('ยกเลิก') || d.status.includes('ปฏิเสธ')) badge = 'bg-danger';
+          if(d.status.includes('รอ') || d.status.includes('เตรียม')) badge = 'bg-warning';
+
+          html += `<tr>
+            <td style="font-weight:600; color:var(--primary);">#${doc.id.substring(0,6).toUpperCase()}</td>
+            <td>${date}</td>
+            <td>${d.restaurantName}</td>
+            <td>${d.customerName}</td>
+            <td style="font-weight:600;">฿${d.totalPrice}</td>
+            <td><span class="badge ${badge}">${d.status}</span></td>
+          </tr>`;
         });
-        document.getElementById('tbody-recent-orders').innerHTML = html || '<tr><td colspan="5">ไม่มีออเดอร์</td></tr>';
+        document.getElementById('tbody-recent-orders').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ยังไม่มีออเดอร์ในระบบ</td></tr>';
       });
     }
 
-    // 4.2 จัดการร้านค้า
+    // 4.2 การตั้งค่าระบบ (Config)
+    function loadSystemConfig() {
+      db.collection("settings").doc("system").get().then(doc => {
+        if(doc.exists) {
+           const d = doc.data();
+           if(d.baseFee) document.getElementById('cfg-base-fee').value = d.baseFee;
+           if(d.kmFee) document.getElementById('cfg-km-fee').value = d.kmFee;
+           if(d.maxDist) document.getElementById('cfg-max-dist').value = d.maxDist;
+           
+           if(d.bannerTitle) document.getElementById('cfg-banner-title').value = d.bannerTitle;
+           if(d.bannerSub) document.getElementById('cfg-banner-sub').value = d.bannerSub;
+           if(d.bannerImg) {
+              document.getElementById('banner-preview-box').style.backgroundImage = `url('${d.bannerImg}')`;
+              document.getElementById('banner-icon-placeholder').style.display = 'none';
+              document.getElementById('banner-text-placeholder').style.display = 'none';
+              tempBannerBase64 = d.bannerImg;
+           }
+        }
+      });
+    }
+
+    function handleBannerUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image(); img.onload = function() {
+            const canvas = document.createElement('canvas'); const MAX = 800; let w = img.width; let h = img.height;
+            if (w > h && w > MAX) { h *= MAX / w; w = MAX; } else if (h > MAX) { w *= MAX / h; h = MAX; }
+            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+            tempBannerBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            document.getElementById('banner-preview-box').style.backgroundImage = `url('${tempBannerBase64}')`;
+            document.getElementById('banner-icon-placeholder').style.display = 'none';
+            document.getElementById('banner-text-placeholder').style.display = 'none';
+          }; img.src = e.target.result;
+        }; reader.readAsDataURL(file);
+      }
+    }
+
+    function saveSystemConfig(type) {
+      let updates = {};
+      if(type === 'fees') {
+         updates.baseFee = parseFloat(document.getElementById('cfg-base-fee').value) || 15;
+         updates.kmFee = parseFloat(document.getElementById('cfg-km-fee').value) || 5;
+         updates.maxDist = parseFloat(document.getElementById('cfg-max-dist').value) || 10;
+      } else if (type === 'banner') {
+         updates.bannerTitle = document.getElementById('cfg-banner-title').value;
+         updates.bannerSub = document.getElementById('cfg-banner-sub').value;
+         if(tempBannerBase64) updates.bannerImg = tempBannerBase64;
+      }
+
+      db.collection("settings").doc("system").set(updates, {merge: true}).then(() => {
+         showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!', 'success');
+      }).catch(e => showToast('Error: ' + e.message, 'error'));
+    }
+
+    // 4.3 ธุรกรรมการเงิน (สแกนหาถอน/เติม)
+    async function loadFinancials() {
+      const tbody = document.getElementById('tbody-finance');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">กำลังสแกนหาข้อมูลการทำธุรกรรมทั้งหมด...</td></tr>';
+      
+      try {
+        let allTx = [];
+        
+        // 1. ดึงจากไรเดอร์
+        const ridersSnap = await db.collection("riders").get();
+        for (let doc of ridersSnap.docs) {
+            const txSnap = await db.collection("riders").doc(doc.id).collection("transactions").get();
+            txSnap.forEach(t => {
+                let data = t.data();
+                if(data.title && (data.title.includes('ถอน') || data.title.includes('เติม'))) {
+                    allTx.push({...data, id: t.id, userType: 'ไรเดอร์', userId: doc.id, userName: doc.data().name, coll: 'riders'});
+                }
+            });
+        }
+
+        // 2. ดึงจากร้านค้า
+        const merchantsSnap = await db.collection("merchants").get();
+        for (let doc of merchantsSnap.docs) {
+            const txSnap = await db.collection("merchants").doc(doc.id).collection("transactions").get();
+            txSnap.forEach(t => {
+                let data = t.data();
+                if(data.title && (data.title.includes('ถอน') || data.title.includes('เติม'))) {
+                    allTx.push({...data, id: t.id, userType: 'ร้านค้า', userId: doc.id, userName: doc.data().storeName, coll: 'merchants'});
+                }
+            });
+        }
+
+        // เรียงจากใหม่ไปเก่า
+        allTx.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+
+        let html = '';
+        allTx.forEach(tx => {
+            const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
+            const isCompleted = tx.title.includes('สำเร็จ') || tx.status === 'completed';
+            const badge = isCompleted ? 'bg-success' : 'bg-warning';
+            const statusText = isCompleted ? 'เสร็จสิ้น' : 'รอดำเนินการ';
+            const typeBadge = tx.type === 'income' ? '<span class="badge bg-info">แจ้งเติมเครดิต</span>' : '<span class="badge bg-danger">แจ้งถอนเงิน</span>';
+            const actionBtn = isCompleted ? '-' : `<button class="btn btn-sm btn-primary" onclick="markTxComplete('${tx.coll}', '${tx.userId}', '${tx.id}')"><span class="material-icons" style="font-size:14px;">check</span> อนุมัติ</button>`;
+
+            html += `<tr>
+              <td>${date}</td>
+              <td><b>${tx.userName}</b> <span style="color:var(--text-muted); font-size:12px;">(${tx.userType})</span></td>
+              <td>${typeBadge}</td>
+              <td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td>
+              <td><span class="badge ${badge}">${statusText}</span></td>
+              <td>${actionBtn}</td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ไม่มีรายการธุรกรรมรอดำเนินการ</td></tr>';
+
+      } catch(e) {
+          console.error(e);
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+      }
+    }
+
+    function markTxComplete(collection, userId, txId) {
+       if(confirm("ยืนยันว่าทำการโอนเงินหรือตรวจสอบสลิปเรียบร้อยแล้วใช่หรือไม่?")) {
+           db.collection(collection).doc(userId).collection("transactions").doc(txId).update({
+               status: 'completed',
+               title: firebase.firestore.FieldValue.increment(" (อนุมัติแล้ว)") // ต่อท้ายข้อความเดิม
+           }).then(() => {
+               showToast('ทำรายการอนุมัติสำเร็จ');
+               loadFinancials(); // โหลดใหม่
+           });
+       }
+    }
+
+    // 4.4 ฐานข้อมูลร้านค้า
     function loadMerchants() {
       db.collection("merchants").get().then(snapshot => {
         let html = '';
         snapshot.forEach(doc => {
           const d = doc.data();
+          const isBanned = d.isBanned === true;
+          const statusBadge = isBanned ? '<span class="badge bg-danger">ถูกระงับ</span>' : (d.isOpen ? '<span class="badge bg-success">เปิดร้าน</span>' : '<span class="badge bg-warning">ปิดร้าน</span>');
+          const actionBtn = isBanned 
+            ? `<button class="btn btn-sm btn-success" onclick="toggleBan('merchants', '${doc.id}', false)">ปลดแบน</button>`
+            : `<button class="btn btn-sm btn-danger" onclick="toggleBan('merchants', '${doc.id}', true)">ระงับการใช้งาน</button>`;
+
           html += `<tr>
-            <td>${doc.id}</td><td><strong>${d.storeName}</strong></td><td>${d.category || '-'}</td>
-            <td><span class="badge ${d.isOpen ? 'bg-success' : 'bg-danger'}">${d.isOpen ? 'เปิดร้าน' : 'ปิดร้าน'}</span></td>
-            <td><button class="btn btn-sm btn-outline" onclick="alert('ฟีเจอร์นี้เตรียมไว้สำหรับแก้ไขข้อมูลร้านค้า')">ตั้งค่า</button></td>
+            <td>${doc.id}</td>
+            <td style="font-weight:600; color:var(--primary);">${d.storeName}</td>
+            <td>${d.category || '-'}</td>
+            <td>${statusBadge}</td>
+            <td>${actionBtn}</td>
           </tr>`;
         });
         document.getElementById('tbody-merchants').innerHTML = html;
       });
     }
 
-    // 4.3 จัดการไรเดอร์
+    // 4.5 ฐานข้อมูลไรเดอร์
     function loadRiders() {
       db.collection("riders").get().then(snapshot => {
         let html = '';
         snapshot.forEach(doc => {
           const d = doc.data();
-          html += `<tr>
-            <td>${doc.id}</td><td>${d.name}</td><td>${d.plate}</td><td><strong style="color:var(--primary);">฿${(d.walletBalance||0).toFixed(2)}</strong></td>
-            <td><button class="btn btn-sm btn-outline" onclick="adjustRiderWallet('${doc.id}', ${d.walletBalance||0})">ปรับยอดเงิน</button></td>
+          const isBanned = d.isBanned === true;
+          
+          html += `<tr style="${isBanned ? 'opacity:0.5; background:#fee2e2;' : ''}">
+            <td>${doc.id}</td>
+            <td>${d.name}</td>
+            <td>${d.plate}</td>
+            <td style="font-weight:600; color:var(--primary);">฿${(d.walletBalance||0).toFixed(2)}</td>
+            <td style="display:flex; gap:5px;">
+              <button class="btn btn-sm btn-outline" onclick="adjustWallet('riders', '${doc.id}', ${d.walletBalance||0})">ปรับยอดเงิน</button>
+              ${isBanned ? `<button class="btn btn-sm btn-success" onclick="toggleBan('riders', '${doc.id}', false)">ปลดแบน</button>` : `<button class="btn btn-sm btn-danger" onclick="toggleBan('riders', '${doc.id}', true)">แบน</button>`}
+            </td>
           </tr>`;
         });
         document.getElementById('tbody-riders').innerHTML = html;
       });
     }
 
-    // 4.4 จัดการลูกค้า
+    // 4.6 ฐานข้อมูลลูกค้า
     function loadUsers() {
-      db.collection("users").limit(20).get().then(snapshot => {
+      db.collection("users").limit(50).get().then(snapshot => {
         let html = '';
         snapshot.forEach(doc => {
           const d = doc.data();
-          html += `<tr><td>${doc.id.substring(0,10)}...</td><td>${d.name || 'ไม่ระบุ'}</td><td>${d.phone || '-'}</td><td>${(d.address || '-').substring(0,20)}...</td><td><button class="btn btn-sm btn-danger">แบน</button></td></tr>`;
+          const isBanned = d.isBanned === true;
+          
+          html += `<tr style="${isBanned ? 'opacity:0.5;' : ''}">
+            <td style="font-size:11px; color:var(--text-muted);">${doc.id.substring(0,12)}...</td>
+            <td style="font-weight:600;">${d.name || 'ไม่ระบุ'}</td>
+            <td>${d.phone || '-'}</td>
+            <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.address || '-'}</div></td>
+            <td>
+              ${isBanned ? `<button class="btn btn-sm btn-success" onclick="toggleBan('users', '${doc.id}', false)">ปลดแบน</button>` : `<button class="btn btn-sm btn-danger" onclick="toggleBan('users', '${doc.id}', true)">แบน</button>`}
+            </td>
+          </tr>`;
         });
-        document.getElementById('tbody-users').innerHTML = html || '<tr><td colspan="5">ยังไม่มีลูกค้า</td></tr>';
+        document.getElementById('tbody-users').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ยังไม่มีลูกค้าในระบบ</td></tr>';
       });
     }
 
-    // 4.5 จัดการการเงิน (ดึงประวัติการเติม/ถอนของไรเดอร์)
-    function loadFinancials() {
-      // ดึงข้อมูล Transactions ที่ต้องการอนุมัติ (ตัวอย่าง: สมมติว่าเก็บไว้ใน Collection กลาง หรือดึงจากไรเดอร์มาประมวลผล)
-      // โค้ดส่วนนี้เป็นตัวอย่างโครงสร้าง
-      let html = `
-        <tr><td>วันนี้ 14:30</td><td>สมชาย (ไรเดอร์)</td><td><span class="badge bg-warning">ขอถอนเงิน</span></td><td>฿500.00</td><td>-</td><td><button class="btn btn-sm btn-primary" onclick="this.innerText='โอนแล้ว';this.disabled=true;">ทำรายการโอน</button></td></tr>
-        <tr><td>วันนี้ 12:00</td><td>วินัย (ไรเดอร์)</td><td><span class="badge bg-success">แจ้งเติมเครดิต</span></td><td>฿200.00</td><td><a href="#" style="color:var(--primary);">ดูสลิป</a></td><td><button class="btn btn-sm btn-primary" onclick="this.innerText='อนุมัติแล้ว';this.disabled=true;">อนุมัติยอด</button></td></tr>
-      `;
-      document.getElementById('tbody-finance').innerHTML = html;
+    // 4.7 โปรโมชัน
+    function loadPromos() {
+       db.collection("promotions").get().then(snapshot => {
+          let html = '';
+          snapshot.forEach(doc => {
+             const d = doc.data();
+             const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '-';
+             html += `<tr>
+               <td><strong style="color:var(--primary);">${doc.id}</strong></td>
+               <td>฿${d.discount}</td>
+               <td>฿${d.minPurchase}</td>
+               <td>${date}</td>
+               <td><button class="btn btn-sm btn-danger" onclick="deletePromo('${doc.id}')">ลบ</button></td>
+             </tr>`;
+          });
+          document.getElementById('tbody-promos').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">ยังไม่มีโปรโมชัน</td></tr>';
+       });
     }
 
-    // 5. Action Functions
-    function saveSystemConfig() {
-      showToast('บันทึกการตั้งค่าระบบลง Database สำเร็จ!', 'success');
-      // คำสั่งบันทึกลง Firestore จะเขียนไว้ที่นี่ เช่น db.collection('settings').doc('config').set({...})
+    function createPromoCode() {
+       const code = document.getElementById('promo-code').value.toUpperCase();
+       const discount = parseFloat(document.getElementById('promo-discount').value);
+       const min = parseFloat(document.getElementById('promo-min').value);
+
+       if(!code || isNaN(discount) || isNaN(min)) {
+          showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error'); return;
+       }
+
+       db.collection("promotions").doc(code).set({
+          discount: discount, minPurchase: min, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+       }).then(() => {
+          showToast('สร้างโค้ดโปรโมชันสำเร็จ', 'success');
+          document.getElementById('promo-code').value = '';
+          document.getElementById('promo-discount').value = '';
+          document.getElementById('promo-min').value = '';
+          loadPromos();
+       });
     }
 
-    function sendBroadcast() {
-      const msg = document.getElementById('bc-msg').value;
-      if(!msg) return showToast('กรุณาพิมพ์ข้อความ', 'error');
-      showToast('ระบบส่งคำสั่ง API ยิงบรอดแคสต์ไปยัง LINE แล้ว', 'success');
-      document.getElementById('bc-msg').value = '';
+    function deletePromo(code) {
+       if(confirm(`ต้องการลบโค้ด ${code} ใช่หรือไม่?`)) {
+          db.collection("promotions").doc(code).delete().then(() => {
+             showToast('ลบโค้ดสำเร็จ', 'success'); loadPromos();
+          });
+       }
     }
 
-    function adjustRiderWallet(riderId, currentBal) {
-      const amt = prompt(`กระเป๋าเงินไรเดอร์ปัจจุบัน: ฿${currentBal}\nใส่จำนวนเงินที่ต้องการเพิ่ม/ลด (เช่น 100 หรือ -50):`);
+    // 5. Action Functions ทั่วไป
+    function toggleBan(collection, docId, isBan) {
+       const action = isBan ? "ระงับการใช้งาน" : "ปลดระงับ";
+       if(confirm(`ต้องการ ${action} บัญชีนี้ใช่หรือไม่?`)) {
+          db.collection(collection).doc(docId).update({ isBanned: isBan }).then(() => {
+             showToast(`${action} สำเร็จ`, 'success');
+             if(collection==='merchants') loadMerchants();
+             if(collection==='riders') loadRiders();
+             if(collection==='users') loadUsers();
+          });
+       }
+    }
+
+    function adjustWallet(collection, docId, currentBal) {
+      const amt = prompt(`กระเป๋าเงินปัจจุบัน: ฿${currentBal}\n\nใส่จำนวนเงินที่ต้องการเพิ่ม/ลด (เช่น 100 เพื่อเพิ่ม หรือ -50 เพื่อลด):`);
       if(amt && !isNaN(amt)) {
-         db.collection("riders").doc(riderId).update({
+         db.collection(collection).doc(docId).update({
             walletBalance: firebase.firestore.FieldValue.increment(parseFloat(amt))
          }).then(() => {
-            showToast('ปรับยอดเงินไรเดอร์สำเร็จ');
-            loadRiders();
+            // บันทึกประวัติ
+            db.collection(collection).doc(docId).collection("transactions").add({
+               title: "Super Admin ปรับปรุงยอดเงิน",
+               amount: Math.abs(parseFloat(amt)),
+               type: parseFloat(amt) >= 0 ? 'income' : 'expense',
+               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+               status: 'completed'
+            });
+            showToast('ปรับยอดเงินสำเร็จ', 'success');
+            if(collection==='riders') loadRiders();
          });
       }
     }
 
+    function sendBroadcast() {
+      const msg = document.getElementById('bc-msg').value;
+      if(!msg) return showToast('กรุณาพิมพ์รายละเอียดข้อความ', 'error');
+      
+      // การยิง Broadcast จริงต้องเชื่อม LINE API ฝั่ง Server (Apps Script)
+      // โค้ดส่วนนี้เป็นการจำลองการยิงคำสั่งไปที่บอท
+      showToast('ส่งคำสั่ง Broadcast ไปยังเซิร์ฟเวอร์ LINE แล้ว!', 'success');
+      document.getElementById('bc-title').value = '';
+      document.getElementById('bc-msg').value = '';
+    }
+
     // Utils
+    function filterTable(tbodyId, query) {
+       query = query.toLowerCase();
+       const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
+       for (let i = 0; i < rows.length; i++) {
+           const rowText = rows[i].textContent.toLowerCase();
+           if (rowText.includes(query)) {
+               rows[i].style.display = '';
+           } else {
+               rows[i].style.display = 'none';
+           }
+       }
+    }
+
     function showToast(message, type = 'success') {
       const toast = document.getElementById("admin-toast");
       document.getElementById("toast-text").innerText = message;
