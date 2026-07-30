@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <!-- ป้องกันเบราว์เซอร์จำแคช (Anti-Cache) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -93,11 +92,21 @@
     /* 🌟 ทำให้ไอคอน GPS ไรเดอร์และลูกค้าไหลแบบสมูท (Real-time Glide) */
     .leaflet-marker-icon { transition: transform 2s ease-in-out !important; }
 
+    /* CSS สำหรับกระเป๋าเงินและสถิติไรเดอร์ */
     .wallet-card-rider { background: linear-gradient(135deg, var(--rider-primary), var(--rider-dark)); border-radius: 20px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(255, 115, 0, 0.2); }
     .tx-item { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .tx-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center; margin-right: 12px; }
     .tx-icon.income { background: rgba(0, 185, 0, 0.1); color: var(--success); }
     .tx-icon.expense { background: rgba(244, 67, 54, 0.1); color: var(--danger); }
+
+    /* CRM Stats */
+    .crm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    .crm-box { background: var(--white); border-radius: 12px; padding: 15px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
+    .crm-title { font-size: 11px; color: var(--text-light); margin-bottom: 5px; }
+    .crm-value { font-size: 16px; font-weight: 700; color: var(--rider-primary); }
+    
+    .qr-box { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .qr-image { width: 180px; height: 180px; margin: 15px auto; background: #f0f0f0; border-radius: 8px; padding: 10px; }
 
     /* CSS สำหรับหน้าโปรไฟล์ */
     .card-box { background: var(--white); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -190,17 +199,28 @@
 
   <div id="wallet-screen" class="screen">
     <div class="rider-header">
-      <h2 style="margin:0; font-size:18px; width:100%; text-align:center;">กระเป๋าเงินรายได้</h2>
+      <h2 style="margin:0; font-size:18px; width:100%; text-align:center;">กระเป๋าเงิน และ สถิติ</h2>
     </div>
     <div style="padding: 20px; flex-grow: 1; overflow-y: auto;">
       <div class="wallet-card-rider">
-        <p style="margin: 0 0 5px; font-size: 14px; opacity: 0.9;">ยอดเงินที่ถอนได้ (บาท)</p>
+        <p style="margin: 0 0 5px; font-size: 14px; opacity: 0.9;">เครดิตคงเหลือ / ถอนได้ (บาท)</p>
         <h1 style="margin: 0 0 15px; font-size: 40px;">฿<span id="rider-wallet-balance">0.00</span></h1>
-        <button class="btn-main" style="background: white; color: var(--rider-primary); width: auto; padding: 8px 30px; box-shadow: none;" onclick="openWithdrawModal()">แจ้งถอนเงิน</button>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button class="btn-main" style="background: white; color: var(--rider-primary); padding: 8px 15px; font-size: 14px; box-shadow: none;" onclick="openTopupModal()"><span class="material-icons" style="font-size: 16px; vertical-align: middle;">add_circle</span> เติมเครดิต</button>
+          <button class="btn-main" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; font-size: 14px; box-shadow: none;" onclick="openWithdrawModal()"><span class="material-icons" style="font-size: 16px; vertical-align: middle;">account_balance</span> แจ้งถอน</button>
+        </div>
+      </div>
+      
+      <!-- CRM สรุปรายได้ -->
+      <h3 style="margin: 0 0 10px; font-size: 15px;">สรุปรายได้ (เฉพาะค่าส่ง)</h3>
+      <div class="crm-grid">
+        <div class="crm-box"><div class="crm-title">วันนี้</div><div class="crm-value">฿<span id="sum-today">0</span></div></div>
+        <div class="crm-box"><div class="crm-title">7 วันย้อนหลัง</div><div class="crm-value">฿<span id="sum-7d">0</span></div></div>
+        <div class="crm-box"><div class="crm-title">30 วันย้อนหลัง</div><div class="crm-value">฿<span id="sum-30d">0</span></div></div>
       </div>
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 16px;">ประวัติรายได้ล่าสุด</h3>
+        <h3 style="margin: 0; font-size: 15px;">ประวัติรายการล่าสุด</h3>
       </div>
       <div id="rider-tx-list">
         <p style="text-align: center; color: var(--text-light); margin-top: 20px;">กำลังโหลดข้อมูล...</p>
@@ -296,6 +316,7 @@
     </div>
   </div>
 
+  <!-- ป๊อปอัปแจ้งถอนเงิน -->
   <div class="modal-overlay" id="withdraw-modal">
     <div class="modal-content">
       <h3 style="margin-top: 0; color: var(--rider-primary);">แจ้งถอนเงินเข้าบัญชี</h3>
@@ -306,7 +327,27 @@
       </div>
       <div style="display: flex; gap: 10px; margin-top: 20px;">
         <button style="flex:1; padding:12px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeWithdrawModal()">ยกเลิก</button>
-        <button class="btn-main" style="flex:1; padding:12px; border-radius:12px;" onclick="submitWithdraw()">ยืนยันการถอน</button>
+        <button style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt';" onclick="submitWithdraw()">ยืนยันการถอน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ป๊อปอัปเติมเครดิต -->
+  <div class="modal-overlay" id="topup-modal">
+    <div class="modal-content qr-box" style="width: 90%; max-width: 320px; padding: 25px;">
+      <h3 style="margin-top: 0; color: var(--rider-primary);">เติมเครดิตรับงาน</h3>
+      <p style="color: var(--text-light); font-size: 12px; margin-bottom: 5px;">สแกน QR Code เพื่อเติมเครดิตสำหรับรับงานเก็บเงินปลายทาง (COD)</p>
+      
+      <img id="rider-promptpay-qr" class="qr-image" src="https://promptpay.io/1410400401805/100.png" alt="QR Code">
+      
+      <div class="input-group" style="margin-bottom: 15px;">
+        <label>จำนวนเงินที่ต้องการเติม:</label>
+        <input type="number" id="topup-rider-amount" value="100" onkeyup="updateRiderQRCode()" onchange="updateRiderQRCode()" style="text-align: center; font-size: 16px;">
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button style="flex:1; padding:12px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt';" onclick="closeTopupModal()">ยกเลิก</button>
+        <button class="btn-main" style="flex:1; padding:12px; border-radius:12px; font-size: 14px;" onclick="submitRiderTopup()"><span class="material-icons" style="font-size: 16px; margin-right: 5px;">upload_file</span> แนบสลิป</button>
       </div>
     </div>
   </div>
@@ -470,6 +511,72 @@
       db.collection("riders").doc(currentRiderId).update(updates).then(() => {
           showToast("อัปเดตโปรไฟล์สำเร็จแล้ว!");
       }).catch(e => showToast("Error: " + e.message));
+    }
+
+    function loadRiderTransactions() {
+       // โหลดข้อมูลย้อนหลัง 30 วันเพื่อมาคำนวณ CRM
+       const thirtyDaysAgo = new Date();
+       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+       db.collection("riders").doc(currentRiderId).collection("transactions")
+         .where("createdAt", ">=", thirtyDaysAgo)
+         .orderBy("createdAt", "desc")
+         .onSnapshot(snapshot => {
+            const list = document.getElementById('rider-tx-list');
+            
+            let sumToday = 0, sum7 = 0, sum30 = 0;
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const sevenDaysAgoTime = startOfToday - (7 * 24 * 60 * 60 * 1000);
+
+            if(snapshot.empty) {
+               list.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติทำรายการ</p>';
+               document.getElementById('sum-today').innerText = "0";
+               document.getElementById('sum-7d').innerText = "0";
+               document.getElementById('sum-30d').innerText = "0";
+               return;
+            }
+
+            let html = '';
+            let count = 0;
+
+            snapshot.forEach(doc => {
+               const tx = doc.data();
+               const isIncome = tx.type === 'income';
+               
+               // คำนวณ CRM เฉพาะรายได้ (ค่าส่ง)
+               if(tx.createdAt && isIncome && !tx.title.includes('เติมเครดิต')) {
+                   const txTime = tx.createdAt.toMillis();
+                   if (txTime >= startOfToday) sumToday += tx.amount;
+                   if (txTime >= sevenDaysAgoTime) sum7 += tx.amount;
+                   sum30 += tx.amount; 
+               }
+
+               // แสดงประวัติแค่ 20 รายการล่าสุด
+               if (count < 20) {
+                 const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
+                 html += `
+                   <div class="tx-item">
+                     <div style="display:flex; align-items:center;">
+                       <div class="tx-icon ${isIncome ? 'income' : 'expense'}"><span class="material-icons">${isIncome ? 'payments' : (tx.title.includes('เติมเครดิต') ? 'account_balance_wallet' : 'account_balance')}</span></div>
+                       <div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div>
+                     </div>
+                     <div style="font-weight:700; color:${isIncome ? 'var(--success)' : 'var(--text-dark)'};">
+                       ${isIncome ? '+' : (tx.title.includes('เติมเครดิต') ? '+' : '-')}฿${tx.amount.toFixed(2)}
+                     </div>
+                   </div>
+                 `;
+                 count++;
+               }
+            });
+            
+            list.innerHTML = html;
+            
+            // อัปเดตตัวเลข CRM
+            document.getElementById('sum-today').innerText = sumToday;
+            document.getElementById('sum-7d').innerText = sum7;
+            document.getElementById('sum-30d').innerText = sum30;
+         });
     }
 
     function toggleOnlineStatus() {
@@ -665,16 +772,35 @@
             showToast("อัปเดตสถานะสำเร็จ!"); 
             
             if(nextStatus === "ไรเดอร์ถึงร้านแล้ว") {
-               notifyCustomerLINE(activeOrderData.userId, "📍 ไรเดอร์ถึงร้านแล้ว", "ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ กำลังรอรับอาหาร", "#3b82f6", { "ร้านอาหาร": activeOrderData.restaurantName, "ชื่อไรเดอร์": riderData.name });
+               notifyCustomerLINE(activeOrderData.userId, "📍 ไรเดอร์ถึงร้านแล้ว", "ไรเดอร์เดินทางถึงร้านอาหารแล้วครับ กำลังรอรับอาหาร", "#3b82f6", {
+                  "ร้านอาหาร": activeOrderData.restaurantName,
+                  "ชื่อไรเดอร์": riderData.name
+               });
             } else if (nextStatus === "กำลังจัดส่ง") {
-               notifyCustomerLINE(activeOrderData.userId, "🛵 กำลังเดินทางไปส่ง!", "อาหารอยู่บนรถแล้ว! ไรเดอร์กำลังเดินทางไปส่งให้คุณครับ", "#3b82f6", { "ไรเดอร์": riderData.name, "ทะเบียนรถ": riderData.plate, "เบอร์ติดต่อ": riderData.phone });
+               notifyCustomerLINE(activeOrderData.userId, "🛵 กำลังเดินทางไปส่ง!", "อาหารอยู่บนรถแล้ว! ไรเดอร์กำลังเดินทางไปส่งให้คุณครับ", "#3b82f6", {
+                  "ไรเดอร์": riderData.name,
+                  "ทะเบียนรถ": riderData.plate,
+                  "เบอร์ติดต่อ": riderData.phone
+               });
             } else if (nextStatus === "จัดส่งสำเร็จ") {
-               notifyCustomerLINE(activeOrderData.userId, "🎉 จัดส่งสำเร็จ!", "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการห้วยเกิ้ง Delivery", "#10b981", { "ร้านอาหาร": activeOrderData.restaurantName, "ยอดชำระ": "฿" + activeOrderData.totalPrice });
+               notifyCustomerLINE(activeOrderData.userId, "🎉 จัดส่งสำเร็จ!", "ทานให้อร่อยนะครับ ขอบคุณที่ใช้บริการห้วยเกิ้ง Delivery", "#10b981", {
+                  "ร้านอาหาร": activeOrderData.restaurantName,
+                  "ยอดชำระ": "฿" + activeOrderData.totalPrice
+               });
                
+               // 🔥 ให้เงินค่ารอบไรเดอร์ (จำลอง 25 บาท)
                const earnings = 25;
-               db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(earnings) });
-               db.collection("riders").doc(currentRiderId).collection("transactions").add({ title: `ค่าส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`, amount: earnings, type: 'income', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+               db.collection("riders").doc(currentRiderId).update({
+                  walletBalance: firebase.firestore.FieldValue.increment(earnings)
+               });
+               db.collection("riders").doc(currentRiderId).collection("transactions").add({
+                  title: `ค่าส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`,
+                  amount: earnings,
+                  type: 'income',
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+               });
             }
+
             if(nextStatus === "จัดส่งสำเร็จ") setTimeout(finishJobLocally, 2000);
           });
         });
@@ -688,39 +814,67 @@
       startFindingJobs();
     }
 
-    function loadRiderTransactions() {
-       db.collection("riders").doc(currentRiderId).collection("transactions").orderBy("createdAt", "desc").limit(20)
-         .onSnapshot(snapshot => {
-            const list = document.getElementById('rider-tx-list');
-            if(snapshot.empty) { list.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">ยังไม่มีประวัติรายได้</p>'; return; }
-            let html = '';
-            snapshot.forEach(doc => {
-               const tx = doc.data(); const isIncome = tx.type === 'income';
-               const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
-               html += `<div class="tx-item"><div style="display:flex; align-items:center;"><div class="tx-icon ${isIncome ? 'income' : 'expense'}"><span class="material-icons">${isIncome ? 'payments' : 'account_balance'}</span></div><div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div></div><div style="font-weight:700; color:${isIncome ? 'var(--success)' : 'var(--text-dark)'};">${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}</div></div>`;
-            });
-            list.innerHTML = html;
-         });
+    function openWithdrawModal() {
+       document.getElementById('withdraw-amount').value = '';
+       document.getElementById('withdraw-modal').style.display = 'flex';
     }
-
-    function openWithdrawModal() { document.getElementById('withdraw-amount').value = ''; document.getElementById('withdraw-modal').style.display = 'flex'; }
     function closeWithdrawModal() { document.getElementById('withdraw-modal').style.display = 'none'; }
     function submitWithdraw() {
-       const amount = parseFloat(document.getElementById('withdraw-amount').value); const currentBalance = riderData.walletBalance || 0;
+       const amount = parseFloat(document.getElementById('withdraw-amount').value);
+       const currentBalance = riderData.walletBalance || 0;
+       
        if(isNaN(amount) || amount <= 0) { showToast("กรุณาระบุจำนวนเงินที่ถูกต้อง"); return; }
        if(amount > currentBalance) { showToast("ยอดเงินในกระเป๋าไม่เพียงพอ"); return; }
        if(amount < 100) { showToast("ขั้นต่ำในการถอนคือ 100 บาท"); return; }
 
-       db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(-amount) }).then(() => {
-          db.collection("riders").doc(currentRiderId).collection("transactions").add({ title: "ถอนเงินเข้าบัญชีธนาคาร", amount: amount, type: 'expense', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-          showToast(`ทำรายการแจ้งถอน ฿${amount} สำเร็จ`); closeWithdrawModal();
+       const btn = document.querySelector('#withdraw-modal .btn-main'); // Disable btn temporarily
+       db.collection("riders").doc(currentRiderId).update({
+          walletBalance: firebase.firestore.FieldValue.increment(-amount)
+       }).then(() => {
+          db.collection("riders").doc(currentRiderId).collection("transactions").add({
+             title: "ถอนเงินเข้าบัญชีธนาคาร",
+             amount: amount,
+             type: 'expense',
+             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast(`ทำรายการแจ้งถอน ฿${amount} สำเร็จ`);
+          closeWithdrawModal();
+       }).catch(e => showToast("Error: " + e.message));
+    }
+
+    // --- ระบบเติมเครดิตไรเดอร์ ---
+    function openTopupModal() { document.getElementById('topup-rider-amount').value = '100'; updateRiderQRCode(); document.getElementById('topup-modal').style.display = 'flex'; }
+    function closeTopupModal() { document.getElementById('topup-modal').style.display = 'none'; }
+    function updateRiderQRCode() {
+      const amt = document.getElementById('topup-rider-amount').value;
+      if(amt && amt > 0) document.getElementById('rider-promptpay-qr').src = `https://promptpay.io/1410400401805/${amt}.png`; // ใส่เลขพร้อมเพย์แอดมินตรงนี้
+    }
+    function submitRiderTopup() {
+       const amount = parseFloat(document.getElementById('topup-rider-amount').value);
+       if(isNaN(amount) || amount <= 0) { showToast("กรุณาระบุจำนวนเงินที่ถูกต้อง"); return; }
+       
+       const btn = document.querySelector('#topup-modal .btn-main');
+       btn.innerText = "กำลังดำเนินการ..."; btn.disabled = true;
+
+       db.collection("riders").doc(currentRiderId).update({
+          walletBalance: firebase.firestore.FieldValue.increment(amount)
+       }).then(() => {
+          db.collection("riders").doc(currentRiderId).collection("transactions").add({
+             title: "เติมเครดิตรับงาน (รอแอดมินตรวจสอบสลิป)",
+             amount: amount,
+             type: 'income', 
+             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast(`เติมเครดิตสำเร็จ ฿${amount} เข้าสู่กระเป๋าแล้ว!`);
+          closeTopupModal();
+          btn.innerHTML = `<span class="material-icons" style="font-size: 16px; margin-right: 5px;">upload_file</span> แนบสลิป`; btn.disabled = false;
        }).catch(e => showToast("Error: " + e.message));
     }
 
     function togglePanel() { document.getElementById('active-order-panel').classList.toggle('collapsed'); }
     
+    // อัปเดตเมนูล่างให้ไฮไลต์ถูกต้อง
     function showScreen(screenId) { 
-      sessionStorage.setItem('activeScreen', screenId);
       document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); 
       document.getElementById(screenId).style.display = 'flex'; 
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
