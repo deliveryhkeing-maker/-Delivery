@@ -103,7 +103,6 @@
     #tracking-screen { background-color: var(--bg-color); display: none; flex-direction: column; height: 100vh; position: relative; overflow: hidden; }
     #tracking-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     
-    /* 🌟 เลเยอร์แบล็คกราวด์ตอนค้นหาไรเดอร์ (เบลอสวยงาม) */
     .searching-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(4px); z-index: 4; transition: opacity 0.5s ease; pointer-events: none; }
     
     .tracking-overlay { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 10; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
@@ -113,7 +112,6 @@
     .radar-ring:nth-child(2) { animation-delay: 0.6s; }
     @keyframes radarPulse { 0% { width: 50px; height: 50px; opacity: 1; } 100% { width: 350px; height: 350px; opacity: 0; } }
     
-    /* 🌟 ทำให้ไอคอน GPS ไรเดอร์และลูกค้าไหลแบบสมูท (Real-time Glide) */
     .leaflet-marker-icon { transition: transform 2s ease-in-out !important; }
 
     .tracking-status-card { background: var(--white); border-radius: 24px 24px 0 0; padding: 30px 25px 25px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; }
@@ -325,26 +323,38 @@
 
   <div id="payment-screen" class="screen">
     <div class="top-bar"><div class="back-btn-simple" onclick="showScreen('menu-screen')"><span class="material-icons">arrow_back</span></div><div class="page-title">ยืนยันคำสั่งซื้อ</div></div>
-    <div class="checkout-items" id="checkout-items-list"></div>
-    <div class="summary-card">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;"><span>ค่าอาหาร</span><span>฿<span id="pay-food-total">0</span></span></div>
-      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;"><span>ค่าจัดส่ง</span><span>฿<span id="pay-delivery-fee">15</span></span></div>
-      <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; font-size: 18px; font-weight: 700; color: var(--primary-color);"><span>ยอดรวมทั้งหมด</span><span>฿<span id="pay-grand-total">0</span></span></div>
+    
+    <div style="background: var(--white); margin: 15px 20px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
+      <h3 style="margin: 0 0 15px; font-size: 16px; display: flex; align-items: center; gap: 8px;"><span class="material-icons" style="color:var(--primary-color);">restaurant</span> รายการอาหารที่สั่ง</h3>
+      <div id="checkout-items-list"></div>
     </div>
 
-    <h3 style="margin: 20px 20px 0; font-size: 16px;">ช่องทางการชำระเงิน</h3>
-    <div class="payment-methods">
+    <div style="background: var(--white); margin: 15px 20px; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; gap: 10px;">
+      <input type="text" id="promo-input" placeholder="ใส่โค้ดส่วนลดที่นี่..." style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Prompt'; outline: none; text-transform: uppercase;">
+      <button class="btn-primary" style="width: auto; padding: 12px 20px; border-radius: 8px;" onclick="applyPromoCode()">ใช้โค้ด</button>
+    </div>
+
+    <div class="summary-card" style="border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+      <h3 style="margin-top: 0; font-size: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">สรุปยอดชำระเงิน (Receipt)</h3>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--text-dark);"><span>ค่าอาหารรวม</span><span>฿<span id="pay-food-total">0</span></span></div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--text-dark);"><span>ค่าจัดส่ง (ระยะทาง <span id="pay-distance-text">0</span> กม.)</span><span>฿<span id="pay-delivery-fee">0</span></span></div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--danger); display: none;" id="discount-row"><span>ส่วนลดโปรโมชัน (<span id="promo-name-display"></span>)</span><span>-฿<span id="pay-discount">0</span></span></div>
+      <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1; font-size: 20px; font-weight: 700; color: var(--primary-color);"><span>ยอดสุทธิที่ต้องชำระ</span><span>฿<span id="pay-grand-total">0</span></span></div>
+    </div>
+
+    <h3 style="margin: 20px 20px 10px; font-size: 16px;">ช่องทางการชำระเงิน</h3>
+    <div class="payment-methods" style="margin-top: 0;">
       <label class="pay-option">
         <input type="radio" name="payment_method" value="wallet" checked onchange="toggleTransferBox(false)">
-        <span style="font-weight: 500;">จ่ายด้วย ห้วยเกิ้งวอลเล็ท <span id="checkout-wallet-text" style="color: var(--primary-color);">(฿0.00)</span></span>
+        <span style="font-weight: 500; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:#f59e0b;">account_balance_wallet</span> จ่ายด้วย ห้วยเกิ้งวอลเล็ท <span id="checkout-wallet-text" style="color: var(--primary-color);">(฿0.00)</span></span>
       </label>
       <label class="pay-option">
         <input type="radio" name="payment_method" value="cod" onchange="toggleTransferBox(false)">
-        <span style="font-weight: 500;">เงินสด (ชำระที่ไรเดอร์)</span>
+        <span style="font-weight: 500; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:#10b981;">payments</span> เงินสด (ชำระที่ไรเดอร์ตอนรับของ)</span>
       </label>
       <label class="pay-option">
         <input type="radio" name="payment_method" value="transfer" onchange="toggleTransferBox(true)">
-        <span style="font-weight: 500;">โอนเงินผ่าน QR Code</span>
+        <span style="font-weight: 500; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:#3b82f6;">qr_code_scanner</span> โอนเงินผ่านบัญชีธนาคาร (แนบสลิป)</span>
       </label>
       
       <div id="transfer-box" class="transfer-box">
@@ -372,7 +382,6 @@
     
     <div id="tracking-map"></div>
     
-    <!-- พื้นหลังเบลอตอนกำลังค้นหาไรเดอร์ -->
     <div class="searching-overlay" id="searching-map-overlay"></div>
 
     <div class="radar-center" id="radar-animation">
@@ -602,7 +611,6 @@
     let trackingMap = null;
     let riderMarkerForTracking = null; 
     let searchTimer = null;
-    let searchTimeLeft = 120;
     let orderListenerUnsubscribe = null;
     let historyListenerUnsubscribe = null;
     let activeChatOrderId = null;
@@ -853,7 +861,7 @@
       if (menu.addons && menu.addons.length > 0) { openToppingModal(menu); } 
       else {
         flyToCartAnimation(event);
-        cartItems.push({ name: menu.name, price: menu.price });
+        cartItems.push({ name: menu.name, price: menu.price, image: menu.image });
         updateCartTotal(); 
       }
     }
@@ -891,7 +899,7 @@
       let toppingsText = toppingsList.length > 0 ? ` (+${toppingsList.join(', ')})` : '';
       
       flyToCartAnimation(event);
-      cartItems.push({ name: currentToppingMenu.name + toppingsText, price: finalPrice });
+      cartItems.push({ name: currentToppingMenu.name + toppingsText, price: finalPrice, image: currentToppingMenu.image });
       updateCartTotal(); closeToppingModal();
     }
 
@@ -927,29 +935,86 @@
       updateFloatingBars(sessionStorage.getItem('activeScreen'));
     }
 
+    let appliedDiscount = 0;
+    let appliedPromoCodeStr = "";
+
     function goToPayment() {
       if(!userProfileData.phone) {
          showToast("กรุณาเพิ่มเบอร์โทรศัพท์ก่อนสั่งอาหาร เพื่อให้ไรเดอร์ติดต่อได้ครับ");
          showScreen('edit-profile-screen');
          return;
       }
-        
-      const checkoutList = document.getElementById('checkout-items-list'); checkoutList.innerHTML = '';
-      cartItems.forEach(item => { checkoutList.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px;"><span>${item.name}</span><span>฿${item.price}</span></div>`; });
       
+      appliedDiscount = 0; appliedPromoCodeStr = "";
+      document.getElementById('promo-input').value = "";
+      document.getElementById('discount-row').style.display = 'none';
+
+      const groupedCart = {};
+      cartItems.forEach(item => {
+         if(!groupedCart[item.name]) groupedCart[item.name] = { ...item, qty: 1 };
+         else { groupedCart[item.name].qty++; groupedCart[item.name].price += item.price; }
+      });
+
+      const checkoutList = document.getElementById('checkout-items-list'); checkoutList.innerHTML = '';
+      for(let key in groupedCart) {
+         let itm = groupedCart[key];
+         let imgHtml = itm.image ? `<div style="width:45px; height:45px; border-radius:8px; background:url('${itm.image}') center/cover; background-color:#eee;"></div>` : `<div style="width:45px; height:45px; border-radius:8px; background:var(--primary-light); display:flex; justify-content:center; align-items:center; color:var(--primary-color);"><span class="material-icons">restaurant</span></div>`;
+         
+         checkoutList.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #f8fafc;">
+               <div style="display:flex; align-items:center; gap:12px;">
+                  ${imgHtml}
+                  <div><div style="font-size:14px; font-weight:600;">${itm.name}</div><div style="font-size:12px; color:var(--text-light);">จำนวน: ${itm.qty}</div></div>
+               </div>
+               <div style="font-weight:600; color:var(--text-dark);">฿${itm.price}</div>
+            </div>
+         `;
+      }
+      
+      calculateCheckoutTotal();
+      showScreen('payment-screen');
+    }
+
+    function calculateCheckoutTotal() {
       const foodTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
       const distance = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
+      
       const deliveryFee = 15 + Math.floor(distance * 5); 
-      const grandTotal = foodTotal + deliveryFee;
+      let grandTotal = (foodTotal + deliveryFee) - appliedDiscount;
+      if(grandTotal < 0) grandTotal = 0;
       
       document.getElementById('pay-food-total').innerText = foodTotal;
+      document.getElementById('pay-distance-text').innerText = distance;
       document.getElementById('pay-delivery-fee').innerText = deliveryFee;
+      document.getElementById('pay-discount').innerText = appliedDiscount;
       document.getElementById('pay-grand-total').innerText = grandTotal;
       document.getElementById('pay-grand-total').dataset.amount = grandTotal;
       
       document.getElementById('payment-qr-img').src = `https://promptpay.io/1410400401805/${grandTotal}.png`;
+    }
+
+    function applyPromoCode() {
+      const code = document.getElementById('promo-input').value.toUpperCase().trim();
+      if(!code) return showToast('กรุณากรอกโค้ดส่วนลด');
       
-      showScreen('payment-screen');
+      const foodTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+
+      db.collection('promotions').doc(code).get().then(doc => {
+         if(!doc.exists) return showToast('ไม่พบโค้ดส่วนลดนี้ หรือโค้ดหมดอายุแล้ว');
+         const data = doc.data();
+         
+         if(foodTotal < data.minPurchase) {
+            return showToast(`ต้องมียอดอาหารขั้นต่ำ ฿${data.minPurchase} จึงจะใช้โค้ดได้`);
+         }
+
+         appliedDiscount = data.discount;
+         appliedPromoCodeStr = code;
+         
+         document.getElementById('discount-row').style.display = 'flex';
+         document.getElementById('promo-name-display').innerText = code;
+         calculateCheckoutTotal();
+         showToast('ใช้โค้ดส่วนลดสำเร็จ! 🎉');
+      }).catch(e => showToast('Error: ' + e.message));
     }
 
     function toggleTransferBox(show) { 
@@ -1010,6 +1075,8 @@
           userId: currentUserId,
           restaurantName: selectedRestaurant.name,
           totalPrice: totalAmount,
+          discount: appliedDiscount,
+          promoCode: appliedPromoCodeStr,
           paymentMethod: paymentMethod,
           slipImage: tempSlipBase64 || null,
           items: cartItems.map(i => i.name),
@@ -1214,7 +1281,7 @@
               if (data.chatMessages) { renderChatMessages(data.chatMessages, 'customer'); }
 
               if(data.riderLat && data.riderLng && trackingMap) {
-                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:32px; height:32px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: all 0.5s ease;"><span class="material-icons" style="font-size:20px; color:white;">sports_motorsports</span></div>` });
+                const riderIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--warning); width:32px; height:32px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; transition: transform 2s ease-in-out;"><span class="material-icons" style="font-size:20px; color:white;">sports_motorsports</span></div>` });
                 if(riderMarkerForTracking) { 
                   riderMarkerForTracking.setLatLng([data.riderLat, data.riderLng]); 
                 } else { 

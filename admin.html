@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <title>Super Admin - ห้วยเกิ้ง Delivery</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
@@ -332,6 +336,35 @@
     <span class="material-icons" id="toast-icon">check_circle</span> <span id="toast-text">ข้อความ</span>
   </div>
 
+  <!-- Modal สำหรับดูประวัติการเงินรายบุคคล -->
+  <div class="modal-overlay" id="finance-history-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
+    <div style="background:var(--white); width:95%; max-width:600px; border-radius:20px; padding:25px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:15px;">
+          <h3 style="margin:0; font-size:18px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">history</span> ประวัติการทำธุรกรรม</h3>
+          <span class="material-icons" style="cursor:pointer; color:var(--text-muted);" onclick="document.getElementById('finance-history-modal').style.display='none'">close</span>
+       </div>
+       
+       <div style="display:flex; gap:15px; margin-bottom:20px;">
+          <div style="flex:1; background:#eff6ff; padding:15px; border-radius:12px; border:1px solid #bfdbfe;">
+             <p style="margin:0 0 5px; font-size:13px; color:#3b82f6;">ยอดรวมรายรับ (เข้ากระเป๋า)</p>
+             <h3 style="margin:0; font-size:20px; color:#1d4ed8;">+฿<span id="modal-sum-income">0</span></h3>
+          </div>
+          <div style="flex:1; background:#fee2e2; padding:15px; border-radius:12px; border:1px solid #fecaca;">
+             <p style="margin:0 0 5px; font-size:13px; color:#ef4444;">ยอดรวมรายจ่าย (ถอน/หัก)</p>
+             <h3 style="margin:0; font-size:20px; color:#b91c1c;">-฿<span id="modal-sum-expense">0</span></h3>
+          </div>
+       </div>
+
+       <h4 style="margin:0 0 10px; font-size:15px;" id="modal-user-name">รายการย้อนหลัง</h4>
+       <div style="overflow-y:auto; flex-grow:1; border:1px solid var(--border); border-radius:12px;">
+          <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+            <thead style="background:#f8fafc; position:sticky; top:0;"><tr><th style="padding:10px;">วันที่</th><th style="padding:10px;">รายการ</th><th style="padding:10px;">ยอดเงิน</th></tr></thead>
+            <tbody id="modal-finance-tbody"></tbody>
+          </table>
+       </div>
+    </div>
+  </div>
+
   <script>
     // 1. เชื่อมต่อ Firebase (ใช้ค่าเดียวกับแอปอื่น)
     const firebaseConfig = {
@@ -363,7 +396,6 @@
         loadRiders();
         loadUsers();
         loadPromos();
-        // loadFinancials() จะถูกเรียกเมื่อกดเปิดแท็บ เพื่อประหยัดการสแกนข้อมูล
       } else {
         alert('รหัสผ่านไม่ถูกต้อง เฉพาะ DEV และ Admin เท่านั้น');
       }
@@ -511,11 +543,11 @@
         let html = '';
         allTx.forEach(tx => {
             const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
-            const isCompleted = tx.title.includes('สำเร็จ') || tx.status === 'completed';
+            const isCompleted = tx.title.includes('สำเร็จ') || tx.status === 'completed' || tx.title.includes('อนุมัติแล้ว');
             const badge = isCompleted ? 'bg-success' : 'bg-warning';
             const statusText = isCompleted ? 'เสร็จสิ้น' : 'รอดำเนินการ';
             const typeBadge = tx.type === 'income' ? '<span class="badge bg-info">แจ้งเติมเครดิต</span>' : '<span class="badge bg-danger">แจ้งถอนเงิน</span>';
-            const actionBtn = isCompleted ? '-' : `<button class="btn btn-sm btn-primary" onclick="markTxComplete('${tx.coll}', '${tx.userId}', '${tx.id}')"><span class="material-icons" style="font-size:14px;">check</span> อนุมัติ</button>`;
+            const actionBtn = isCompleted ? `<button class="btn btn-sm btn-outline" onclick="viewUserFinanceHistory('${tx.coll}', '${tx.userId}', '${tx.userName}')">ดูประวัติทั้งหมด</button>` : `<button class="btn btn-sm btn-primary" onclick="markTxComplete('${tx.coll}', '${tx.userId}', '${tx.id}')"><span class="material-icons" style="font-size:14px;">check</span> อนุมัติ</button>`;
 
             html += `<tr>
               <td>${date}</td>
@@ -523,7 +555,7 @@
               <td>${typeBadge}</td>
               <td style="font-weight:600;">฿${tx.amount.toFixed(2)}</td>
               <td><span class="badge ${badge}">${statusText}</span></td>
-              <td>${actionBtn}</td>
+              <td><div style="display:flex; gap:5px;">${actionBtn}</div></td>
             </tr>`;
         });
 
@@ -539,12 +571,53 @@
        if(confirm("ยืนยันว่าทำการโอนเงินหรือตรวจสอบสลิปเรียบร้อยแล้วใช่หรือไม่?")) {
            db.collection(collection).doc(userId).collection("transactions").doc(txId).update({
                status: 'completed',
-               title: firebase.firestore.FieldValue.increment(" (อนุมัติแล้ว)") // ต่อท้ายข้อความเดิม
+               title: firebase.firestore.FieldValue.increment(" (อนุมัติแล้ว)") 
            }).then(() => {
                showToast('ทำรายการอนุมัติสำเร็จ');
-               loadFinancials(); // โหลดใหม่
+               loadFinancials(); 
            });
        }
+    }
+
+    // ฟังก์ชันใหม่: เรียกดูประวัติการเงินรายบุคคล
+    function viewUserFinanceHistory(collection, userId, userName) {
+       document.getElementById('modal-user-name').innerText = `รายการย้อนหลัง: ${userName}`;
+       const tbody = document.getElementById('modal-finance-tbody');
+       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">กำลังโหลด...</td></tr>';
+       document.getElementById('finance-history-modal').style.display = 'flex';
+
+       db.collection(collection).doc(userId).collection("transactions")
+         .orderBy("createdAt", "desc").get().then(snap => {
+            if(snap.empty) {
+               tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">ไม่มีประวัติการทำรายการ</td></tr>';
+               return;
+            }
+
+            let html = '';
+            let sumIncome = 0;
+            let sumExpense = 0;
+
+            snap.forEach(doc => {
+               const tx = doc.data();
+               const date = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short'}) : '-';
+               
+               if(tx.type === 'income') sumIncome += tx.amount;
+               else sumExpense += tx.amount;
+
+               const color = tx.type === 'income' ? 'color:#10b981;' : 'color:#ef4444;';
+               const sign = tx.type === 'income' ? '+' : '-';
+
+               html += `<tr style="border-bottom:1px solid #f1f5f9;">
+                 <td style="padding:10px; color:var(--text-muted);">${date}</td>
+                 <td style="padding:10px;">${tx.title}</td>
+                 <td style="padding:10px; font-weight:600; ${color}">${sign}฿${tx.amount.toFixed(2)}</td>
+               </tr>`;
+            });
+
+            document.getElementById('modal-sum-income').innerText = sumIncome.toFixed(2);
+            document.getElementById('modal-sum-expense').innerText = sumExpense.toFixed(2);
+            tbody.innerHTML = html;
+         });
     }
 
     // 4.4 ฐานข้อมูลร้านค้า
@@ -700,8 +773,6 @@
       const msg = document.getElementById('bc-msg').value;
       if(!msg) return showToast('กรุณาพิมพ์รายละเอียดข้อความ', 'error');
       
-      // การยิง Broadcast จริงต้องเชื่อม LINE API ฝั่ง Server (Apps Script)
-      // โค้ดส่วนนี้เป็นการจำลองการยิงคำสั่งไปที่บอท
       showToast('ส่งคำสั่ง Broadcast ไปยังเซิร์ฟเวอร์ LINE แล้ว!', 'success');
       document.getElementById('bc-title').value = '';
       document.getElementById('bc-msg').value = '';
