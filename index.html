@@ -105,7 +105,6 @@
       </div>
     </div>
     
-    <!-- หมุด GPS -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -222,6 +221,7 @@
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
 
+    <!-- ส่วนที่ซ่อนสำหรับ Guest -->
     <div id="auth-features" style="display: none;">
       <div style="display: flex; background: white; margin-bottom: 15px; padding: 20px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
         <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
@@ -393,8 +393,8 @@
   <script>
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
     
-    // ⚠️ สำคัญมาก: เปลี่ยนคำว่า YOUR_LIFF_ID_HERE เป็นไอดี LIFF ของคุณ
-    const LIFF_ID = "const LIFF_ID = "1657890123-xyzabcde";"; 
+    // ⚠️ สำคัญมาก: เปลี่ยนคำว่า YOUR_LIFF_ID_HERE เป็นไอดี LIFF ของคุณ (ถ้าไม่ใส่ ระบบจะบังคับใช้ Mock Login)
+    const LIFF_ID = "2010799042-aNBObgM9"; 
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
@@ -515,12 +515,15 @@
       }
     }
 
-    // แก้ไขระบบล็อกอิน LINE ให้เรียก LIFF แบบบังคับ
     function loginWithLine() {
-        if(LIFF_ID === "YOUR_LIFF_ID_HERE") {
-            alert("⚠️ ยังไม่ได้ตั้งค่า LIFF ID: กรุณานำ LIFF ID จาก LINE Developers มาใส่ในโค้ดบรรทัด 384 ก่อนครับ (ระบบจะรันจำลองให้แทนเพื่อทดสอบหน้าตา)");
+        if(typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+            if(!liff.isLoggedIn()) {
+                liff.login();
+            }
+        } else {
+            alert("⚠️ ยังไม่ได้ตั้งค่า LIFF ID: ระบบจะทำการจำลองการเข้าสู่ระบบให้แทนครับ");
             currentUserId = "uid_" + Math.floor(Math.random()*100000);
-            currentUserName = "ลูกค้า LINE (จำลอง)";
+            currentUserName = "ลูกค้าจำลอง (Mock)";
             localStorage.setItem('hk_user_id', currentUserId);
             db.collection("users").doc(currentUserId).set({ name: currentUserName, walletBalance: 0, points: 0, isBanned: false }, {merge:true}).then(() => {
                 document.getElementById('profile-name').innerText = currentUserName;
@@ -529,15 +532,6 @@
                 fetchOrderHistory();
                 checkActiveOrder();
             });
-            return;
-        }
-
-        if(typeof liff !== 'undefined') {
-            if(!liff.isLoggedIn()) {
-                liff.login();
-            }
-        } else {
-            showToast("ไม่สามารถโหลดระบบ LINE ได้ กรุณารีเฟรชหน้าเว็บ");
         }
     }
 
@@ -595,7 +589,6 @@
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
           menuList.innerHTML = '<p style="text-align:center; padding:20px;">ยังไม่มีเมนู</p>';
       } else {
-          // ดึงรายละเอียดอาหาร (description หรือ detail) คืนมา
           menuList.innerHTML = selectedRestaurant.menus.map((m, i) => {
             const menuDesc = m.description || m.detail || '';
             return `
@@ -615,10 +608,8 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping (แก้ไขให้รองรับ DB ทุกแบบ) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
-        // กวาดหาคีย์ท็อปปิ้งในฐานข้อมูลเดิม
         const addons = menu.addons || menu.toppings || menu.options; 
 
         if (addons && addons.length > 0) {
@@ -636,7 +627,6 @@
         
         let html = '';
         addons.forEach(addon => {
-            // รองรับรูปแบบข้อมูลท็อปปิ้งเดิม
             const addonName = addon.name || addon.title || addon.label;
             const addonPrice = addon.price || 0;
             html += `
@@ -677,7 +667,6 @@
         showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
-    // ================= ระบบ Payment & Cart =================
     function updateCartTotal() {
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
       document.getElementById('cart-count').innerText = cartItems.length;
@@ -821,7 +810,6 @@
         });
     }
 
-    // ================= Tracker & Chat (Bypass Firebase Index Error) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -914,7 +902,6 @@
         input.value = '';
     }
 
-    // --- Utils ---
     function showScreen(screenId) { 
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
       document.getElementById(screenId).classList.add('active'); 
@@ -961,7 +948,6 @@
         .then(() => { showToast("ส่งเรื่องสำเร็จ แอดมินจะรีบตรวจสอบครับ!"); document.getElementById('ticket-msg').value = ''; document.getElementById('help-modal').style.display = 'none'; });
     }
 
-    // ================= แก้บั๊ก Firebase Index สำหรับประวัติการสั่งซื้อ =================
     function fetchOrderHistory() {
        if (currentUserId.startsWith('guest')) return;
        db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
@@ -972,7 +958,6 @@
            }
            let orders = [];
            snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
-           // เรียงข้อมูลในฝั่งแอปเพื่อเลี่ยงปัญหา Index ของ Firebase
            orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
            let html = '';
