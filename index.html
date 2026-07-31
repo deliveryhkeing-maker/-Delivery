@@ -105,6 +105,7 @@
       </div>
     </div>
     
+    <!-- หมุด GPS -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -354,7 +355,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal -->
+  <!-- Order Detail / Chat Modal (เพิ่มปุ่มยกเลิกออเดอร์) -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -362,8 +363,13 @@
           <span class="material-icons" style="cursor: pointer;" onclick="document.getElementById('order-detail-modal').style.display='none'">close</span>
        </div>
        <div style="padding: 20px; border-bottom: 1px solid #eee;">
-          <h2 style="margin: 0 0 5px; color: var(--primary-color);" id="track-status-text">สถานะ...</h2>
-          <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+             <div>
+                <h2 style="margin: 0 0 5px; color: var(--primary-color);" id="track-status-text">สถานะ...</h2>
+                <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
+             </div>
+             <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
+          </div>
           <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
              <div>
                 <p style="margin: 0 0 3px; font-size: 12px; color: var(--text-light);">ไรเดอร์ของคุณ</p>
@@ -391,10 +397,10 @@
   <!-- ================= SCRIPTS ================= -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
+    const LINE_BOT_API_URL = "นำ_URL_ของเว็บแอปมาใส่ตรงนี้_ให้เก็บเครื่องหมายคำพูดไว้"; 
     
     // ⚠️ สำคัญมาก: เปลี่ยนคำว่า YOUR_LIFF_ID_HERE เป็นไอดี LIFF ของคุณ (ถ้าไม่ใส่ ระบบจะบังคับใช้ Mock Login)
-    const LIFF_ID = "2010799042-aNBObgM9"; 
+    const LIFF_ID = "YOUR_LIFF_ID_HERE"; 
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
@@ -516,14 +522,10 @@
     }
 
     function loginWithLine() {
-        if(typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID_HERE") {
-            if(!liff.isLoggedIn()) {
-                liff.login();
-            }
-        } else {
-            alert("⚠️ ยังไม่ได้ตั้งค่า LIFF ID: ระบบจะทำการจำลองการเข้าสู่ระบบให้แทนครับ");
+        if(LIFF_ID === "YOUR_LIFF_ID_HERE") {
+            alert("⚠️ ยังไม่ได้ตั้งค่า LIFF ID: กรุณานำ LIFF ID จาก LINE Developers มาใส่ในโค้ดบรรทัด 384 ก่อนครับ (ระบบจะรันจำลองให้แทนเพื่อทดสอบหน้าตา)");
             currentUserId = "uid_" + Math.floor(Math.random()*100000);
-            currentUserName = "ลูกค้าจำลอง (Mock)";
+            currentUserName = "ลูกค้า LINE (จำลอง)";
             localStorage.setItem('hk_user_id', currentUserId);
             db.collection("users").doc(currentUserId).set({ name: currentUserName, walletBalance: 0, points: 0, isBanned: false }, {merge:true}).then(() => {
                 document.getElementById('profile-name').innerText = currentUserName;
@@ -532,6 +534,15 @@
                 fetchOrderHistory();
                 checkActiveOrder();
             });
+            return;
+        }
+
+        if(typeof liff !== 'undefined') {
+            if(!liff.isLoggedIn()) {
+                liff.login();
+            }
+        } else {
+            showToast("ไม่สามารถโหลดระบบ LINE ได้ กรุณารีเฟรชหน้าเว็บ");
         }
     }
 
@@ -589,6 +600,7 @@
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
           menuList.innerHTML = '<p style="text-align:center; padding:20px;">ยังไม่มีเมนู</p>';
       } else {
+          // ดึงรายละเอียดอาหาร (description หรือ detail) คืนมา
           menuList.innerHTML = selectedRestaurant.menus.map((m, i) => {
             const menuDesc = m.description || m.detail || '';
             return `
@@ -608,8 +620,10 @@
       showScreen('menu-screen');
     }
 
+    // ================= ระบบ Topping (แก้ไขให้รองรับ DB ทุกแบบ) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
+        // กวาดหาคีย์ท็อปปิ้งในฐานข้อมูลเดิม
         const addons = menu.addons || menu.toppings || menu.options; 
 
         if (addons && addons.length > 0) {
@@ -627,6 +641,7 @@
         
         let html = '';
         addons.forEach(addon => {
+            // รองรับรูปแบบข้อมูลท็อปปิ้งเดิม
             const addonName = addon.name || addon.title || addon.label;
             const addonPrice = addon.price || 0;
             html += `
@@ -667,6 +682,7 @@
         showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
+    // ================= ระบบ Payment & Cart =================
     function updateCartTotal() {
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
       document.getElementById('cart-count').innerText = cartItems.length;
@@ -810,6 +826,7 @@
         });
     }
 
+    // ================= Tracker & Chat (รวมปุ่มยกเลิกออเดอร์) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -859,6 +876,13 @@
         document.getElementById('track-status-text').innerText = d.status;
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
+        // ควบคุมปุ่มยกเลิกออเดอร์
+        if(d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
+            document.getElementById('btn-cancel-order').style.display = 'block';
+        } else {
+            document.getElementById('btn-cancel-order').style.display = 'none';
+        }
+        
         if(d.riderName && !d.status.includes('ค้นหา')) {
             document.getElementById('track-rider-name').innerText = d.riderName;
             document.getElementById('track-rider-call').style.display = 'flex';
@@ -891,6 +915,47 @@
         }
     }
 
+    async function cancelActiveOrder() {
+        if(!activeOrderId) return;
+        if(!confirm("คุณต้องการยกเลิกออเดอร์นี้ใช่หรือไม่?")) return;
+
+        try {
+            const docRef = db.collection("orders").doc(activeOrderId);
+            const docSnap = await docRef.get();
+            if(!docSnap.exists) return;
+            const d = docSnap.data();
+
+            if(d.status !== "ค้นหาไรเดอร์" && d.status !== "รอรับออเดอร์") {
+                showToast("ออเดอร์กำลังดำเนินการ ไม่สามารถยกเลิกได้ กรุณาติดต่อแอดมิน");
+                document.getElementById('btn-cancel-order').style.display = 'none';
+                return;
+            }
+
+            await docRef.update({ status: "ลูกค้ายกเลิก" });
+
+            if(d.paymentMethod === 'wallet' || d.paymentMethod === 'transfer') {
+                await db.collection("users").doc(currentUserId).update({
+                    walletBalance: firebase.firestore.FieldValue.increment(d.totalPrice)
+                });
+                await db.collection("users").doc(currentUserId).collection("transactions").add({
+                    title: `คืนเงิน (ยกเลิกออเดอร์) บิล #${activeOrderId.substring(0,6).toUpperCase()}`,
+                    amount: d.totalPrice,
+                    type: 'income',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            showToast("ยกเลิกออเดอร์และคืนเงินสำเร็จ");
+            document.getElementById('order-detail-modal').style.display = 'none';
+            document.getElementById('active-order-tracker').style.display = 'none';
+            fetchOrderHistory();
+
+        } catch(e) {
+            console.error("Cancel error", e);
+            showToast("เกิดข้อผิดพลาดในการยกเลิก");
+        }
+    }
+
     function sendChatToRider() {
         const input = document.getElementById('cus-chat-input');
         const text = input.value.trim();
@@ -902,6 +967,7 @@
         input.value = '';
     }
 
+    // --- Utils ---
     function showScreen(screenId) { 
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
       document.getElementById(screenId).classList.add('active'); 
@@ -948,6 +1014,7 @@
         .then(() => { showToast("ส่งเรื่องสำเร็จ แอดมินจะรีบตรวจสอบครับ!"); document.getElementById('ticket-msg').value = ''; document.getElementById('help-modal').style.display = 'none'; });
     }
 
+    // Bypass Firebase Index Error for Order History
     function fetchOrderHistory() {
        if (currentUserId.startsWith('guest')) return;
        db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
@@ -958,6 +1025,7 @@
            }
            let orders = [];
            snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
+           // เรียงข้อมูลในฝั่งแอปเพื่อเลี่ยงปัญหา Index ของ Firebase
            orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
            let html = '';
