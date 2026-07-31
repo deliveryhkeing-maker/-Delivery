@@ -105,7 +105,7 @@
       </div>
     </div>
     
-    <!-- นำหมุดตำแหน่ง GPS กลับมา -->
+    <!-- หมุด GPS (แก้กลับมาแล้ว) -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -307,7 +307,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal (ของเดิมที่กลับมาสมบูรณ์) -->
+  <!-- Topping Modal -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -378,7 +378,7 @@
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>
        </div>
        
-       <div style="padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; padding-bottom: calc(15px + env(safe-area-inset-bottom));">
+       <div style="padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
           <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';" disabled>
           <button id="cus-chat-send" style="background: #ccc; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" disabled onclick="sendChatToRider()">
              <span class="material-icons">send</span>
@@ -393,7 +393,7 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
-    const LIFF_ID = "YOUR_LIFF_ID_HERE"; // เปลี่ยนให้เป็น LIFF ID ของคุณ
+    const LIFF_ID = "YOUR_LIFF_ID_HERE"; // เปลี่ยนให้เป็น LIFF ID ของคุณ หรือถ้ายังไม่มีให้ปล่อยไว้
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
@@ -440,8 +440,6 @@
       handleGuestUI();
       loadSystemSettings();
       loadRestaurants();
-      fetchOrderHistory();
-      checkActiveOrder();
       
       if(navigator.geolocation) {
          navigator.geolocation.getCurrentPosition(async p => { 
@@ -449,25 +447,32 @@
              userLng = p.coords.longitude; 
              
              try {
-                 // ดึงชื่อตำแหน่งจำลอง (Reverse Geocoding) ให้แสดงผลที่แถบด้านบน
-                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`);
+                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&accept-language=th`);
                  const data = await res.json();
                  if(data && data.display_name) {
                      const addressParts = data.display_name.split(',');
-                     // นำที่อยู่แบบย่อมาแสดง
                      document.getElementById('user-current-location').innerText = addressParts[0] + (addressParts[1] ? ',' + addressParts[1] : '');
                  } else {
-                     document.getElementById('user-current-location').innerText = "ตำแหน่งปัจจุบันของคุณ";
+                     document.getElementById('user-current-location').innerText = "พิกัด: " + userLat.toFixed(4) + ", " + userLng.toFixed(4);
                  }
              } catch(e) {
-                 document.getElementById('user-current-location').innerText = "ตำแหน่งปัจจุบันของคุณ";
+                 document.getElementById('user-current-location').innerText = "พิกัด: " + userLat.toFixed(4) + ", " + userLng.toFixed(4);
              }
 
          }, e => console.log(e));
       }
       
-      try {
-          if(LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+      // ให้ระบบแสดง UI และโหลดประวัติทันทีก่อน ไม่ต้องรอ LIFF ตอบกลับ
+      fetchOrderHistory();
+      checkActiveOrder();
+
+      // โหลด LIFF แบบไม่ให้กระทบการทำงานหลักของเว็บ
+      initLIFF();
+    };
+
+    async function initLIFF() {
+        try {
+          if(typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID_HERE") {
              await liff.init({ liffId: LIFF_ID });
              if(liff.isLoggedIn()) {
                  const profile = await liff.getProfile();
@@ -483,11 +488,12 @@
                  
                  db.collection("users").doc(currentUserId).set({ name: currentUserName, picture: currentUserProfilePic, isBanned: false }, {merge:true});
                  handleGuestUI();
-                 fetchOrderHistory(); // รีโหลดประวัติหลังล็อกอิน
+                 fetchOrderHistory();
+                 checkActiveOrder();
              }
           }
-      } catch (err) { console.error("LIFF Init Error:", err); }
-    };
+        } catch (err) { console.error("LIFF Init Error:", err); }
+    }
 
     function handleGuestUI() {
       if (currentUserId.startsWith('guest')) {
@@ -518,13 +524,14 @@
             }
         } else {
             currentUserId = "uid_" + Math.floor(Math.random()*100000);
-            currentUserName = "ลูกค้า LINE (จำลอง)";
+            currentUserName = "ลูกค้าจำลอง (Mock)";
             localStorage.setItem('hk_user_id', currentUserId);
             db.collection("users").doc(currentUserId).set({ name: currentUserName, walletBalance: 0, points: 0, isBanned: false }, {merge:true}).then(() => {
                 document.getElementById('profile-name').innerText = currentUserName;
-                showToast('เข้าสู่ระบบสำเร็จ');
+                showToast('จำลองเข้าสู่ระบบสำเร็จ');
                 handleGuestUI();
                 fetchOrderHistory();
+                checkActiveOrder();
             });
         }
     }
@@ -600,7 +607,7 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping (ที่นำกลับมา) =================
+    // ================= ระบบ Topping =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         if (menu.addons && menu.addons.length > 0) {
@@ -655,7 +662,7 @@
         
         updateCartTotal();
         document.getElementById('topping-modal').style.display = 'none';
-        showToast(`เพิ่ม ${currentToppingMenu.name} ลงตะกร้าแล้ว`);
+        showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
     // ================= ระบบ Payment & Cart =================
@@ -802,19 +809,30 @@
         });
     }
 
-    // ================= Tracker & Chat =================
+    // ================= Tracker & Chat (Bypass Firebase Index Error) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
-      db.collection("orders").where("userId", "==", currentUserId).orderBy("createdAt", "desc").limit(1).onSnapshot(snapshot => {
-         if(!snapshot.empty) {
-            const d = snapshot.docs[0].data();
-            activeOrderId = snapshot.docs[0].id;
-            
-            if(d.status.includes('สำเร็จ') || d.status.includes('ยกเลิก') || d.status.includes('ปฏิเสธ')) {
-               document.getElementById('active-order-tracker').style.display = 'none';
-               return;
-            }
+      db.collection("orders").where("userId", "==", currentUserId).onSnapshot(snapshot => {
+         let activeFound = false;
+         let latestActiveOrder = null;
+         let latestTime = 0;
+
+         snapshot.forEach(doc => {
+             const d = doc.data();
+             if(!d.status.includes('สำเร็จ') && !d.status.includes('ยกเลิก') && !d.status.includes('ปฏิเสธ')) {
+                 const t = d.createdAt ? d.createdAt.toMillis() : 0;
+                 if(t > latestTime) {
+                     latestTime = t;
+                     latestActiveOrder = { id: doc.id, ...d };
+                     activeFound = true;
+                 }
+             }
+         });
+
+         if(activeFound && latestActiveOrder) {
+            const d = latestActiveOrder;
+            activeOrderId = d.id;
 
             document.getElementById('active-order-tracker').style.display = 'flex';
             document.getElementById('tracker-status').innerText = d.status;
@@ -931,14 +949,21 @@
         .then(() => { showToast("ส่งเรื่องสำเร็จ แอดมินจะรีบตรวจสอบครับ!"); document.getElementById('ticket-msg').value = ''; document.getElementById('help-modal').style.display = 'none'; });
     }
 
+    // Bypass Firebase Index Error for Order History
     function fetchOrderHistory() {
        if (currentUserId.startsWith('guest')) return;
-       db.collection("orders").where("userId", "==", currentUserId).orderBy("createdAt", "desc").limit(10).get().then(snap => {
+       db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
            const list = document.getElementById('history-list');
-           if(snap.empty) return;
+           if(snap.empty) {
+               list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p>'; 
+               return;
+           }
+           let orders = [];
+           snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
+           orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
            let html = '';
-           snap.forEach(doc => {
-              const d = doc.data();
+           orders.slice(0, 15).forEach(d => {
               const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
               html += `<div style="background:white; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #eee;">
                  <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>${d.restaurantName}</b><span style="font-size:12px; color:#999;">${date}</span></div>
