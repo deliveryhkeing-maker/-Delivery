@@ -33,9 +33,12 @@
     .screen.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Header & Banner */
-    .header { background: var(--primary-color); color: white; padding: 15px 20px; padding-top: calc(15px + env(safe-area-inset-top)); display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 24px 24px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); margin-bottom: 20px; z-index: 10; position: sticky; top: 0; }
+    /* Header & Location Bar */
+    .header { background: var(--primary-color); color: white; padding: 15px 20px; padding-top: calc(15px + env(safe-area-inset-top)); display: flex; justify-content: space-between; align-items: center; z-index: 10; position: sticky; top: 0; }
     .header h2 { margin: 0; font-size: 20px; font-weight: 700; }
+    
+    .location-bar { background: white; padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-radius: 0 0 24px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; z-index: 9; }
+    .location-bar .loc-icon { width: 36px; height: 36px; background: #fee2e2; color: var(--danger); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
     
     .banner-container { padding: 0 20px; margin-bottom: 20px; }
     .promo-banner { background: var(--secondary-color); color: white; padding: 25px 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2); position: relative; overflow: hidden; }
@@ -43,18 +46,20 @@
     /* Restaurant & Menu Cards */
     .section-title { padding: 0 20px; font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
     .restaurant-card { background: white; margin: 0 20px 15px; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; cursor: pointer; transition: 0.3s; }
+    .restaurant-card:active { transform: scale(0.98); }
     .res-img { width: 100%; height: 160px; object-fit: cover; background-color: #e2e8f0; }
     .res-info { padding: 15px; }
     .res-name { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
     .res-meta { display: flex; align-items: center; gap: 15px; font-size: 13px; color: var(--text-light); }
     
     /* Menu Item */
-    .menu-item { display: flex; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; background: white; align-items: center; gap: 15px; }
-    .menu-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; background: #e2e8f0; }
+    .menu-item { display: flex; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; background: white; align-items: flex-start; gap: 15px; }
+    .menu-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; background: #e2e8f0; flex-shrink: 0; }
     .menu-details { flex: 1; }
-    .menu-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .menu-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: var(--text-dark); }
+    .menu-desc { font-size: 12px; color: var(--text-light); margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .menu-price { color: var(--primary-color); font-weight: 700; font-size: 16px; }
-    .add-btn { background: var(--primary-light); color: var(--primary-color); border: none; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    .add-btn { background: var(--primary-light); color: var(--primary-color); border: none; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; align-self: flex-end; }
 
     /* Floating Cart & Navigation */
     .floating-cart { position: fixed; bottom: 80px; left: 20px; right: 20px; background: var(--primary-color); color: white; padding: 15px 20px; border-radius: 16px; display: none; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); z-index: 100; cursor: pointer; transition: transform 0.2s; }
@@ -97,6 +102,15 @@
       <h2>ห้วยเกิ้ง Delivery</h2>
       <div style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 5px;">
         <span class="material-icons" style="font-size: 16px;">account_balance_wallet</span> ฿<span id="header-wallet">0.00</span>
+      </div>
+    </div>
+    
+    <!-- นำหมุดตำแหน่ง GPS กลับมา -->
+    <div class="location-bar">
+      <div class="loc-icon"><span class="material-icons">location_on</span></div>
+      <div style="flex: 1; overflow: hidden;">
+        <p style="margin: 0; font-size: 11px; color: var(--text-light);">จัดส่งที่</p>
+        <p style="margin: 0; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="user-current-location">กำลังค้นหาตำแหน่งของคุณ...</p>
       </div>
     </div>
     
@@ -379,7 +393,7 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
-    const LIFF_ID = "https://liff.line.me/2010799042-aNBObgM9"; // เปลี่ยนให้เป็น LIFF ID ของคุณ
+    const LIFF_ID = "YOUR_LIFF_ID_HERE"; // เปลี่ยนให้เป็น LIFF ID ของคุณ
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
@@ -400,14 +414,14 @@
     let allRestaurants = [];
     let selectedRestaurant = null;
     let cartItems = [];
-    let userLat = 17.1593, userLng = 102.9737; // ห้วยเกิ้ง
+    let userLat = 17.1593, userLng = 102.9737; 
     
     let sysBaseFee = 15; let sysKmFee = 5; let sysMaxDist = 10;
     let appliedDiscount = 0; let appliedPromoCodeStr = "";
     
     let activeOrderId = null;
     let previousChatCount = 0;
-    let currentToppingMenu = null; // สำหรับระบบ Topping เดิม
+    let currentToppingMenu = null; 
 
     window.onload = async function() {
       if(!localStorage.getItem('hk_user_id')) localStorage.setItem('hk_user_id', currentUserId);
@@ -430,26 +444,47 @@
       checkActiveOrder();
       
       if(navigator.geolocation) {
-         navigator.geolocation.getCurrentPosition(p => { userLat = p.coords.latitude; userLng = p.coords.longitude; }, e => console.log(e));
+         navigator.geolocation.getCurrentPosition(async p => { 
+             userLat = p.coords.latitude; 
+             userLng = p.coords.longitude; 
+             
+             try {
+                 // ดึงชื่อตำแหน่งจำลอง (Reverse Geocoding) ให้แสดงผลที่แถบด้านบน
+                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`);
+                 const data = await res.json();
+                 if(data && data.display_name) {
+                     const addressParts = data.display_name.split(',');
+                     // นำที่อยู่แบบย่อมาแสดง
+                     document.getElementById('user-current-location').innerText = addressParts[0] + (addressParts[1] ? ',' + addressParts[1] : '');
+                 } else {
+                     document.getElementById('user-current-location').innerText = "ตำแหน่งปัจจุบันของคุณ";
+                 }
+             } catch(e) {
+                 document.getElementById('user-current-location').innerText = "ตำแหน่งปัจจุบันของคุณ";
+             }
+
+         }, e => console.log(e));
       }
       
-      // การเชื่อมต่อ LIFF
       try {
-          await liff.init({ liffId: LIFF_ID });
-          if(liff.isLoggedIn()) {
-              const profile = await liff.getProfile();
-              currentUserId = profile.userId;
-              currentUserName = profile.displayName;
-              currentUserProfilePic = profile.pictureUrl;
-              localStorage.setItem('hk_user_id', currentUserId);
-              
-              document.getElementById('profile-name').innerText = currentUserName;
-              if(currentUserProfilePic) {
-                  document.getElementById('profile-image-container').innerHTML = `<img src="${currentUserProfilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-              }
-              
-              db.collection("users").doc(currentUserId).set({ name: currentUserName, picture: currentUserProfilePic, isBanned: false }, {merge:true});
-              handleGuestUI();
+          if(LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+             await liff.init({ liffId: LIFF_ID });
+             if(liff.isLoggedIn()) {
+                 const profile = await liff.getProfile();
+                 currentUserId = profile.userId;
+                 currentUserName = profile.displayName;
+                 currentUserProfilePic = profile.pictureUrl;
+                 localStorage.setItem('hk_user_id', currentUserId);
+                 
+                 document.getElementById('profile-name').innerText = currentUserName;
+                 if(currentUserProfilePic) {
+                     document.getElementById('profile-image-container').innerHTML = `<img src="${currentUserProfilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                 }
+                 
+                 db.collection("users").doc(currentUserId).set({ name: currentUserName, picture: currentUserProfilePic, isBanned: false }, {merge:true});
+                 handleGuestUI();
+                 fetchOrderHistory(); // รีโหลดประวัติหลังล็อกอิน
+             }
           }
       } catch (err) { console.error("LIFF Init Error:", err); }
     };
@@ -477,23 +512,25 @@
     }
 
     function loginWithLine() {
-        if(liff && !liff.isLoggedIn()) {
-            liff.login();
+        if(typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+            if(!liff.isLoggedIn()) {
+                liff.login();
+            }
         } else {
-            // สำรองกรณีไม่ได้เปิดผ่าน LINE
             currentUserId = "uid_" + Math.floor(Math.random()*100000);
-            currentUserName = "ลูกค้า LINE (Mock)";
+            currentUserName = "ลูกค้า LINE (จำลอง)";
             localStorage.setItem('hk_user_id', currentUserId);
             db.collection("users").doc(currentUserId).set({ name: currentUserName, walletBalance: 0, points: 0, isBanned: false }, {merge:true}).then(() => {
                 document.getElementById('profile-name').innerText = currentUserName;
                 showToast('เข้าสู่ระบบสำเร็จ');
                 handleGuestUI();
+                fetchOrderHistory();
             });
         }
     }
 
     function logoutLine() {
-        if(liff && liff.isLoggedIn()) { liff.logout(); }
+        if(typeof liff !== 'undefined' && liff.isLoggedIn()) { liff.logout(); }
         localStorage.removeItem('hk_user_id');
         localStorage.removeItem('hk_user_profile_data');
         location.reload();
@@ -546,11 +583,13 @@
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
           menuList.innerHTML = '<p style="text-align:center; padding:20px;">ยังไม่มีเมนู</p>';
       } else {
+          // เพิ่มระบบดึงรายละเอียดอาหาร (description) กลับมา
           menuList.innerHTML = selectedRestaurant.menus.map((m, i) => `
             <div class="menu-item">
               <img src="${m.image || 'https://via.placeholder.com/150'}" class="menu-img">
               <div class="menu-details">
                 <div class="menu-name">${m.name}</div>
+                ${m.description ? `<div class="menu-desc">${m.description}</div>` : ''}
                 <div class="menu-price">฿${m.price}</div>
               </div>
               <button class="add-btn" onclick="handleMenuClick(${i}, event)"><span class="material-icons">add</span></button>
@@ -661,7 +700,6 @@
       
       calculateCheckoutTotal();
       
-      // อัปเดตรายการคูปอง
       const promoContainer = document.getElementById('promo-list-container');
       db.collection("promotions").get().then(snap => {
           if(snap.empty) { promoContainer.innerHTML = '<p style="text-align:center; color:#999;">ยังไม่มีโค้ดส่วนลด</p>'; return; }
@@ -745,7 +783,7 @@
           items: cartItems.map(i => i.name), totalPrice: totalAmount,
           discount: appliedDiscount, promoCode: appliedPromoCodeStr,
           paymentMethod: method, slipImage: slipUrl,
-          status: "ค้นหาไรเดอร์", createdAt: firebase.firestore.FieldValue.serverTimestamp() // เปลี่ยนเป็นค้นหาไรเดอร์เลย
+          status: "ค้นหาไรเดอร์", createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         db.collection("orders").add(orderData).then(docRef => {
@@ -756,7 +794,6 @@
                 });
             }
             
-            // แจ้งเตือนร้านค้าผ่าน API
             fetch(LINE_BOT_API_URL + "?action=notifyMerchant&merchantId=" + selectedRestaurant.id + "&orderId=" + docRef.id, { mode: 'no-cors' });
 
             cartItems = []; updateCartTotal();
@@ -783,7 +820,6 @@
             document.getElementById('tracker-status').innerText = d.status;
             document.getElementById('tracker-res').innerText = d.restaurantName;
             
-            // แก้บั๊กโชว์ชื่อไรเดอร์ถ้ายังไม่มี
             if (d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์" || !d.riderName) {
                 document.getElementById('tracker-rider').innerText = "กำลังค้นหาไรเดอร์...";
             } else {
