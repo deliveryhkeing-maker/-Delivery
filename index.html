@@ -105,7 +105,7 @@
       </div>
     </div>
     
-    <!-- หมุด GPS (แก้กลับมาแล้ว) -->
+    <!-- หมุด GPS -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -222,7 +222,6 @@
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
 
-    <!-- ส่วนที่ซ่อนสำหรับ Guest -->
     <div id="auth-features" style="display: none;">
       <div style="display: flex; background: white; margin-bottom: 15px; padding: 20px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
         <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
@@ -393,7 +392,9 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
-    const LIFF_ID = "YOUR_LIFF_ID_HERE"; // เปลี่ยนให้เป็น LIFF ID ของคุณ หรือถ้ายังไม่มีให้ปล่อยไว้
+    
+    // ⚠️ สำคัญมาก: เปลี่ยนคำว่า YOUR_LIFF_ID_HERE เป็นไอดี LIFF ของคุณ
+    const LIFF_ID = "https://liff.line.me/2010799042-aNBObgM9"; 
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
@@ -462,11 +463,8 @@
          }, e => console.log(e));
       }
       
-      // ให้ระบบแสดง UI และโหลดประวัติทันทีก่อน ไม่ต้องรอ LIFF ตอบกลับ
       fetchOrderHistory();
       checkActiveOrder();
-
-      // โหลด LIFF แบบไม่ให้กระทบการทำงานหลักของเว็บ
       initLIFF();
     };
 
@@ -517,14 +515,12 @@
       }
     }
 
+    // แก้ไขระบบล็อกอิน LINE ให้เรียก LIFF แบบบังคับ
     function loginWithLine() {
-        if(typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID_HERE") {
-            if(!liff.isLoggedIn()) {
-                liff.login();
-            }
-        } else {
+        if(LIFF_ID === "YOUR_LIFF_ID_HERE") {
+            alert("⚠️ ยังไม่ได้ตั้งค่า LIFF ID: กรุณานำ LIFF ID จาก LINE Developers มาใส่ในโค้ดบรรทัด 384 ก่อนครับ (ระบบจะรันจำลองให้แทนเพื่อทดสอบหน้าตา)");
             currentUserId = "uid_" + Math.floor(Math.random()*100000);
-            currentUserName = "ลูกค้าจำลอง (Mock)";
+            currentUserName = "ลูกค้า LINE (จำลอง)";
             localStorage.setItem('hk_user_id', currentUserId);
             db.collection("users").doc(currentUserId).set({ name: currentUserName, walletBalance: 0, points: 0, isBanned: false }, {merge:true}).then(() => {
                 document.getElementById('profile-name').innerText = currentUserName;
@@ -533,6 +529,15 @@
                 fetchOrderHistory();
                 checkActiveOrder();
             });
+            return;
+        }
+
+        if(typeof liff !== 'undefined') {
+            if(!liff.isLoggedIn()) {
+                liff.login();
+            }
+        } else {
+            showToast("ไม่สามารถโหลดระบบ LINE ได้ กรุณารีเฟรชหน้าเว็บ");
         }
     }
 
@@ -590,28 +595,34 @@
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
           menuList.innerHTML = '<p style="text-align:center; padding:20px;">ยังไม่มีเมนู</p>';
       } else {
-          // เพิ่มระบบดึงรายละเอียดอาหาร (description) กลับมา
-          menuList.innerHTML = selectedRestaurant.menus.map((m, i) => `
+          // ดึงรายละเอียดอาหาร (description หรือ detail) คืนมา
+          menuList.innerHTML = selectedRestaurant.menus.map((m, i) => {
+            const menuDesc = m.description || m.detail || '';
+            return `
             <div class="menu-item">
               <img src="${m.image || 'https://via.placeholder.com/150'}" class="menu-img">
               <div class="menu-details">
                 <div class="menu-name">${m.name}</div>
-                ${m.description ? `<div class="menu-desc">${m.description}</div>` : ''}
+                ${menuDesc ? `<div class="menu-desc">${menuDesc}</div>` : ''}
                 <div class="menu-price">฿${m.price}</div>
               </div>
               <button class="add-btn" onclick="handleMenuClick(${i}, event)"><span class="material-icons">add</span></button>
             </div>
-          `).join('');
+            `;
+          }).join('');
       }
       cartItems = []; updateCartTotal();
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping =================
+    // ================= ระบบ Topping (แก้ไขให้รองรับ DB ทุกแบบ) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
-        if (menu.addons && menu.addons.length > 0) {
-            openToppingModal(menu);
+        // กวาดหาคีย์ท็อปปิ้งในฐานข้อมูลเดิม
+        const addons = menu.addons || menu.toppings || menu.options; 
+
+        if (addons && addons.length > 0) {
+            openToppingModal(menu, addons);
         } else {
             cartItems.push({ name: menu.name, price: menu.price, image: menu.image });
             updateCartTotal();
@@ -619,23 +630,24 @@
         }
     }
 
-    function openToppingModal(menu) {
+    function openToppingModal(menu, addons) {
         currentToppingMenu = menu;
         document.getElementById('topping-menu-name').innerText = menu.name;
         
         let html = '';
-        if(menu.addons) {
-            menu.addons.forEach(addon => {
-                html += `
-                <div class="topping-item">
-                   <label>
-                      <input type="checkbox" data-name="${addon.name}" data-price="${addon.price}" onchange="updateToppingPrice()"> 
-                      ${addon.name} 
-                   </label>
-                   <span style="font-size:14px; color:var(--text-light);">+฿${addon.price}</span>
-                </div>`;
-            });
-        }
+        addons.forEach(addon => {
+            // รองรับรูปแบบข้อมูลท็อปปิ้งเดิม
+            const addonName = addon.name || addon.title || addon.label;
+            const addonPrice = addon.price || 0;
+            html += `
+            <div class="topping-item">
+               <label>
+                  <input type="checkbox" data-name="${addonName}" data-price="${addonPrice}" onchange="updateToppingPrice()"> 
+                  ${addonName} 
+               </label>
+               <span style="font-size:14px; color:var(--text-light);">+฿${addonPrice}</span>
+            </div>`;
+        });
         document.getElementById('topping-options-container').innerHTML = html;
         document.getElementById('topping-total-price').innerText = menu.price;
         document.getElementById('topping-modal').style.display = 'flex';
@@ -949,7 +961,7 @@
         .then(() => { showToast("ส่งเรื่องสำเร็จ แอดมินจะรีบตรวจสอบครับ!"); document.getElementById('ticket-msg').value = ''; document.getElementById('help-modal').style.display = 'none'; });
     }
 
-    // Bypass Firebase Index Error for Order History
+    // ================= แก้บั๊ก Firebase Index สำหรับประวัติการสั่งซื้อ =================
     function fetchOrderHistory() {
        if (currentUserId.startsWith('guest')) return;
        db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
@@ -960,6 +972,7 @@
            }
            let orders = [];
            snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
+           // เรียงข้อมูลในฝั่งแอปเพื่อเลี่ยงปัญหา Index ของ Firebase
            orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
            let html = '';
