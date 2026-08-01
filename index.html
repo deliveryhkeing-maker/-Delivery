@@ -74,7 +74,7 @@
       background: var(--primary-color);
       color: white;
       border-radius: 50%;
-      display: none; /* ซ่อนไว้จนกว่าจะมีสินค้า */
+      display: none;
       justify-content: center;
       align-items: center;
       box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
@@ -112,7 +112,7 @@
       position: fixed; 
       bottom: 90px; 
       left: 20px; 
-      width: calc(100% - 100px); /* เว้นที่ให้ปุ่มตะกร้าลอยด้านขวา */
+      width: calc(100% - 100px); 
       background: white; 
       padding: 15px; 
       border-radius: 16px; 
@@ -207,7 +207,7 @@
 
   <!-- ================= 3. PAYMENT SCREEN ================= -->
   <div id="payment-screen" class="screen">
-    <div class="header" style="border-radius: 0; margin-bottom: 0;"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('home-screen')">arrow_back</span><h2>ยืนยันคำสั่งซื้อ</h2><div style="width:24px;"></div></div>
+    <div class="header" style="border-radius: 0; margin-bottom: 0;"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('menu-screen')">arrow_back</span><h2>ยืนยันคำสั่งซื้อ</h2><div style="width:24px;"></div></div>
     
     <div style="background: white; margin: 15px 20px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
       <h3 style="margin: 0 0 15px; font-size: 16px; display: flex; align-items: center; gap: 8px;"><span class="material-icons" style="color:var(--primary-color);">receipt_long</span> รายการอาหารที่สั่ง</h3>
@@ -361,7 +361,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal (สแกนหาตัวแปรอัตโนมัติ) -->
+  <!-- Topping Modal (สแกนหาตัวแปรครอบจักรวาล ป้องกัน undefined) -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -469,7 +469,10 @@
   <!-- ================= SCRIPTS ================= -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
+    // ตั้งค่า URL สำหรับการยิงแจ้งเตือนผ่าน Google Apps Script
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
+    
+    // ตั้งค่า LIFF ID สำหรับใช้งานเข้าสู่ระบบ LINE จริงๆ
     const LIFF_ID = "2010799042-aNBObgM9"; 
 
     const firebaseConfig = {
@@ -659,7 +662,7 @@
 
     function openRestaurant(id) {
       selectedRestaurant = allRestaurants.find(r => r.id === id);
-      document.getElementById('res-detail-name').innerText = selectedRestaurant.storeName;
+      document.getElementById('res-detail-name').innerText = selectedRestaurant.storeName || selectedRestaurant.name || "ชื่อร้าน";
       document.getElementById('res-detail-cat').innerText = selectedRestaurant.category || 'อาหารทั่วไป';
       document.getElementById('res-detail-dist').innerText = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
       
@@ -672,13 +675,17 @@
       } else {
           menuList.innerHTML = selectedRestaurant.menus.map((m, i) => {
             const menuDesc = m.description || m.detail || '';
+            const menuImg = m.image || 'https://via.placeholder.com/150';
+            const menuName = m.name || "ไม่มีชื่อเมนู";
+            const menuPrice = parseFloat(m.price || 0);
+
             return `
             <div class="menu-item">
-              <img src="${m.image || 'https://via.placeholder.com/150'}" class="menu-img">
+              <img src="${menuImg}" class="menu-img">
               <div class="menu-details">
-                <div class="menu-name">${m.name}</div>
+                <div class="menu-name">${menuName}</div>
                 ${menuDesc ? `<div class="menu-desc">${menuDesc}</div>` : ''}
-                <div class="menu-price">฿${m.price}</div>
+                <div class="menu-price">฿${menuPrice}</div>
               </div>
               <button class="add-btn" onclick="handleMenuClick(${i}, event)"><span class="material-icons">add</span></button>
             </div>
@@ -689,15 +696,20 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping (สแกนคีย์ขั้นสูงสุด) =================
+    // ================= ระบบ Topping (สแกนหาคีย์แบบครอบจักรวาล) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
-        const addons = menu.addons || menu.toppings || menu.options || menu.extra; 
+        const addons = menu.addons || menu.toppings || menu.options || menu.extra || menu.choices || menu.Addons || menu.Toppings || []; 
 
-        if (addons && (addons.length > 0 || Object.keys(addons).length > 0)) {
+        // ตรวจสอบว่าเป็น Object หรือ Array ที่มีข้อมูลจริงๆ หรือไม่
+        let hasAddons = false;
+        if (Array.isArray(addons) && addons.length > 0) hasAddons = true;
+        if (typeof addons === 'object' && addons !== null && Object.keys(addons).length > 0 && !Array.isArray(addons)) hasAddons = true;
+
+        if (hasAddons) {
             openToppingModal(menu, addons);
         } else {
-            cartItems.push({ name: menu.name, price: menu.price, image: menu.image });
+            cartItems.push({ name: menu.name || "เมนู", price: parseFloat(menu.price)||0, image: menu.image||"" });
             updateCartTotal();
             flyToCartAnimation(event);
         }
@@ -705,7 +717,7 @@
 
     function openToppingModal(menu, addons) {
         currentToppingMenu = menu;
-        document.getElementById('topping-menu-name').innerText = menu.name;
+        document.getElementById('topping-menu-name').innerText = menu.name || "เพิ่มตัวเลือก";
         
         let html = '';
         let addonArray = [];
@@ -724,7 +736,7 @@
                 addonName = addon;
             } else if (typeof addon === 'object' && addon !== null) {
                 addonName = addon.name || addon.title || addon.label || addon.toppingName || addon.optionName || addon.choice || "ตัวเลือก";
-                addonPrice = parseFloat(addon.price || addon.addPrice || addon.cost || 0);
+                addonPrice = parseFloat(addon.price || addon.addPrice || addon.cost || addon.Price || 0);
             }
 
             html += `
@@ -738,35 +750,35 @@
         });
         
         document.getElementById('topping-options-container').innerHTML = html;
-        document.getElementById('topping-total-price').innerText = menu.price;
+        document.getElementById('topping-total-price').innerText = parseFloat(menu.price)||0;
         document.getElementById('topping-modal').style.display = 'flex';
     }
 
     function updateToppingPrice() {
-        let finalPrice = parseFloat(currentToppingMenu.price);
+        let finalPrice = parseFloat(currentToppingMenu.price || 0);
         document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked').forEach(cb => {
-            finalPrice += parseFloat(cb.getAttribute('data-price'));
+            finalPrice += parseFloat(cb.getAttribute('data-price') || 0);
         });
         document.getElementById('topping-total-price').innerText = finalPrice;
     }
 
     function confirmAddWithTopping(event) {
-        let finalPrice = parseFloat(currentToppingMenu.price);
+        let finalPrice = parseFloat(currentToppingMenu.price || 0);
         let toppingsList = [];
         document.querySelectorAll('#topping-options-container input[type="checkbox"]:checked').forEach(cb => {
-            finalPrice += parseFloat(cb.getAttribute('data-price'));
+            finalPrice += parseFloat(cb.getAttribute('data-price') || 0);
             toppingsList.push(cb.getAttribute('data-name'));
         });
         
         let toppingsText = toppingsList.length > 0 ? ` (+${toppingsList.join(', ')})` : '';
-        cartItems.push({ name: currentToppingMenu.name + toppingsText, price: finalPrice, image: currentToppingMenu.image });
+        cartItems.push({ name: (currentToppingMenu.name || "เมนู") + toppingsText, price: finalPrice, image: currentToppingMenu.image || "" });
         
         updateCartTotal();
         document.getElementById('topping-modal').style.display = 'none';
         showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
-    // ================= ระบบ Payment & Cart (อัปเดตไอคอนลอย) =================
+    // ================= ระบบ Payment & Cart =================
     function updateCartTotal() {
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
       document.getElementById('fab-cart-count').innerText = cartItems.length;
@@ -884,15 +896,23 @@
             slipUrl = "รอการตรวจสอบสลิป";
         }
 
+        // ป้องกัน undefined ในตัวแปรที่จะส่งให้ Firebase
         const orderData = {
-          userId: currentUserId, customerName: currentUserName, customerPhone: userProfileData.phone, customerAddress: userProfileData.address,
-          merchantId: selectedRestaurant.id, restaurantName: selectedRestaurant.name,
-          items: cartItems.map(i => i.name), 
+          userId: currentUserId || "guest", 
+          customerName: currentUserName || "ลูกค้าทั่วไป", 
+          customerPhone: userProfileData.phone || "ไม่ระบุ", 
+          customerAddress: userProfileData.address || "ไม่ระบุ",
+          merchantId: selectedRestaurant.id || "unknown", 
+          restaurantName: selectedRestaurant.storeName || selectedRestaurant.name || "ร้านค้า",
+          items: cartItems.map(i => i.name || "เมนู"), 
           fullItems: cartItems, 
-          totalPrice: totalAmount,
-          discount: appliedDiscount, promoCode: appliedPromoCodeStr,
-          paymentMethod: method, slipImage: slipUrl,
-          status: "ค้นหาไรเดอร์", createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          totalPrice: totalAmount || 0,
+          discount: appliedDiscount || 0, 
+          promoCode: appliedPromoCodeStr || "",
+          paymentMethod: method || "cash", 
+          slipImage: slipUrl || "",
+          status: "ค้นหาไรเดอร์", 
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         db.collection("orders").add(orderData).then(docRef => {
@@ -908,6 +928,9 @@
             cartItems = []; updateCartTotal();
             showToast("สั่งอาหารสำเร็จ! กำลังค้นหาไรเดอร์...");
             showScreen('home-screen');
+        }).catch(err => {
+            console.error("Add order error", err);
+            showToast("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
         });
     }
 
@@ -918,7 +941,7 @@
         }
     }
 
-    // ================= Tracker, Map, Chat & ปุ่มยกเลิก =================
+    // ================= Tracker, Map & Chat (ระบบสมบูรณ์ 100%) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -970,7 +993,7 @@
         
         const btnCancel = document.getElementById('btn-cancel-order');
         
-        // ให้ปุ่มยกเลิกโชว์ทันทีเมื่อยังหาไรเดอร์
+        // ให้ปุ่มยกเลิกโชว์ทันทีเมื่อยังหาไรเดอร์ หรือร้านยังไม่ทำอาหาร
         if (d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
             btnCancel.style.display = 'block';
             document.getElementById('wait-animation').style.display = 'block';
