@@ -222,7 +222,6 @@
       <button id="btn-line-logout" class="btn-outline" style="display:none; margin-top: 10px;" onclick="logoutLine()">ออกจากระบบ</button>
     </div>
 
-    <!-- ส่วนที่ซ่อนสำหรับ Guest -->
     <div id="auth-features" style="display: none;">
       <div style="display: flex; background: white; margin-bottom: 15px; padding: 20px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
         <div style="flex: 1; text-align: center; border-right: 1px solid #eee;">
@@ -355,7 +354,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal (เพิ่มปุ่มยกเลิกออเดอร์) -->
+  <!-- Order Detail / Chat Modal (ปุ่มยกเลิกออเดอร์) -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -397,10 +396,11 @@
   <!-- ================= SCRIPTS ================= -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const LINE_BOT_API_URL = "นำ_URL_ของเว็บแอปมาใส่ตรงนี้_ให้เก็บเครื่องหมายคำพูดไว้"; 
+    // ตั้งค่า URL สำหรับการยิงแจ้งเตือนผ่าน Google Apps Script
+    const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
     
-    // ⚠️ สำคัญมาก: เปลี่ยนคำว่า YOUR_LIFF_ID_HERE เป็นไอดี LIFF ของคุณ (ถ้าไม่ใส่ ระบบจะบังคับใช้ Mock Login)
-    const LIFF_ID = "YOUR_LIFF_ID_HERE"; 
+    // ตั้งค่า LIFF ID สำหรับใช้งานเข้าสู่ระบบ LINE จริงๆ
+    const LIFF_ID = "2010799042-aNBObgM9"; 
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
@@ -476,7 +476,7 @@
 
     async function initLIFF() {
         try {
-          if(typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+          if(typeof liff !== 'undefined' && LIFF_ID) {
              await liff.init({ liffId: LIFF_ID });
              if(liff.isLoggedIn()) {
                  const profile = await liff.getProfile();
@@ -522,21 +522,6 @@
     }
 
     function loginWithLine() {
-        if(LIFF_ID === "YOUR_LIFF_ID_HERE") {
-            alert("⚠️ ยังไม่ได้ตั้งค่า LIFF ID: กรุณานำ LIFF ID จาก LINE Developers มาใส่ในโค้ดบรรทัด 384 ก่อนครับ (ระบบจะรันจำลองให้แทนเพื่อทดสอบหน้าตา)");
-            currentUserId = "uid_" + Math.floor(Math.random()*100000);
-            currentUserName = "ลูกค้า LINE (จำลอง)";
-            localStorage.setItem('hk_user_id', currentUserId);
-            db.collection("users").doc(currentUserId).set({ name: currentUserName, walletBalance: 0, points: 0, isBanned: false }, {merge:true}).then(() => {
-                document.getElementById('profile-name').innerText = currentUserName;
-                showToast('จำลองเข้าสู่ระบบสำเร็จ');
-                handleGuestUI();
-                fetchOrderHistory();
-                checkActiveOrder();
-            });
-            return;
-        }
-
         if(typeof liff !== 'undefined') {
             if(!liff.isLoggedIn()) {
                 liff.login();
@@ -623,7 +608,6 @@
     // ================= ระบบ Topping (แก้ไขให้รองรับ DB ทุกแบบ) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
-        // กวาดหาคีย์ท็อปปิ้งในฐานข้อมูลเดิม
         const addons = menu.addons || menu.toppings || menu.options; 
 
         if (addons && addons.length > 0) {
@@ -641,7 +625,6 @@
         
         let html = '';
         addons.forEach(addon => {
-            // รองรับรูปแบบข้อมูลท็อปปิ้งเดิม
             const addonName = addon.name || addon.title || addon.label;
             const addonPrice = addon.price || 0;
             html += `
@@ -876,7 +859,6 @@
         document.getElementById('track-status-text').innerText = d.status;
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
-        // ควบคุมปุ่มยกเลิกออเดอร์
         if(d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
             document.getElementById('btn-cancel-order').style.display = 'block';
         } else {
@@ -1025,7 +1007,6 @@
            }
            let orders = [];
            snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
-           // เรียงข้อมูลในฝั่งแอปเพื่อเลี่ยงปัญหา Index ของ Firebase
            orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
            let html = '';
