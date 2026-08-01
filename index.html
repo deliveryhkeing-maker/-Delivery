@@ -9,9 +9,15 @@
   
   <title>ห้วยเกิ้ง Delivery</title>
   
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
+  <!-- Map (Leaflet) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
@@ -74,7 +80,7 @@
 
     /* Modals & Inputs */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 999; backdrop-filter: blur(2px); }
-    .modal-content { background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 25px 20px 40px; max-height: 85vh; overflow-y: auto; }
+    .modal-content { background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 25px 20px 40px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; }
     
     .input-group { margin-bottom: 15px; }
     .input-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
@@ -92,6 +98,11 @@
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 24px; border-radius: 30px; font-size: 14px; z-index: 10000; display: none; white-space: nowrap; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .toast.show { display: block; animation: fadeUp 0.3s ease; }
     @keyframes fadeUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* Map & Animation Styles */
+    #tracking-map { width: 100%; height: 250px; border-radius: 12px; margin-top: 15px; display: none; z-index: 1; border: 1px solid #e2e8f0; }
+    .radar-pulse-anim { animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+    @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
   </style>
 </head>
 <body>
@@ -105,7 +116,6 @@
       </div>
     </div>
     
-    <!-- หมุด GPS -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -285,7 +295,7 @@
   </div>
 
   <!-- ================= ACTIVE ORDER TRACKER ================= -->
-  <div class="active-order-tracker" id="active-order-tracker" onclick="document.getElementById('order-detail-modal').style.display='flex'">
+  <div class="active-order-tracker" id="active-order-tracker" onclick="openTrackerModal()">
     <div style="width: 45px; height: 45px; background: var(--primary-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative;">
       <span class="material-icons" style="color: var(--primary-color);">delivery_dining</span>
       <div id="tracker-dot" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; border: 2px solid white;"></div>
@@ -354,7 +364,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal (ปุ่มยกเลิก และซ่อนแชทเมื่อไม่มีไรเดอร์) -->
+  <!-- Order Detail / Chat Modal (แผนที่, แอนิเมชัน, ยกเลิก, ซ่อนแชท) -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -369,6 +379,22 @@
              </div>
              <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
           </div>
+          
+          <!-- Animation ค้นหาไรเดอร์ -->
+          <div id="wait-animation" style="text-align: center; display: none; padding: 20px 0;">
+             <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 15px;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-light); border-radius: 50%;" class="radar-pulse-anim"></div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 50px; height: 50px; background: var(--primary-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);">
+                   <span class="material-icons" style="color: white; font-size: 28px;">motorcycle</span>
+                </div>
+             </div>
+             <h3 style="margin: 0 0 5px; color: var(--primary-color); font-size: 16px;">กำลังค้นหาไรเดอร์...</h3>
+             <p style="margin: 0; font-size: 12px; color: var(--text-light);">กรุณารอสักครู่ ระบบกำลังจับคู่ไรเดอร์ให้คุณ</p>
+          </div>
+
+          <!-- แผนที่ Tracking -->
+          <div id="tracking-map"></div>
+
           <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
              <div>
                 <p style="margin: 0 0 3px; font-size: 12px; color: var(--text-light);">ไรเดอร์ของคุณ</p>
@@ -382,7 +408,7 @@
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>
        </div>
        
-       <!-- ส่วนนี้จะถูกซ่อนไว้ถ้ายังไม่มีไรเดอร์รับงาน -->
+       <!-- ส่วนแชท -->
        <div id="chat-input-wrapper" style="padding: 15px; background: white; border-top: 1px solid #eee; display: none; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
           <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';">
           <button id="cus-chat-send" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" onclick="sendChatToRider()">
@@ -427,7 +453,13 @@
     let activeOrderId = null;
     let previousChatCount = 0;
     let currentToppingMenu = null; 
-    let cancelTimerInterval = null; // ตัวแปรสำหรับจัดการเวลาปุ่มยกเลิก
+    let cancelTimerInterval = null; 
+    
+    // Map Tracking
+    let trackingMap = null;
+    let riderMarker = null;
+    let userMarker = null;
+    let riderLocationListener = null;
 
     window.onload = async function() {
       if(!localStorage.getItem('hk_user_id')) localStorage.setItem('hk_user_id', currentUserId);
@@ -603,7 +635,6 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options; 
@@ -663,7 +694,6 @@
         showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
-    // ================= ระบบ Payment & Cart =================
     function updateCartTotal() {
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
       document.getElementById('cart-count').innerText = cartItems.length;
@@ -785,7 +815,9 @@
         const orderData = {
           userId: currentUserId, customerName: currentUserName, customerPhone: userProfileData.phone, customerAddress: userProfileData.address,
           merchantId: selectedRestaurant.id, restaurantName: selectedRestaurant.name,
-          items: cartItems.map(i => i.name), totalPrice: totalAmount,
+          items: cartItems.map(i => i.name), 
+          fullItems: cartItems, // บันทึกข้อมูลรูปอาหารลงไปในออเดอร์ด้วย
+          totalPrice: totalAmount,
           discount: appliedDiscount, promoCode: appliedPromoCodeStr,
           paymentMethod: method, slipImage: slipUrl,
           status: "ค้นหาไรเดอร์", createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -807,7 +839,15 @@
         });
     }
 
-    // ================= Tracker & Chat (อัปเกรดปุ่มยกเลิก 2 นาที & ซ่อนแชท) =================
+    // ฟังก์ชันเปิด Modal พร้อมโหลดแผนที่
+    function openTrackerModal() {
+        document.getElementById('order-detail-modal').style.display='flex';
+        if (trackingMap) {
+            setTimeout(() => { trackingMap.invalidateSize(); }, 300);
+        }
+    }
+
+    // ================= Tracker, Map & Chat =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -857,7 +897,6 @@
         document.getElementById('track-status-text').innerText = d.status;
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
-        // 1. จัดการปุ่มยกเลิก (จับเวลา 2 นาที)
         const btnCancel = document.getElementById('btn-cancel-order');
         clearInterval(cancelTimerInterval); 
         
@@ -865,19 +904,24 @@
             const checkTime = () => {
                 const orderTime = d.createdAt ? d.createdAt.toMillis() : Date.now();
                 const diff = Date.now() - orderTime;
-                if (diff >= 2 * 60 * 1000) { // หากเกิน 2 นาที (120,000 ms) ให้ปุ่มโผล่
+                if (diff >= 2 * 60 * 1000) { 
                     btnCancel.style.display = 'block';
                 } else {
                     btnCancel.style.display = 'none';
                 }
             };
             checkTime(); 
-            cancelTimerInterval = setInterval(checkTime, 10000); // ตรวจสอบทุกๆ 10 วินาที
+            cancelTimerInterval = setInterval(checkTime, 10000); 
+            
+            // แสดงแอนิเมชันตอนรอไรเดอร์
+            document.getElementById('wait-animation').style.display = 'block';
+            document.getElementById('tracking-map').style.display = 'none';
+            
         } else {
             btnCancel.style.display = 'none';
+            document.getElementById('wait-animation').style.display = 'none';
         }
         
-        // 2. จัดการหน้าต่างแชท (ซ่อนจนกว่าไรเดอร์จะรับ)
         const chatInputWrapper = document.getElementById('chat-input-wrapper');
         const chatContainer = document.getElementById('cus-chat-container');
 
@@ -885,23 +929,50 @@
             document.getElementById('track-rider-name').innerText = d.riderName;
             document.getElementById('track-rider-call').style.display = 'flex';
             
-            // เปิดให้พิมพ์แชทได้
             chatInputWrapper.style.display = 'flex';
-            
-            // ลบข้อความรอไรเดอร์ออก
             if (chatContainer.innerHTML.includes('พื้นที่แชทกับไรเดอร์')) {
                 chatContainer.innerHTML = '';
             }
+            
+            // --- ระบบแผนที่ (Real-time Tracking) ---
+            document.getElementById('tracking-map').style.display = 'block';
+            
+            if (!trackingMap) {
+                trackingMap = L.map('tracking-map').setView([userLat, userLng], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackingMap);
+                
+                const uIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--secondary-color); width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`, iconSize: [20, 20]});
+                userMarker = L.marker([userLat, userLng], {icon: uIcon}).addTo(trackingMap);
+                
+                const rIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--primary-color); width:32px; height:32px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><span class="material-icons" style="color:white; font-size:20px;">motorcycle</span></div>`, iconSize: [32, 32]});
+                riderMarker = L.marker([userLat, userLng], {icon: rIcon}).addTo(trackingMap);
+            }
+            
+            // ดึงตำแหน่งไรเดอร์แบบ Real-time
+            if(d.riderId && !riderLocationListener) {
+                riderLocationListener = db.collection('riders').doc(d.riderId).onSnapshot(rDoc => {
+                    if(rDoc.exists && rDoc.data().lat && trackingMap && riderMarker) {
+                        const rLat = rDoc.data().lat;
+                        const rLng = rDoc.data().lng;
+                        riderMarker.setLatLng([rLat, rLng]);
+                        
+                        const group = new L.featureGroup([userMarker, riderMarker]);
+                        trackingMap.fitBounds(group.getBounds(), {padding: [30, 30]});
+                    }
+                });
+            }
+            
         } else {
             document.getElementById('track-rider-name').innerText = 'กำลังค้นหา...';
             document.getElementById('track-rider-call').style.display = 'none';
+            document.getElementById('tracking-map').style.display = 'none';
             
-            // ปิดและซ่อนช่องแชท
             chatInputWrapper.style.display = 'none';
             chatContainer.innerHTML = '<p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>';
+            
+            if(riderLocationListener) { riderLocationListener(); riderLocationListener = null; }
         }
         
-        // ดึงข้อความแชทมาแสดง (ถ้ามีไรเดอร์รับแล้ว)
         if(d.chatMessages && d.riderName && !d.status.includes('ค้นหา')) {
            chatContainer.innerHTML = d.chatMessages.map(msg => {
                 const isMe = msg.sender === 'customer';
@@ -924,7 +995,8 @@
         if(!confirm("คุณต้องการยกเลิกออเดอร์นี้ใช่หรือไม่?")) return;
 
         try {
-            clearInterval(cancelTimerInterval); // เคลียร์เวลา
+            clearInterval(cancelTimerInterval); 
+            if(riderLocationListener) { riderLocationListener(); riderLocationListener = null; }
             
             const docRef = db.collection("orders").doc(activeOrderId);
             const docSnap = await docRef.get();
@@ -973,7 +1045,6 @@
         input.value = '';
     }
 
-    // --- Utils ---
     function showScreen(screenId) { 
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
       document.getElementById(screenId).classList.add('active'); 
@@ -1035,10 +1106,22 @@
            let html = '';
            orders.slice(0, 15).forEach(d => {
               const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
+              
+              // ดึงรูปอาหารมาโชว์ในประวัติ (ถ้ามี)
+              let itemsHtml = '';
+              if(d.fullItems && d.fullItems.length > 0) {
+                  itemsHtml = d.fullItems.map(itm => {
+                      let imgHtml = itm.image ? `<img src="${itm.image}" style="width:36px; height:36px; border-radius:8px; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:8px; background:var(--primary-light); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:16px; color:var(--primary-color);">restaurant</span></div>`;
+                      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">${imgHtml} <span style="font-size:13px; font-weight:500; color:var(--text-dark);">${itm.name}</span></div>`;
+                  }).join('');
+              } else {
+                  itemsHtml = `<div style="font-size:13px; color:var(--text-light); margin-bottom:5px;">${d.items ? d.items.join(', ') : ''}</div>`;
+              }
+
               html += `<div style="background:white; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #eee;">
-                 <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b>${d.restaurantName}</b><span style="font-size:12px; color:#999;">${date}</span></div>
-                 <div style="font-size:13px; color:var(--text-light); margin-bottom:5px;">${d.items.join(', ')}</div>
-                 <div style="display:flex; justify-content:space-between; align-items:center;">
+                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><b>${d.restaurantName}</b><span style="font-size:12px; color:#999;">${date}</span></div>
+                 ${itemsHtml}
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top:1px dashed #eee; padding-top:10px;">
                     <span style="color:var(--primary-color); font-weight:700;">฿${d.totalPrice}</span>
                     <span class="badge" style="background:#f1f5f9; color:#64748b; padding:4px 8px; font-size:11px; border-radius:12px;">${d.status}</span>
                  </div>
