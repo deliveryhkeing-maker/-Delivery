@@ -9,15 +9,12 @@
   
   <title>ห้วยเกิ้ง Delivery</title>
   
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
-  <!-- Map (Leaflet) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
@@ -56,7 +53,7 @@
     .res-img { width: 100%; height: 160px; object-fit: cover; background-color: #e2e8f0; }
     .res-info { padding: 15px; }
     .res-name { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
-    .res-meta { display: flex; align-items: center; gap: 15px; font-size: 13px; color: var(--text-light); }
+    .res-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-light); }
     
     /* Menu Item */
     .menu-item { display: flex; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; background: white; align-items: flex-start; gap: 15px; }
@@ -116,6 +113,7 @@
       </div>
     </div>
     
+    <!-- หมุด GPS ลูกค้าด้านบน -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -150,6 +148,9 @@
     <div style="background: white; padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
       <p style="margin: 0 0 5px; color: var(--text-light); font-size: 13px;" id="res-detail-cat">หมวดหมู่</p>
       <div style="display: flex; gap: 15px; font-size: 13px; font-weight: 500; color: var(--text-dark);">
+        <!-- คืนค่าดาวเรตติ้ง และ รายการสั่งซื้อกี่ครั้ง -->
+        <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--secondary-color);">star</span> <span id="res-detail-rating">0.0</span></span>
+        <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--primary-color);">receipt_long</span> ขายแล้ว <span id="res-detail-orders">0</span></span>
         <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--primary-color);">moped</span> ระยะทาง <span id="res-detail-dist">0</span> กม.</span>
       </div>
     </div>
@@ -316,7 +317,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal -->
+  <!-- Topping Modal (อัปเกรดสแกนหาตัวแปรครอบจักรวาล) -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -364,7 +365,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal (แผนที่, แอนิเมชัน, ยกเลิก, ซ่อนแชท) -->
+  <!-- Order Detail / Chat Modal -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -380,7 +381,6 @@
              <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
           </div>
           
-          <!-- Animation ค้นหาไรเดอร์ -->
           <div id="wait-animation" style="text-align: center; display: none; padding: 20px 0;">
              <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 15px;">
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-light); border-radius: 50%;" class="radar-pulse-anim"></div>
@@ -392,7 +392,6 @@
              <p style="margin: 0; font-size: 12px; color: var(--text-light);">กรุณารอสักครู่ ระบบกำลังจับคู่ไรเดอร์ให้คุณ</p>
           </div>
 
-          <!-- แผนที่ Tracking -->
           <div id="tracking-map"></div>
 
           <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -408,7 +407,6 @@
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>
        </div>
        
-       <!-- ส่วนแชท -->
        <div id="chat-input-wrapper" style="padding: 15px; background: white; border-top: 1px solid #eee; display: none; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
           <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';">
           <button id="cus-chat-send" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" onclick="sendChatToRider()">
@@ -593,12 +591,19 @@
         snapshot.forEach(doc => {
           const res = { id: doc.id, ...doc.data() };
           allRestaurants.push(res);
+          
+          // ดึงดาวเรตติ้ง และ จำนวนขาย (ถ้าไม่มีให้ตั้งค่าเริ่มต้น)
+          const rating = res.rating || res.score || '4.5';
+          const orderCount = res.orderCount || res.sold || res.reviews || '0';
+          
           html += `
             <div class="restaurant-card" onclick="openRestaurant('${res.id}')">
               <img src="${res.image || 'https://via.placeholder.com/400x200?text=Restaurant'}" class="res-img">
               <div class="res-info">
                 <div class="res-name">${res.storeName}</div>
-                <div class="res-meta"><span class="material-icons" style="font-size:14px; color:var(--secondary-color);">star</span> 4.8 (120+) &bull; ${res.category || 'อาหารทั่วไป'}</div>
+                <div class="res-meta">
+                   <span style="display:flex; align-items:center; gap:4px;"><span class="material-icons" style="font-size:14px; color:var(--secondary-color);">star</span> ${rating} (ขายแล้ว ${orderCount})</span> &bull; ${res.category || 'อาหารทั่วไป'}
+                </div>
               </div>
             </div>`;
         });
@@ -611,6 +616,10 @@
       document.getElementById('res-detail-name').innerText = selectedRestaurant.storeName;
       document.getElementById('res-detail-cat').innerText = selectedRestaurant.category || 'อาหารทั่วไป';
       document.getElementById('res-detail-dist').innerText = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
+      
+      // อัปเดตดาวเรตติ้งและยอดขายในหน้าร้านค้า
+      document.getElementById('res-detail-rating').innerText = selectedRestaurant.rating || selectedRestaurant.score || '4.5';
+      document.getElementById('res-detail-orders').innerText = selectedRestaurant.orderCount || selectedRestaurant.sold || selectedRestaurant.reviews || '0';
       
       const menuList = document.getElementById('menu-list');
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
@@ -635,11 +644,12 @@
       showScreen('menu-screen');
     }
 
+    // ================= ระบบ Topping (สแกนคีย์ขั้นสูงสุด) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
-        const addons = menu.addons || menu.toppings || menu.options; 
+        const addons = menu.addons || menu.toppings || menu.options || menu.extra; 
 
-        if (addons && addons.length > 0) {
+        if (addons && addons.length > 0 || typeof addons === 'object') {
             openToppingModal(menu, addons);
         } else {
             cartItems.push({ name: menu.name, price: menu.price, image: menu.image });
@@ -653,9 +663,28 @@
         document.getElementById('topping-menu-name').innerText = menu.name;
         
         let html = '';
-        addons.forEach(addon => {
-            const addonName = addon.name || addon.title || addon.label;
-            const addonPrice = addon.price || 0;
+        
+        // รองรับกรณีที่ฐานข้อมูลเป็นทั้งแบบ Array และ Object
+        let addonArray = [];
+        if(Array.isArray(addons)) {
+            addonArray = addons;
+        } else if(typeof addons === 'object' && addons !== null) {
+            addonArray = Object.keys(addons).map(k => ({ name: k, price: addons[k] }));
+        }
+
+        addonArray.forEach(addon => {
+            let addonName = 'ตัวเลือกเพิ่ม';
+            let addonPrice = 0;
+
+            if (typeof addon === 'string') {
+                addonName = addon;
+            } else if (typeof addon === 'object' && addon !== null) {
+                // กวาดหาคีย์ชื่อทุกรูปแบบที่เป็นไปได้
+                addonName = addon.name || addon.title || addon.label || addon.toppingName || addon.optionName || addon.choice || "ตัวเลือก";
+                // กวาดหาคีย์ราคาทุกรูปแบบที่เป็นไปได้
+                addonPrice = parseFloat(addon.price || addon.addPrice || addon.cost || 0);
+            }
+
             html += `
             <div class="topping-item">
                <label>
@@ -665,6 +694,7 @@
                <span style="font-size:14px; color:var(--text-light);">+฿${addonPrice}</span>
             </div>`;
         });
+        
         document.getElementById('topping-options-container').innerHTML = html;
         document.getElementById('topping-total-price').innerText = menu.price;
         document.getElementById('topping-modal').style.display = 'flex';
@@ -816,7 +846,7 @@
           userId: currentUserId, customerName: currentUserName, customerPhone: userProfileData.phone, customerAddress: userProfileData.address,
           merchantId: selectedRestaurant.id, restaurantName: selectedRestaurant.name,
           items: cartItems.map(i => i.name), 
-          fullItems: cartItems, // บันทึกข้อมูลรูปอาหารลงไปในออเดอร์ด้วย
+          fullItems: cartItems, // บันทึกข้อมูลรูปอาหารลงไปในออเดอร์
           totalPrice: totalAmount,
           discount: appliedDiscount, promoCode: appliedPromoCodeStr,
           paymentMethod: method, slipImage: slipUrl,
@@ -839,7 +869,6 @@
         });
     }
 
-    // ฟังก์ชันเปิด Modal พร้อมโหลดแผนที่
     function openTrackerModal() {
         document.getElementById('order-detail-modal').style.display='flex';
         if (trackingMap) {
@@ -913,7 +942,6 @@
             checkTime(); 
             cancelTimerInterval = setInterval(checkTime, 10000); 
             
-            // แสดงแอนิเมชันตอนรอไรเดอร์
             document.getElementById('wait-animation').style.display = 'block';
             document.getElementById('tracking-map').style.display = 'none';
             
@@ -934,7 +962,6 @@
                 chatContainer.innerHTML = '';
             }
             
-            // --- ระบบแผนที่ (Real-time Tracking) ---
             document.getElementById('tracking-map').style.display = 'block';
             
             if (!trackingMap) {
@@ -948,7 +975,6 @@
                 riderMarker = L.marker([userLat, userLng], {icon: rIcon}).addTo(trackingMap);
             }
             
-            // ดึงตำแหน่งไรเดอร์แบบ Real-time
             if(d.riderId && !riderLocationListener) {
                 riderLocationListener = db.collection('riders').doc(d.riderId).onSnapshot(rDoc => {
                     if(rDoc.exists && rDoc.data().lat && trackingMap && riderMarker) {
@@ -1107,7 +1133,6 @@
            orders.slice(0, 15).forEach(d => {
               const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
               
-              // ดึงรูปอาหารมาโชว์ในประวัติ (ถ้ามี)
               let itemsHtml = '';
               if(d.fullItems && d.fullItems.length > 0) {
                   itemsHtml = d.fullItems.map(itm => {
