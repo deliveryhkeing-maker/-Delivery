@@ -354,7 +354,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal (ปุ่มยกเลิกออเดอร์) -->
+  <!-- Order Detail / Chat Modal (ปุ่มยกเลิก และซ่อนแชทเมื่อไม่มีไรเดอร์) -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -382,9 +382,10 @@
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>
        </div>
        
-       <div style="padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
-          <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';" disabled>
-          <button id="cus-chat-send" style="background: #ccc; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" disabled onclick="sendChatToRider()">
+       <!-- ส่วนนี้จะถูกซ่อนไว้ถ้ายังไม่มีไรเดอร์รับงาน -->
+       <div id="chat-input-wrapper" style="padding: 15px; background: white; border-top: 1px solid #eee; display: none; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
+          <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';">
+          <button id="cus-chat-send" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" onclick="sendChatToRider()">
              <span class="material-icons">send</span>
           </button>
        </div>
@@ -396,10 +397,7 @@
   <!-- ================= SCRIPTS ================= -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // ตั้งค่า URL สำหรับการยิงแจ้งเตือนผ่าน Google Apps Script
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
-    
-    // ตั้งค่า LIFF ID สำหรับใช้งานเข้าสู่ระบบ LINE จริงๆ
     const LIFF_ID = "2010799042-aNBObgM9"; 
 
     const firebaseConfig = {
@@ -429,6 +427,7 @@
     let activeOrderId = null;
     let previousChatCount = 0;
     let currentToppingMenu = null; 
+    let cancelTimerInterval = null; // ตัวแปรสำหรับจัดการเวลาปุ่มยกเลิก
 
     window.onload = async function() {
       if(!localStorage.getItem('hk_user_id')) localStorage.setItem('hk_user_id', currentUserId);
@@ -585,7 +584,6 @@
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
           menuList.innerHTML = '<p style="text-align:center; padding:20px;">ยังไม่มีเมนู</p>';
       } else {
-          // ดึงรายละเอียดอาหาร (description หรือ detail) คืนมา
           menuList.innerHTML = selectedRestaurant.menus.map((m, i) => {
             const menuDesc = m.description || m.detail || '';
             return `
@@ -605,7 +603,7 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping (แก้ไขให้รองรับ DB ทุกแบบ) =================
+    // ================= ระบบ Topping =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options; 
@@ -809,7 +807,7 @@
         });
     }
 
-    // ================= Tracker & Chat (รวมปุ่มยกเลิกออเดอร์) =================
+    // ================= Tracker & Chat (อัปเกรดปุ่มยกเลิก 2 นาที & ซ่อนแชท) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -859,33 +857,57 @@
         document.getElementById('track-status-text').innerText = d.status;
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
-        if(d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
-            document.getElementById('btn-cancel-order').style.display = 'block';
+        // 1. จัดการปุ่มยกเลิก (จับเวลา 2 นาที)
+        const btnCancel = document.getElementById('btn-cancel-order');
+        clearInterval(cancelTimerInterval); 
+        
+        if (d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
+            const checkTime = () => {
+                const orderTime = d.createdAt ? d.createdAt.toMillis() : Date.now();
+                const diff = Date.now() - orderTime;
+                if (diff >= 2 * 60 * 1000) { // หากเกิน 2 นาที (120,000 ms) ให้ปุ่มโผล่
+                    btnCancel.style.display = 'block';
+                } else {
+                    btnCancel.style.display = 'none';
+                }
+            };
+            checkTime(); 
+            cancelTimerInterval = setInterval(checkTime, 10000); // ตรวจสอบทุกๆ 10 วินาที
         } else {
-            document.getElementById('btn-cancel-order').style.display = 'none';
+            btnCancel.style.display = 'none';
         }
         
+        // 2. จัดการหน้าต่างแชท (ซ่อนจนกว่าไรเดอร์จะรับ)
+        const chatInputWrapper = document.getElementById('chat-input-wrapper');
+        const chatContainer = document.getElementById('cus-chat-container');
+
         if(d.riderName && !d.status.includes('ค้นหา')) {
             document.getElementById('track-rider-name').innerText = d.riderName;
             document.getElementById('track-rider-call').style.display = 'flex';
-            document.getElementById('cus-chat-input').disabled = false;
-            document.getElementById('cus-chat-send').disabled = false;
-            document.getElementById('cus-chat-send').style.background = 'var(--primary-color)';
+            
+            // เปิดให้พิมพ์แชทได้
+            chatInputWrapper.style.display = 'flex';
+            
+            // ลบข้อความรอไรเดอร์ออก
+            if (chatContainer.innerHTML.includes('พื้นที่แชทกับไรเดอร์')) {
+                chatContainer.innerHTML = '';
+            }
         } else {
             document.getElementById('track-rider-name').innerText = 'กำลังค้นหา...';
             document.getElementById('track-rider-call').style.display = 'none';
-            document.getElementById('cus-chat-input').disabled = true;
-            document.getElementById('cus-chat-send').disabled = true;
-            document.getElementById('cus-chat-send').style.background = '#ccc';
+            
+            // ปิดและซ่อนช่องแชท
+            chatInputWrapper.style.display = 'none';
+            chatContainer.innerHTML = '<p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>';
         }
         
-        if(d.chatMessages) {
-           const container = document.getElementById('cus-chat-container');
-           container.innerHTML = d.chatMessages.map(msg => {
+        // ดึงข้อความแชทมาแสดง (ถ้ามีไรเดอร์รับแล้ว)
+        if(d.chatMessages && d.riderName && !d.status.includes('ค้นหา')) {
+           chatContainer.innerHTML = d.chatMessages.map(msg => {
                 const isMe = msg.sender === 'customer';
                 return `<div style="max-width:80%; padding:10px 15px; border-radius:18px; font-size:13px; line-height:1.4; ${isMe ? 'background:var(--primary-color); color:white; align-self:flex-end; border-bottom-right-radius:4px;' : 'background:white; border:1px solid #eee; align-self:flex-start; border-bottom-left-radius:4px;'}">${msg.text}<div style="font-size:9px; opacity:0.8; text-align:right; margin-top:2px;">${msg.time}</div></div>`;
            }).join('');
-           container.scrollTop = container.scrollHeight;
+           chatContainer.scrollTop = chatContainer.scrollHeight;
            
            if(d.chatMessages.length > previousChatCount) {
                const lastMsg = d.chatMessages[d.chatMessages.length-1];
@@ -902,6 +924,8 @@
         if(!confirm("คุณต้องการยกเลิกออเดอร์นี้ใช่หรือไม่?")) return;
 
         try {
+            clearInterval(cancelTimerInterval); // เคลียร์เวลา
+            
             const docRef = db.collection("orders").doc(activeOrderId);
             const docSnap = await docRef.get();
             if(!docSnap.exists) return;
@@ -996,7 +1020,6 @@
         .then(() => { showToast("ส่งเรื่องสำเร็จ แอดมินจะรีบตรวจสอบครับ!"); document.getElementById('ticket-msg').value = ''; document.getElementById('help-modal').style.display = 'none'; });
     }
 
-    // Bypass Firebase Index Error for Order History
     function fetchOrderHistory() {
        if (currentUserId.startsWith('guest')) return;
        db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
