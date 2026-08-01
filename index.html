@@ -32,7 +32,7 @@
     * { box-sizing: border-box; font-family: 'Prompt', sans-serif; margin: 0; padding: 0; }
     body { background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 80px; animation: fadeIn 0.3s ease; }
+    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.3s ease; }
     .screen.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -64,16 +64,66 @@
     .menu-price { color: var(--primary-color); font-weight: 700; font-size: 16px; }
     .add-btn { background: var(--primary-light); color: var(--primary-color); border: none; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; align-self: flex-end; }
 
-    /* Floating Cart & Navigation */
-    .floating-cart { position: fixed; bottom: 80px; left: 20px; right: 20px; background: var(--primary-color); color: white; padding: 15px 20px; border-radius: 16px; display: none; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); z-index: 100; cursor: pointer; transition: transform 0.2s; }
+    /* UI ตะกร้าสินค้าแบบลอย (Floating Cart FAB) */
+    .fab-cart {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      display: none; /* ซ่อนไว้จนกว่าจะมีสินค้า */
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+      z-index: 100;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .fab-cart:active { transform: scale(0.9); }
+    .fab-cart .material-icons { font-size: 28px; }
+    .fab-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid white;
+    }
     
+    /* Bottom Navigation */
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); z-index: 99; border-radius: 24px 24px 0 0; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-light); font-size: 11px; font-weight: 500; cursor: pointer; transition: 0.3s; }
     .nav-item.active { color: var(--primary-color); }
     .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
 
     /* Active Order Tracker */
-    .active-order-tracker { position: fixed; bottom: 80px; left: 20px; right: 20px; background: white; padding: 15px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; align-items: center; gap: 15px; z-index: 98; border: 2px solid var(--primary-color); cursor: pointer; }
+    .active-order-tracker { 
+      position: fixed; 
+      bottom: 90px; 
+      left: 20px; 
+      width: calc(100% - 100px); /* เว้นที่ให้ปุ่มตะกร้าลอยด้านขวา */
+      background: white; 
+      padding: 15px; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+      display: none; 
+      align-items: center; 
+      gap: 12px; 
+      z-index: 98; 
+      border: 2px solid var(--primary-color); 
+      cursor: pointer; 
+    }
 
     /* Modals & Inputs */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 999; backdrop-filter: blur(2px); }
@@ -113,7 +163,6 @@
       </div>
     </div>
     
-    <!-- หมุด GPS ลูกค้าด้านบน -->
     <div class="location-bar">
       <div class="loc-icon"><span class="material-icons">location_on</span></div>
       <div style="flex: 1; overflow: hidden;">
@@ -148,26 +197,17 @@
     <div style="background: white; padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
       <p style="margin: 0 0 5px; color: var(--text-light); font-size: 13px;" id="res-detail-cat">หมวดหมู่</p>
       <div style="display: flex; gap: 15px; font-size: 13px; font-weight: 500; color: var(--text-dark);">
-        <!-- คืนค่าดาวเรตติ้ง และ รายการสั่งซื้อกี่ครั้ง -->
         <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--secondary-color);">star</span> <span id="res-detail-rating">0.0</span></span>
         <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--primary-color);">receipt_long</span> ขายแล้ว <span id="res-detail-orders">0</span></span>
         <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--primary-color);">moped</span> ระยะทาง <span id="res-detail-dist">0</span> กม.</span>
       </div>
     </div>
     <div id="menu-list"></div>
-    
-    <div class="floating-cart" id="floating-cart" onclick="goToPayment()">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="material-icons">shopping_cart</span>
-        <span style="font-weight: 600;"><span id="cart-count">0</span> รายการ</span>
-      </div>
-      <div style="font-weight: 700; font-size: 18px;">฿<span id="cart-total">0</span></div>
-    </div>
   </div>
 
   <!-- ================= 3. PAYMENT SCREEN ================= -->
   <div id="payment-screen" class="screen">
-    <div class="header" style="border-radius: 0; margin-bottom: 0;"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('menu-screen')">arrow_back</span><h2>ยืนยันคำสั่งซื้อ</h2><div style="width:24px;"></div></div>
+    <div class="header" style="border-radius: 0; margin-bottom: 0;"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('home-screen')">arrow_back</span><h2>ยืนยันคำสั่งซื้อ</h2><div style="width:24px;"></div></div>
     
     <div style="background: white; margin: 15px 20px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
       <h3 style="margin: 0 0 15px; font-size: 16px; display: flex; align-items: center; gap: 8px;"><span class="material-icons" style="color:var(--primary-color);">receipt_long</span> รายการอาหารที่สั่ง</h3>
@@ -295,18 +335,22 @@
     <div id="history-list" style="padding: 20px;"><p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p></div>
   </div>
 
+  <!-- ================= FLOATING CART (ตระกร้าแบบลอย) ================= -->
+  <div class="fab-cart" id="fab-cart" onclick="goToPayment()">
+    <span class="material-icons">shopping_cart</span>
+    <div class="fab-badge" id="fab-cart-count">0</div>
+  </div>
+
   <!-- ================= ACTIVE ORDER TRACKER ================= -->
   <div class="active-order-tracker" id="active-order-tracker" onclick="openTrackerModal()">
     <div style="width: 45px; height: 45px; background: var(--primary-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative;">
       <span class="material-icons" style="color: var(--primary-color);">delivery_dining</span>
       <div id="tracker-dot" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; border: 2px solid white;"></div>
     </div>
-    <div style="flex: 1;">
+    <div style="flex: 1; overflow: hidden;">
       <h4 style="margin: 0 0 3px; font-size: 15px; color: var(--primary-color);" id="tracker-status">สถานะ</h4>
-      <p style="margin: 0; font-size: 12px; color: var(--text-light);" id="tracker-res">ชื่อร้าน</p>
-      <p style="margin: 0; font-size: 11px; font-weight: 600;" id="tracker-rider">กำลังค้นหาไรเดอร์...</p>
+      <p style="margin: 0; font-size: 12px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="tracker-res">ชื่อร้าน</p>
     </div>
-    <span class="material-icons" style="color: var(--text-light);">chevron_right</span>
   </div>
 
   <!-- ================= BOTTOM NAVIGATION ================= -->
@@ -317,7 +361,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal (อัปเกรดสแกนหาตัวแปรครอบจักรวาล) -->
+  <!-- Topping Modal (สแกนหาตัวแปรอัตโนมัติ) -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -365,7 +409,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal -->
+  <!-- Order Detail / Chat Modal (แผนที่, แอนิเมชัน, ยกเลิก, ซ่อนแชท) -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -378,9 +422,11 @@
                 <h2 style="margin: 0 0 5px; color: var(--primary-color);" id="track-status-text">สถานะ...</h2>
                 <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
              </div>
-             <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
+             <!-- ปุ่มยกเลิกออเดอร์ แสดงทันทีตอนค้นหาไรเดอร์ -->
+             <button id="btn-cancel-order" style="background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: none;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
           </div>
           
+          <!-- Animation ค้นหาไรเดอร์ -->
           <div id="wait-animation" style="text-align: center; display: none; padding: 20px 0;">
              <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 15px;">
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-light); border-radius: 50%;" class="radar-pulse-anim"></div>
@@ -392,6 +438,7 @@
              <p style="margin: 0; font-size: 12px; color: var(--text-light);">กรุณารอสักครู่ ระบบกำลังจับคู่ไรเดอร์ให้คุณ</p>
           </div>
 
+          <!-- แผนที่ Tracking -->
           <div id="tracking-map"></div>
 
           <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -407,6 +454,7 @@
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>
        </div>
        
+       <!-- ส่วนแชท -->
        <div id="chat-input-wrapper" style="padding: 15px; background: white; border-top: 1px solid #eee; display: none; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
           <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';">
           <button id="cus-chat-send" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" onclick="sendChatToRider()">
@@ -451,7 +499,6 @@
     let activeOrderId = null;
     let previousChatCount = 0;
     let currentToppingMenu = null; 
-    let cancelTimerInterval = null; 
     
     // Map Tracking
     let trackingMap = null;
@@ -592,7 +639,6 @@
           const res = { id: doc.id, ...doc.data() };
           allRestaurants.push(res);
           
-          // ดึงดาวเรตติ้ง และ จำนวนขาย (ถ้าไม่มีให้ตั้งค่าเริ่มต้น)
           const rating = res.rating || res.score || '4.5';
           const orderCount = res.orderCount || res.sold || res.reviews || '0';
           
@@ -617,7 +663,6 @@
       document.getElementById('res-detail-cat').innerText = selectedRestaurant.category || 'อาหารทั่วไป';
       document.getElementById('res-detail-dist').innerText = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
       
-      // อัปเดตดาวเรตติ้งและยอดขายในหน้าร้านค้า
       document.getElementById('res-detail-rating').innerText = selectedRestaurant.rating || selectedRestaurant.score || '4.5';
       document.getElementById('res-detail-orders').innerText = selectedRestaurant.orderCount || selectedRestaurant.sold || selectedRestaurant.reviews || '0';
       
@@ -649,7 +694,7 @@
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options || menu.extra; 
 
-        if (addons && addons.length > 0 || typeof addons === 'object') {
+        if (addons && (addons.length > 0 || Object.keys(addons).length > 0)) {
             openToppingModal(menu, addons);
         } else {
             cartItems.push({ name: menu.name, price: menu.price, image: menu.image });
@@ -663,9 +708,8 @@
         document.getElementById('topping-menu-name').innerText = menu.name;
         
         let html = '';
-        
-        // รองรับกรณีที่ฐานข้อมูลเป็นทั้งแบบ Array และ Object
         let addonArray = [];
+        
         if(Array.isArray(addons)) {
             addonArray = addons;
         } else if(typeof addons === 'object' && addons !== null) {
@@ -679,9 +723,7 @@
             if (typeof addon === 'string') {
                 addonName = addon;
             } else if (typeof addon === 'object' && addon !== null) {
-                // กวาดหาคีย์ชื่อทุกรูปแบบที่เป็นไปได้
                 addonName = addon.name || addon.title || addon.label || addon.toppingName || addon.optionName || addon.choice || "ตัวเลือก";
-                // กวาดหาคีย์ราคาทุกรูปแบบที่เป็นไปได้
                 addonPrice = parseFloat(addon.price || addon.addPrice || addon.cost || 0);
             }
 
@@ -724,11 +766,11 @@
         showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
+    // ================= ระบบ Payment & Cart (อัปเดตไอคอนลอย) =================
     function updateCartTotal() {
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
-      document.getElementById('cart-count').innerText = cartItems.length;
-      document.getElementById('cart-total').innerText = total;
-      document.getElementById('floating-cart').style.display = cartItems.length > 0 ? 'flex' : 'none';
+      document.getElementById('fab-cart-count').innerText = cartItems.length;
+      document.getElementById('fab-cart').style.display = cartItems.length > 0 ? 'flex' : 'none';
     }
 
     function goToPayment() {
@@ -846,7 +888,7 @@
           userId: currentUserId, customerName: currentUserName, customerPhone: userProfileData.phone, customerAddress: userProfileData.address,
           merchantId: selectedRestaurant.id, restaurantName: selectedRestaurant.name,
           items: cartItems.map(i => i.name), 
-          fullItems: cartItems, // บันทึกข้อมูลรูปอาหารลงไปในออเดอร์
+          fullItems: cartItems, 
           totalPrice: totalAmount,
           discount: appliedDiscount, promoCode: appliedPromoCodeStr,
           paymentMethod: method, slipImage: slipUrl,
@@ -876,7 +918,7 @@
         }
     }
 
-    // ================= Tracker, Map & Chat =================
+    // ================= Tracker, Map, Chat & ปุ่มยกเลิก =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -927,24 +969,12 @@
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
         const btnCancel = document.getElementById('btn-cancel-order');
-        clearInterval(cancelTimerInterval); 
         
+        // ให้ปุ่มยกเลิกโชว์ทันทีเมื่อยังหาไรเดอร์
         if (d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
-            const checkTime = () => {
-                const orderTime = d.createdAt ? d.createdAt.toMillis() : Date.now();
-                const diff = Date.now() - orderTime;
-                if (diff >= 2 * 60 * 1000) { 
-                    btnCancel.style.display = 'block';
-                } else {
-                    btnCancel.style.display = 'none';
-                }
-            };
-            checkTime(); 
-            cancelTimerInterval = setInterval(checkTime, 10000); 
-            
+            btnCancel.style.display = 'block';
             document.getElementById('wait-animation').style.display = 'block';
             document.getElementById('tracking-map').style.display = 'none';
-            
         } else {
             btnCancel.style.display = 'none';
             document.getElementById('wait-animation').style.display = 'none';
@@ -1021,7 +1051,6 @@
         if(!confirm("คุณต้องการยกเลิกออเดอร์นี้ใช่หรือไม่?")) return;
 
         try {
-            clearInterval(cancelTimerInterval); 
             if(riderLocationListener) { riderLocationListener(); riderLocationListener = null; }
             
             const docRef = db.collection("orders").doc(activeOrderId);
@@ -1157,14 +1186,23 @@
     }
 
     function flyToCartAnimation(e) {
-      const cart = document.getElementById('floating-cart');
+      const fabCart = document.getElementById('fab-cart');
       const dot = document.createElement('div');
       dot.style.cssText = `position:fixed; width:20px; height:20px; background:var(--primary-color); border-radius:50%; z-index:9999; top:${e.clientY}px; left:${e.clientX}px; transition:all 0.5s ease;`;
       document.body.appendChild(dot);
       
-      const cartRect = cart.getBoundingClientRect();
-      setTimeout(() => { dot.style.top = (cartRect.top + 20) + 'px'; dot.style.left = (cartRect.left + cartRect.width/2) + 'px'; dot.style.transform = 'scale(0.1)'; }, 10);
-      setTimeout(() => { dot.remove(); cart.style.transform = 'scale(1.05)'; setTimeout(() => cart.style.transform = 'scale(1)', 150); }, 500);
+      const cartRect = fabCart.getBoundingClientRect();
+      setTimeout(() => { 
+          dot.style.top = (cartRect.top + 20) + 'px'; 
+          dot.style.left = (cartRect.left + 20) + 'px'; 
+          dot.style.transform = 'scale(0.1)'; 
+      }, 10);
+      
+      setTimeout(() => { 
+          dot.remove(); 
+          fabCart.style.transform = 'scale(1.2)'; 
+          setTimeout(() => fabCart.style.transform = 'scale(1)', 150); 
+      }, 500);
     }
   </script>
 </body>
