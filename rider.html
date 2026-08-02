@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- Anti-Cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -38,26 +37,21 @@
     .screen.active { display: flex; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-    /* ================= LOGIN ================= */
     #login-screen { background: linear-gradient(135deg, #0f172a, #1e293b); justify-content: center; align-items: center; z-index: 9999; }
     .login-box { background: var(--white); padding: 40px 30px; border-radius: 24px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
     .login-box input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 20px; font-family: 'Prompt'; font-size: 16px; outline: none; text-align: center; background: #f8fafc; }
     .login-box input:focus { border-color: var(--rider-primary); background: white; }
 
-    /* ================= UI COMPONENTS ================= */
     .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 10; padding-top: calc(15px + env(safe-area-inset-top)); }
     .btn-main { background: var(--rider-primary); color: white; border: none; padding: 15px; border-radius: 16px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 15px rgba(16, 185, 129, 0.3); transition: 0.3s; }
     .btn-main:active { transform: translateY(2px); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); }
     
-    /* ================= MAP & RADAR ================= */
     #rider-map { flex-grow: 1; width: 100%; z-index: 1; }
     .radar-pulse { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; z-index: 2; pointer-events: none; animation: pulse 2s infinite; display: none; }
     @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
 
-    /* ================= PANELS ================= */
     .glass-panel { position: absolute; bottom: 20px; left: 20px; right: 20px; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.8); z-index: 1000; }
     
-    /* ================= BOTTOM NAV ================= */
     .bottom-nav { background: var(--white); display: flex; justify-content: space-around; padding: 15px 0 calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); z-index: 10; border-radius: 30px 30px 0 0; position: relative; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #94a3b8; font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.3s; position: relative; }
     .nav-item.active { color: var(--rider-primary); }
@@ -65,7 +59,6 @@
     .nav-item.active .material-icons { transform: translateY(-3px); }
     .nav-badge { position: absolute; top: -5px; right: 10%; background: var(--danger); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; display: none; }
 
-    /* ================= CRM & WALLET ================= */
     .wallet-card-rider { background: linear-gradient(135deg, #10b981, #047857); border-radius: 24px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3); }
     .crm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .crm-box { background: var(--white); border-radius: 16px; padding: 15px 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
@@ -73,13 +66,11 @@
     .crm-value { font-size: 18px; font-weight: 700; color: var(--rider-dark); }
     .tx-item { background: var(--white); border-radius: 16px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
 
-    /* ================= JOB ALERT OVERLAY ================= */
     .job-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
     .job-ring { width: 100px; height: 100px; background: var(--rider-primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; animation: ring 1s infinite alternate; margin-bottom: 30px; box-shadow: 0 0 30px var(--rider-primary); }
     .job-ring .material-icons { font-size: 50px; color: white; }
     @keyframes ring { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 
-    /* ================= MODALS & TOAST ================= */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
     .modal-content { background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 350px; }
     
@@ -146,9 +137,9 @@
            <p style="margin:0; font-size:12px; color:var(--text-light);">เปิดแอปทิ้งไว้ ระบบจะแจ้งเตือนเมื่อมีงานเข้า</p>
         </div>
 
-        <!-- แผงควบคุมงานที่กำลังทำ (Active Job) -->
+        <!-- แผงควบคุมงานที่กำลังทำ (Active Job) แสดงภาพสินค้าให้ครบ -->
         <div id="active-order-panel" class="glass-panel" style="display:none;">
-           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
              <div>
                 <span class="badge" style="background:var(--primary-light); color:var(--rider-dark); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700; margin-bottom:8px; display:inline-block;">งานปัจจุบัน</span>
                 <h3 style="margin:0 0 5px; font-size:18px; font-weight:700;" id="active-res-name">ชื่อร้าน</h3>
@@ -159,6 +150,11 @@
                 <p style="margin:0; font-size:11px; font-weight:600; color:var(--text-light);" id="active-pay-method">(เก็บเงินสด)</p>
              </div>
            </div>
+           
+           <div id="active-items-list" style="background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:15px; max-height:120px; overflow-y:auto;">
+               <!-- รายการอาหารและรูปจะถูกดึงมาโชว์ที่นี่ -->
+           </div>
+
            <div style="display:flex; gap:12px;">
               <button class="btn-main" id="job-action-btn" onclick="updateOrderStatus()">ไปรับอาหาร</button>
               <button style="background:white; border:none; border-radius:16px; width:55px; display:flex; justify-content:center; align-items:center; position:relative; box-shadow:0 4px 10px rgba(0,0,0,0.05);" onclick="openChatModal()">
@@ -385,7 +381,6 @@
           
           document.getElementById('rider-wallet-balance').innerText = (riderData.walletBalance || 0).toFixed(2);
           
-          // จัดการ UI เปิด/ปิดรับงาน
           const toggle = document.getElementById('online-toggle');
           toggle.checked = riderData.isOnline || false;
           document.getElementById('online-status-text').innerText = riderData.isOnline ? "ออนไลน์" : "ออฟไลน์";
@@ -397,7 +392,6 @@
 
           loadRiderTransactions();
           
-          // ถ้าระบบอัปเดตว่าออนไลน์ ให้เริ่มฟัง Job Pool
           if(riderData.isOnline && !activeOrderId) listenToJobPool();
           else if(!riderData.isOnline && jobPoolListener) { jobPoolListener(); jobPoolListener = null; hideNewJobPopup(); }
         }
@@ -416,17 +410,27 @@
        db.collection("riders").doc(currentRiderId).update({ plate: plate }).then(() => showToast("บันทึกข้อมูลสำเร็จ"));
     }
 
-    // --- 3. JOB POOL & RADAR (กระจายงาน) ---
+    // --- 3. JOB POOL & RADAR (แก้ให้ไรเดอร์เห็นงานเสมอ ไม่ว่าร้านจะกดรับหรือไม่) ---
     function listenToJobPool() {
         if(jobPoolListener) jobPoolListener();
-        jobPoolListener = db.collection("orders").where("status", "==", "ค้นหาไรเดอร์").onSnapshot(snap => {
-            if(!snap.empty && riderData.isOnline && !activeOrderId) {
-                const job = snap.docs[0];
-                showNewJobPopup(job.id, job.data());
-            } else {
-                hideNewJobPopup();
-            }
-        });
+        
+        // ไรเดอร์จะเห็นงานที่ยังไม่มีไรเดอร์รับ ไม่ว่าร้านจะกด "กำลังเตรียมอาหาร" ไปแล้วหรือไม่ก็ตาม
+        jobPoolListener = db.collection("orders")
+            .where("status", "in", ["ค้นหาไรเดอร์", "รอรับออเดอร์", "กำลังเตรียมอาหาร", "รอไรเดอร์มารับอาหาร"])
+            .onSnapshot(snap => {
+                let foundJob = null;
+                snap.forEach(doc => {
+                    if(!doc.data().riderId) { 
+                        foundJob = {id: doc.id, ...doc.data()};
+                    }
+                });
+                
+                if(foundJob && riderData.isOnline && !activeOrderId) {
+                    showNewJobPopup(foundJob.id, foundJob);
+                } else {
+                    hideNewJobPopup();
+                }
+            });
     }
 
     function showNewJobPopup(jobId, jobData) {
@@ -457,7 +461,10 @@
             await db.runTransaction(async (t) => {
                 const docRef = db.collection("orders").doc(incomingJobId);
                 const doc = await t.get(docRef);
-                if(doc.data().status !== "ค้นหาไรเดอร์") throw "งานนี้ถูกรับไปแล้ว หรือถูกยกเลิก";
+                const d = doc.data();
+                
+                // ป้องกันไรเดอร์ชนกันรับงาน
+                if(d.riderId) throw "มีไรเดอร์คนอื่นรับงานนี้ไปแล้ว";
                 
                 t.update(docRef, { riderId: currentRiderId, riderName: riderData.name, status: "ไรเดอร์กำลังไปรับอาหาร" });
             });
@@ -472,7 +479,7 @@
         }
     }
 
-    // --- 4. ACTIVE JOB HANDLING (Bypass Composite Index) ---
+    // --- 4. ACTIVE JOB HANDLING ---
     function checkActiveJob() {
       if(activeJobListener) activeJobListener();
       
@@ -481,7 +488,7 @@
         
         snapshot.forEach(doc => {
             const st = doc.data().status;
-            if (st === "ไรเดอร์กำลังไปรับอาหาร" || st === "กำลังเตรียมอาหาร" || st === "ไรเดอร์กำลังไปส่งอาหาร") {
+            if (st === "ไรเดอร์กำลังไปรับอาหาร" || st === "กำลังเตรียมอาหาร" || st === "รอไรเดอร์มารับอาหาร" || st === "ไรเดอร์กำลังไปส่งอาหาร") {
                 activeOrderId = doc.id;
                 activeOrderData = doc.data();
                 currentOrderStatus = st;
@@ -500,6 +507,17 @@
             document.getElementById('active-total').innerText = activeOrderData.totalPrice;
             document.getElementById('active-pay-method').innerText = (activeOrderData.paymentMethod === 'transfer' || activeOrderData.paymentMethod === 'wallet') ? '(ชำระเงินแล้ว)' : '(เก็บเงินสด)';
             document.getElementById('call-cus-btn').href = `tel:${activeOrderData.customerPhone || ''}`;
+
+            // นำรายการอาหารแบบ fullItems มาโชว์ให้ไรเดอร์เห็นรูปด้วย
+            const listContainer = document.getElementById('active-items-list');
+            if(activeOrderData.fullItems && activeOrderData.fullItems.length > 0) {
+                listContainer.innerHTML = activeOrderData.fullItems.map(itm => {
+                    let imgHtml = itm.image ? `<img src="${itm.image}" style="width:30px; height:30px; border-radius:6px; object-fit:cover;">` : '';
+                    return `<div style="display:flex; gap:10px; align-items:center; margin-bottom:5px;">${imgHtml} <span>${itm.name}</span></div>`;
+                }).join('');
+            } else {
+                listContainer.innerHTML = activeOrderData.items ? activeOrderData.items.map(i => `<div>- ${i}</div>`).join('') : 'ไม่มีรายละเอียด';
+            }
 
             updateButtonUI();
             handleChatUpdates(activeOrderData.chatMessages);
@@ -521,7 +539,7 @@
 
     function updateButtonUI() {
         const btn = document.getElementById('job-action-btn');
-        if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร" || currentOrderStatus === "กำลังเตรียมอาหาร") { 
+        if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร" || currentOrderStatus === "กำลังเตรียมอาหาร" || currentOrderStatus === "รอไรเดอร์มารับอาหาร") { 
             btn.innerText = "รับอาหารแล้ว / ไปส่ง"; 
             btn.style.background = "var(--warning)"; 
         }
@@ -533,8 +551,12 @@
 
     function updateOrderStatus() {
       let nextStatus = "";
-      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร" || currentOrderStatus === "กำลังเตรียมอาหาร") nextStatus = "ไรเดอร์กำลังไปส่งอาหาร";
-      else if(currentOrderStatus === "ไรเดอร์กำลังไปส่งอาหาร") nextStatus = "จัดส่งสำเร็จ";
+      if(currentOrderStatus === "ไรเดอร์กำลังไปรับอาหาร" || currentOrderStatus === "กำลังเตรียมอาหาร" || currentOrderStatus === "รอไรเดอร์มารับอาหาร") {
+          nextStatus = "ไรเดอร์กำลังไปส่งอาหาร";
+      }
+      else if(currentOrderStatus === "ไรเดอร์กำลังไปส่งอาหาร") {
+          nextStatus = "จัดส่งสำเร็จ";
+      }
 
       if(nextStatus) {
          db.collection("orders").doc(activeOrderId).update({ status: nextStatus }).then(() => {
