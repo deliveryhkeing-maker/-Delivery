@@ -150,6 +150,11 @@
     #tracking-map { width: 100%; height: 250px; border-radius: 12px; margin-top: 15px; display: none; z-index: 1; border: 1px solid #e2e8f0; }
     .radar-pulse-anim { animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
     @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+    @keyframes pulseTracker {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
   </style>
 </head>
 <body>
@@ -207,7 +212,7 @@
 
   <!-- ================= 3. PAYMENT SCREEN ================= -->
   <div id="payment-screen" class="screen">
-    <div class="header" style="border-radius: 0; margin-bottom: 0;"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('menu-screen')">arrow_back</span><h2>ยืนยันคำสั่งซื้อ</h2><div style="width:24px;"></div></div>
+    <div class="header" style="border-radius: 0; margin-bottom: 0;"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('home-screen')">arrow_back</span><h2>ยืนยันคำสั่งซื้อ</h2><div style="width:24px;"></div></div>
     
     <div style="background: white; margin: 15px 20px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
       <h3 style="margin: 0 0 15px; font-size: 16px; display: flex; align-items: center; gap: 8px;"><span class="material-icons" style="color:var(--primary-color);">receipt_long</span> รายการอาหารที่สั่ง</h3>
@@ -361,7 +366,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal (สแกนหาตัวแปรครอบจักรวาล ป้องกัน undefined) -->
+  <!-- Topping Modal -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -422,7 +427,7 @@
                 <h2 style="margin: 0 0 5px; color: var(--primary-color);" id="track-status-text">สถานะ...</h2>
                 <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
              </div>
-             <!-- ปุ่มยกเลิกออเดอร์ แสดงทันทีตอนค้นหาไรเดอร์ -->
+             <!-- ปุ่มยกเลิกออเดอร์ -->
              <button id="btn-cancel-order" style="background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: none;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
           </div>
           
@@ -469,10 +474,7 @@
   <!-- ================= SCRIPTS ================= -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // ตั้งค่า URL สำหรับการยิงแจ้งเตือนผ่าน Google Apps Script
     const LINE_BOT_API_URL = "https://script.google.com/macros/s/AKfycbw_K-6k_Jm3VmyOReZHFB3pGikgMWQ4bno11cU_7GRn6-beQeOzPuYXHe1VWIcNk9Mr/exec"; 
-    
-    // ตั้งค่า LIFF ID สำหรับใช้งานเข้าสู่ระบบ LINE จริงๆ
     const LIFF_ID = "2010799042-aNBObgM9"; 
 
     const firebaseConfig = {
@@ -696,12 +698,10 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping (สแกนหาคีย์แบบครอบจักรวาล) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options || menu.extra || menu.choices || menu.Addons || menu.Toppings || []; 
 
-        // ตรวจสอบว่าเป็น Object หรือ Array ที่มีข้อมูลจริงๆ หรือไม่
         let hasAddons = false;
         if (Array.isArray(addons) && addons.length > 0) hasAddons = true;
         if (typeof addons === 'object' && addons !== null && Object.keys(addons).length > 0 && !Array.isArray(addons)) hasAddons = true;
@@ -778,7 +778,6 @@
         showToast(`เพิ่มลงตะกร้าแล้ว`);
     }
 
-    // ================= ระบบ Payment & Cart =================
     function updateCartTotal() {
       const total = cartItems.reduce((sum, item) => sum + item.price, 0);
       document.getElementById('fab-cart-count').innerText = cartItems.length;
@@ -896,7 +895,6 @@
             slipUrl = "รอการตรวจสอบสลิป";
         }
 
-        // ป้องกัน undefined ในตัวแปรที่จะส่งให้ Firebase
         const orderData = {
           userId: currentUserId || "guest", 
           customerName: currentUserName || "ลูกค้าทั่วไป", 
@@ -941,7 +939,7 @@
         }
     }
 
-    // ================= Tracker, Map & Chat (ระบบสมบูรณ์ 100%) =================
+    // ================= Tracker, Map & Chat (แก้ไขสถานะให้ปุ่มยกเลิกโชว์แน่ๆ) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -970,15 +968,23 @@
             document.getElementById('tracker-status').innerText = d.status;
             document.getElementById('tracker-res').innerText = d.restaurantName;
             
-            if (d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์" || !d.riderName) {
+            // เช็คว่าสถานะกำลังรอดำเนินการหรือไม่ (ใช้ .includes แทน === เพื่อกันบั๊กข้อความไม่ตรง)
+            const isWaiting = d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์');
+
+            if (isWaiting || !d.riderName) {
                 document.getElementById('tracker-rider').innerText = "กำลังค้นหาไรเดอร์...";
             } else {
                 document.getElementById('tracker-rider').innerText = "ไรเดอร์: " + d.riderName;
             }
             
             const dot = document.getElementById('tracker-dot');
-            if(d.status === 'ค้นหาไรเดอร์' || d.status === 'กำลังเตรียมอาหาร') { dot.style.background = '#f59e0b'; dot.style.animation = 'pulse 1s infinite'; }
-            else { dot.style.background = '#10b981'; dot.style.animation = 'none'; }
+            if(isWaiting || d.status.includes('เตรียม')) { 
+                dot.style.background = '#f59e0b'; 
+                dot.style.animation = 'pulseTracker 2s infinite'; 
+            } else { 
+                dot.style.background = '#10b981'; 
+                dot.style.animation = 'none'; 
+            }
             
             updateOrderDetailModal(d);
          } else {
@@ -992,9 +998,10 @@
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
         const btnCancel = document.getElementById('btn-cancel-order');
+        const isWaiting = d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์');
         
-        // ให้ปุ่มยกเลิกโชว์ทันทีเมื่อยังหาไรเดอร์ หรือร้านยังไม่ทำอาหาร
-        if (d.status === "ค้นหาไรเดอร์" || d.status === "รอรับออเดอร์") {
+        // ให้ปุ่มยกเลิกและเรดาร์โชว์ทันทีเมื่อยังหาไรเดอร์
+        if (isWaiting) {
             btnCancel.style.display = 'block';
             document.getElementById('wait-animation').style.display = 'block';
             document.getElementById('tracking-map').style.display = 'none';
@@ -1006,7 +1013,7 @@
         const chatInputWrapper = document.getElementById('chat-input-wrapper');
         const chatContainer = document.getElementById('cus-chat-container');
 
-        if(d.riderName && !d.status.includes('ค้นหา')) {
+        if(d.riderName && !isWaiting) {
             document.getElementById('track-rider-name').innerText = d.riderName;
             document.getElementById('track-rider-call').style.display = 'flex';
             
@@ -1018,14 +1025,16 @@
             document.getElementById('tracking-map').style.display = 'block';
             
             if (!trackingMap) {
-                trackingMap = L.map('tracking-map').setView([userLat, userLng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackingMap);
-                
-                const uIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--secondary-color); width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`, iconSize: [20, 20]});
-                userMarker = L.marker([userLat, userLng], {icon: uIcon}).addTo(trackingMap);
-                
-                const rIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--primary-color); width:32px; height:32px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><span class="material-icons" style="color:white; font-size:20px;">motorcycle</span></div>`, iconSize: [32, 32]});
-                riderMarker = L.marker([userLat, userLng], {icon: rIcon}).addTo(trackingMap);
+                try {
+                    trackingMap = L.map('tracking-map').setView([userLat, userLng], 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackingMap);
+                    
+                    const uIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--secondary-color); width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`, iconSize: [20, 20]});
+                    userMarker = L.marker([userLat, userLng], {icon: uIcon}).addTo(trackingMap);
+                    
+                    const rIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--primary-color); width:32px; height:32px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><span class="material-icons" style="color:white; font-size:20px;">motorcycle</span></div>`, iconSize: [32, 32]});
+                    riderMarker = L.marker([userLat, userLng], {icon: rIcon}).addTo(trackingMap);
+                } catch(e) { console.error("Map Load Error:", e); }
             }
             
             if(d.riderId && !riderLocationListener) {
@@ -1052,7 +1061,7 @@
             if(riderLocationListener) { riderLocationListener(); riderLocationListener = null; }
         }
         
-        if(d.chatMessages && d.riderName && !d.status.includes('ค้นหา')) {
+        if(d.chatMessages && d.riderName && !isWaiting) {
            chatContainer.innerHTML = d.chatMessages.map(msg => {
                 const isMe = msg.sender === 'customer';
                 return `<div style="max-width:80%; padding:10px 15px; border-radius:18px; font-size:13px; line-height:1.4; ${isMe ? 'background:var(--primary-color); color:white; align-self:flex-end; border-bottom-right-radius:4px;' : 'background:white; border:1px solid #eee; align-self:flex-start; border-bottom-left-radius:4px;'}">${msg.text}<div style="font-size:9px; opacity:0.8; text-align:right; margin-top:2px;">${msg.time}</div></div>`;
@@ -1080,8 +1089,10 @@
             const docSnap = await docRef.get();
             if(!docSnap.exists) return;
             const d = docSnap.data();
+            
+            const isWaiting = d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์');
 
-            if(d.status !== "ค้นหาไรเดอร์" && d.status !== "รอรับออเดอร์") {
+            if(!isWaiting) {
                 showToast("ออเดอร์กำลังดำเนินการ ไม่สามารถยกเลิกได้ กรุณาติดต่อแอดมิน");
                 document.getElementById('btn-cancel-order').style.display = 'none';
                 return;
