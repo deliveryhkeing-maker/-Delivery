@@ -261,8 +261,8 @@
       <div style="margin-bottom:15px;"><label style="font-size:12px; color:var(--text-light); margin-bottom:5px; display:block;">เลขบัญชี</label><input type="text" id="wd-acc" placeholder="ระบุเลขบัญชี" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ccc; font-family:'Prompt'; outline:none;"></div>
       <div style="margin-bottom:20px;"><label style="font-size:12px; color:var(--text-light); margin-bottom:5px; display:block;">จำนวนเงิน (บาท)</label><input type="number" id="withdraw-amount" placeholder="ขั้นต่ำ 100 บาท" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ccc; font-family:'Prompt'; outline:none;"></div>
       <div style="display:flex; gap:10px;">
-        <button class="btn-outline" onclick="document.getElementById('withdraw-modal').style.display='none'">ยกเลิก</button>
-        <button class="btn-main" onclick="submitWithdraw()">ยืนยัน</button>
+        <button style="flex:1; padding:15px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt'; font-weight:600; cursor:pointer;" onclick="document.getElementById('withdraw-modal').style.display='none'">ยกเลิก</button>
+        <button style="flex:1; padding:15px; border-radius:12px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt'; font-weight:600; cursor:pointer;" onclick="submitWithdraw()">ยืนยัน</button>
       </div>
     </div>
   </div>
@@ -289,15 +289,26 @@
 
   <!-- ================= SCRIPTS ================= -->
   <script>
+    // ==========================================
+    // ⚠️ คำเตือนสำคัญ: กรุณาแก้ไข firebaseConfig ด้านล่างนี้
+    // ให้เป็นข้อมูลจาก Firebase Project ของคุณเอง
+    // มิฉะนั้นระบบจะไม่สามารถเชื่อมต่อฐานข้อมูลได้!
+    // ==========================================
     const firebaseConfig = {
-      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
+      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI", // เปลี่ยนเป็น API Key ของคุณ
       authDomain: "fooddelivery-h.firebaseapp.com",
       projectId: "fooddelivery-h",
       storageBucket: "fooddelivery-h.firebasestorage.app",
       messagingSenderId: "901130815996",
       appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
     };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    } catch (error) {
+        alert("⚠️ เกิดข้อผิดพลาดในการตั้งค่า Firebase: " + error.message);
+    }
+    
     const db = firebase.firestore();
 
     let currentRiderId = localStorage.getItem('hk_rider_id');
@@ -331,7 +342,11 @@
         "Cancelled Rider": "ไรเดอร์ยกเลิก"
     };
 
-    window.onload = function() {
+    function translateStatus(dbStatus) {
+        return statusMap[dbStatus] || dbStatus; 
+    }
+
+    window.onload = async function() {
        if(currentRiderId) { initApp(); } 
        else { document.getElementById('login-screen').style.display = 'flex'; }
     };
@@ -366,7 +381,10 @@
                     initApp();
                 }
             }
-        } catch(e) { showToast("Error: " + e.message); }
+        } catch(e) { 
+            showToast("Database Error: " + e.message); 
+            alert("⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาตรวจสอบ Firebase Config หรือสิทธิ์ Rules\n\nรายละเอียด: " + e.message);
+        }
     }
 
     function logout() { localStorage.removeItem('hk_rider_id'); location.reload(); }
@@ -375,6 +393,12 @@
     function initApp() {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
+        
+        // Check DB Connection immediately
+        db.collection("riders").limit(1).get().catch(e => {
+            alert("⚠️ ตรวจพบปัญหาการดึงข้อมูลจาก Firebase: " + e.message);
+        });
+
         initMap();
         loadRiderProfile();
         checkActiveJob();
@@ -436,6 +460,8 @@
           if(riderData.isOnline && !activeOrderId) listenToJobPool();
           else if(!riderData.isOnline && jobPoolListener) { jobPoolListener(); jobPoolListener = null; hideNewJobPopup(); }
         }
+      }, err => {
+          alert("⚠️ หลุดการเชื่อมต่อจากฐานข้อมูล (Profile): " + err.message);
       });
     }
 
@@ -443,7 +469,7 @@
        const isOnline = document.getElementById('online-toggle').checked;
        db.collection("riders").doc(currentRiderId).update({ isOnline: isOnline }).then(() => {
            showToast(isOnline ? "ออนไลน์: กำลังค้นหางาน" : "ออฟไลน์: ปิดรับงาน");
-       });
+       }).catch(err => alert("⚠️ เปลี่ยนสถานะไม่สำเร็จ: " + err.message));
     }
 
     function saveProfile() {
@@ -471,6 +497,8 @@
                 } else {
                     hideNewJobPopup();
                 }
+            }, err => {
+                console.error("Job Pool Error:", err);
             });
     }
 
