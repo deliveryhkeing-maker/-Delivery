@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   
-  <title>ห้วยเกิ้ง Delivery - Customer App</title>
+  <title>ห้วยเกิ้ง Delivery - Customer</title>
   
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -348,7 +348,7 @@
     <div class="fab-badge" id="fab-cart-count">0</div>
   </div>
 
-  <!-- ================= ACTIVE ORDER TRACKER ================= -->
+  <!-- ================= ACTIVE ORDER TRACKER (ปรับโครงสร้างปุ่มยกเลิกไว้ด้านนอก) ================= -->
   <div class="active-order-tracker" id="active-order-tracker">
     <div style="display: flex; align-items: center; flex: 1; cursor: pointer; overflow: hidden;" onclick="openTrackerModal()">
       <div style="width: 40px; height: 40px; background: var(--primary-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative; margin-right: 12px; flex-shrink: 0;">
@@ -372,7 +372,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal -->
+  <!-- Topping Modal (สแกนหาตัวแปรครอบจักรวาล ป้องกัน undefined) -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -420,7 +420,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal -->
+  <!-- Order Detail / Chat Modal (แผนที่, แอนิเมชัน, ยกเลิก, ซ่อนแชท) -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -434,7 +434,7 @@
                 <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
              </div>
              <!-- ปุ่มยกเลิกออเดอร์ใน Modal -->
-             <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
+             <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder(event)">ยกเลิกออเดอร์</button>
           </div>
           
           <!-- Animation ค้นหาไรเดอร์ -->
@@ -516,6 +516,29 @@
     let riderMarker = null;
     let userMarker = null;
     let riderLocationListener = null;
+
+    // ระบบ Mapping สถานะเป็นภาษาไทย
+    const statusMap = {
+        "Pending": "รอร้านรับออเดอร์",
+        "Merchant Accept": "ร้านรับออเดอร์แล้ว",
+        "Preparing": "กำลังเตรียมอาหาร",
+        "Searching Rider": "กำลังค้นหาไรเดอร์",
+        "Rider Accepted": "ไรเดอร์กำลังเดินทางไปร้าน",
+        "Rider Arrived": "ไรเดอร์ถึงร้านแล้ว",
+        "Picked Up": "รับอาหารแล้ว",
+        "On Delivery": "กำลังจัดส่ง",
+        "Delivered": "จัดส่งสำเร็จ",
+        "Completed": "เสร็จสิ้น",
+        "Cancelled Customer": "ลูกค้ายกเลิก",
+        "Cancelled Merchant": "ร้านค้ายกเลิก",
+        "Cancelled Rider": "ไรเดอร์ยกเลิก",
+        "Cancelled Admin": "แอดมินยกเลิก"
+    };
+
+    function translateStatus(dbStatus) {
+        // หากใน DB เป็นคำไทยอยู่แล้วให้ใช้เลย (รองรับระบบเดิม) หรือใช้ statusMap สำหรับโครงสร้างใหม่
+        return statusMap[dbStatus] || dbStatus; 
+    }
 
     window.onload = async function() {
       if(!localStorage.getItem('hk_user_id')) localStorage.setItem('hk_user_id', currentUserId);
@@ -704,6 +727,7 @@
       showScreen('menu-screen');
     }
 
+    // ================= ระบบ Topping (สแกนหาคีย์แบบครอบจักรวาล) =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options || menu.extra || menu.choices || menu.Addons || menu.Toppings || []; 
@@ -901,6 +925,7 @@
             slipUrl = "รอการตรวจสอบสลิป";
         }
 
+        // สถานะเริ่มต้นของ Flow ใหม่คือ "Pending"
         const orderData = {
           userId: currentUserId || "guest", 
           customerName: currentUserName || "ลูกค้าทั่วไป", 
@@ -915,7 +940,7 @@
           promoCode: appliedPromoCodeStr || "",
           paymentMethod: method || "cash", 
           slipImage: slipUrl || "",
-          status: "Pending", // ล็อกตาม Flow ใหม่ข้อ 6 (เริ่มที่ Pending รอร้านรับ)
+          status: "Pending", // ใช้ภาษาอังกฤษคุมหลังบ้าน (แปลไทยที่หน้าจอ)
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -930,7 +955,7 @@
             fetch(LINE_BOT_API_URL + "?action=notifyMerchant&merchantId=" + selectedRestaurant.id + "&orderId=" + docRef.id, { mode: 'no-cors' });
 
             cartItems = []; updateCartTotal();
-            showToast("สั่งอาหารสำเร็จ! กำลังส่งออเดอร์ไปที่ร้าน...");
+            showToast("สั่งอาหารสำเร็จ! กรุณารอร้านค้ายืนยัน...");
             showScreen('home-screen');
         }).catch(err => {
             console.error("Add order error", err);
@@ -945,7 +970,7 @@
         }
     }
 
-    // ================= Tracker, Map & Chat =================
+    // ================= Tracker, Map & Chat (ระบบดักออเดอร์ผี + แปลสถานะ + ปุ่มยกเลิกข้างนอก) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -954,13 +979,19 @@
          let latestActiveOrder = null;
          let latestTime = 0;
          
+         // ดักออเดอร์ผี (ออเดอร์เก่าที่ค้างในฐานข้อมูลเกิน 12 ชั่วโมง)
          const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000); 
 
          snapshot.forEach(doc => {
              const d = doc.data();
-             const st = d.status || "";
-             if(!st.includes('สำเร็จ') && !st.includes('Completed') && !st.includes('Delivered') && !st.includes('ยกเลิก') && !st.includes('Cancelled') && !st.includes('ปฏิเสธ')) {
+             const status = d.status || "";
+             
+             // ดักจับสถานะที่เสร็จสมบูรณ์หรือถูกยกเลิกแล้ว (ทั้งคีย์ใหม่และคีย์เก่า)
+             const isCompletedOrCancelled = status.includes('สำเร็จ') || status.includes('เสร็จสิ้น') || status.includes('ยกเลิก') || status === 'Delivered' || status === 'Completed' || status.includes('Cancelled');
+             
+             if(!isCompletedOrCancelled) {
                  const t = d.createdAt ? d.createdAt.toMillis() : Date.now();
+                 // ล้างออเดอร์ที่ค้างเกิน 12 ชม.
                  if (t > twelveHoursAgo) {
                      if(t > latestTime) {
                          latestTime = t;
@@ -974,13 +1005,18 @@
          if(activeFound && latestActiveOrder) {
             const d = latestActiveOrder;
             activeOrderId = d.id;
+            
+            // แปลงสถานะจากอังกฤษเป็นไทย (หรือถ้าเป็นไทยอยู่แล้วก็ปล่อยผ่าน)
+            const thaiStatus = translateStatus(d.status);
 
             document.getElementById('active-order-tracker').style.display = 'flex';
-            document.getElementById('tracker-status').innerText = d.status;
+            document.getElementById('tracker-status').innerText = thaiStatus;
             document.getElementById('tracker-res').innerText = d.restaurantName;
             
-            const isWaiting = d.status === 'Pending' || d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์') || d.status.includes('Searching');
+            // ตรวจจับคำว่ารอหรือค้นหา (ทั้งอังกฤษและไทย)
+            const isWaiting = thaiStatus.includes('ค้นหา') || thaiStatus.includes('รอ') || d.status === 'Pending' || d.status === 'Merchant Accept' || d.status === 'Searching Rider';
 
+            // โชว์ปุ่มยกเลิกบนแถบ Tracking Bar
             if(isWaiting) {
                 document.getElementById('quick-cancel-btn').style.display = 'block';
             } else {
@@ -988,7 +1024,7 @@
             }
 
             const dot = document.getElementById('tracker-dot');
-            if(isWaiting || d.status.includes('เตรียม') || d.status.includes('Preparing')) { 
+            if(isWaiting || thaiStatus.includes('เตรียม') || d.status === 'Preparing') { 
                 dot.style.background = '#f59e0b'; 
                 dot.style.animation = 'pulseTracker 2s infinite'; 
             } else { 
@@ -996,20 +1032,27 @@
                 dot.style.animation = 'none'; 
             }
             
-            updateOrderDetailModal(d);
+            updateOrderDetailModal(d, thaiStatus, isWaiting);
          } else {
             document.getElementById('active-order-tracker').style.display = 'none';
          }
       }, err => { console.error(err); });
     }
 
-    function updateOrderDetailModal(d) {
-        document.getElementById('track-status-text').innerText = d.status;
+    function openTrackerModal() {
+        document.getElementById('order-detail-modal').style.display='flex';
+        if (trackingMap) {
+            setTimeout(() => { trackingMap.invalidateSize(); }, 300);
+        }
+    }
+
+    function updateOrderDetailModal(d, thaiStatus, isWaiting) {
+        document.getElementById('track-status-text').innerText = thaiStatus;
         document.getElementById('track-res-name').innerText = d.restaurantName;
         
         const btnCancel = document.getElementById('btn-cancel-order');
-        const isWaiting = d.status === 'Pending' || d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์') || d.status.includes('Searching');
         
+        // ให้ปุ่มยกเลิกและเรดาร์โชว์เมื่อร้านยังไม่เสร็จอาหารหรือยังไม่มีไรเดอร์
         if (isWaiting) {
             btnCancel.style.display = 'block';
             document.getElementById('wait-animation').style.display = 'block';
@@ -1102,15 +1145,16 @@
             const docSnap = await docRef.get();
             if(!docSnap.exists) return;
             const d = docSnap.data();
-
-            const isWaiting = d.status === 'Pending' || d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์') || d.status.includes('Searching');
+            
+            const thaiStatus = translateStatus(d.status);
+            const isWaiting = thaiStatus.includes('ค้นหา') || thaiStatus.includes('รอ') || d.status === 'Pending' || d.status === 'Merchant Accept' || d.status === 'Searching Rider';
 
             if(!isWaiting) {
                 showToast("ออเดอร์กำลังดำเนินการ ไม่สามารถยกเลิกได้ กรุณาติดต่อแอดมิน");
                 return;
             }
 
-            await docRef.update({ status: "Cancelled Customer" }); // ใช้คำว่า Cancelled Customer ตาม Flow ใหม่ข้อ 6
+            await docRef.update({ status: "Cancelled Customer" });
 
             if(d.paymentMethod === 'wallet' || d.paymentMethod === 'transfer') {
                 await db.collection("users").doc(currentUserId).update({
@@ -1205,6 +1249,7 @@
            let html = '';
            orders.slice(0, 15).forEach(d => {
               const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
+              const thaiStatus = translateStatus(d.status || "");
               
               let itemsHtml = '';
               if(d.fullItems && d.fullItems.length > 0) {
@@ -1221,7 +1266,7 @@
                  ${itemsHtml}
                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top:1px dashed #eee; padding-top:10px;">
                     <span style="color:var(--primary-color); font-weight:700;">฿${d.totalPrice}</span>
-                    <span class="badge" style="background:#f1f5f9; color:#64748b; padding:4px 8px; font-size:11px; border-radius:12px;">${d.status}</span>
+                    <span class="badge" style="background:#f1f5f9; color:#64748b; padding:4px 8px; font-size:11px; border-radius:12px;">${thaiStatus}</span>
                  </div>
               </div>`;
            });
