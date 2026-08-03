@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <title>Super Admin - ห้วยเกิ้ง Delivery</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
+  <!-- Firebase (Firestore & Storage) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js"></script>
+  
+  <style>
+    :root {
+      --sadmin-primary: #8b5cf6; /* Violet for Super Admin */
+      --sadmin-dark: #6d28d9;
+      --sadmin-light: #ede9fe;
+      --bg-color: #f8fafc;
+      --sidebar-bg: #0f172a; /* Darker than normal Admin */
+      --white: #ffffff;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; font-family: 'Prompt', sans-serif; margin: 0; padding: 0; }
+    body { background-color: var(--bg-color); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+
+    /* Login Screen */
+    #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0f172a, #1e1b4b); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+    .login-box { background: var(--white); padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .login-box input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 20px; font-size: 16px; outline: none; background: #f8fafc; font-family: 'Prompt'; }
+    .login-box input:focus { border-color: var(--sadmin-primary); background: white; }
+
+    /* Layout */
+    #sadmin-app { display: none; width: 100%; height: 100%; }
+    
+    /* Sidebar */
+    .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; transition: 0.3s; flex-shrink: 0; }
+    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px; }
+    .nav-menu { padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+    .nav-link { padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: #94a3b8; cursor: pointer; transition: 0.2s; text-decoration: none; font-size: 15px; }
+    .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-link.active { background: var(--sadmin-primary); color: white; border-right: 4px solid white; }
+    
+    /* Main Content */
+    .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-color); }
+    .topbar { background: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); z-index: 10; }
+    .content-area { padding: 30px; overflow-y: auto; flex-grow: 1; }
+    
+    /* Screens */
+    .screen { display: none; animation: fadeIn 0.3s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Cards & Forms */
+    .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 30px; }
+    .card-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .card-header h3 { margin: 0; font-size: 18px; color: var(--text-dark); }
+    
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
+    .input-group input[type="text"], .input-group input[type="number"] { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: 'Prompt'; font-size: 14px; outline: none; background: #f8fafc; }
+    .input-group input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 10px; font-family: 'Prompt'; font-size: 13px; outline: none; background: white; cursor: pointer; }
+    .input-group input:focus { border-color: var(--sadmin-primary); background: white; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 15px; background: #f8fafc; color: var(--text-light); font-size: 13px; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: var(--text-dark); vertical-align: middle; }
+    tr:hover td { background: #f8fafc; }
+
+    /* Buttons & Badges */
+    .btn { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Prompt'; }
+    .btn-primary { background: var(--sadmin-primary); color: white; }
+    .btn-primary:hover { background: var(--sadmin-dark); }
+    .btn-danger { background: #fee2e2; color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: white; }
+    .btn-success { background: #d1fae5; color: var(--success); }
+    .btn-success:hover { background: var(--success); color: white; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    
+    .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+    .badge-success { background: #d1fae5; color: #059669; }
+    .badge-danger { background: #fee2e2; color: #dc2626; }
+
+    .toast { position: fixed; bottom: 30px; right: 30px; background: #1e293b; color: white; padding: 15px 25px; border-radius: 12px; font-size: 15px; z-index: 10000; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .toast.show { display: block; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+    /* Flex Grid for Forms */
+    .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+    .form-row .input-group { flex: 1; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= 1. LOGIN SCREEN ================= -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div style="width:80px; height:80px; background:var(--sadmin-light); border-radius:24px; display:flex; justify-content:center; align-items:center; margin:0 auto 20px;">
+        <span class="material-icons" style="font-size:40px; color:var(--sadmin-primary);">settings_suggest</span>
+      </div>
+      <h2 style="margin:0 0 5px; color:var(--text-dark);">System Settings</h2>
+      <p style="color:var(--text-light); font-size:14px; margin-bottom:30px;">การตั้งค่าระดับ Super Admin</p>
+      
+      <input type="password" id="sadmin-pin" placeholder="รหัสผ่าน Super Admin" onkeypress="if(event.key === 'Enter') loginSAdmin()">
+      <button class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 16px;" onclick="loginSAdmin()">เข้าสู่ระบบจัดการสูงสุด</button>
+    </div>
+  </div>
+
+  <!-- ================= 2. MAIN APP SHELL ================= -->
+  <div id="sadmin-app">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+       <div class="sidebar-header">
+          <span class="material-icons" style="font-size: 32px; color: var(--sadmin-primary);">settings_suggest</span>
+          <div>
+             <h3 style="margin:0; font-size:16px;">Super Admin</h3>
+             <p style="margin:0; font-size:11px; color:#94a3b8;">System Config</p>
+          </div>
+       </div>
+       <nav class="nav-menu">
+          <a class="nav-link active" id="nav-settings" onclick="switchScreen('settings')"><span class="material-icons">tune</span> ตั้งค่าแอปพลิเคชัน</a>
+          <a class="nav-link" id="nav-promos" onclick="switchScreen('promos')"><span class="material-icons">local_offer</span> จัดการคูปองส่วนลด</a>
+          <a class="nav-link" id="nav-merchants" onclick="switchScreen('merchants')"><span class="material-icons">storefront</span> จัดการบัญชีร้านค้า</a>
+          <a class="nav-link" id="nav-riders" onclick="switchScreen('riders')"><span class="material-icons">sports_motorsports</span> จัดการบัญชีไรเดอร์</a>
+       </nav>
+       <div style="padding: 20px;">
+          <button class="btn" style="width: 100%; background: rgba(255,255,255,0.1); color: white;" onclick="logoutSAdmin()">ออกจากระบบ</button>
+       </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+       <header class="topbar">
+          <h2 style="margin:0; font-size:20px; font-weight:600;" id="page-title">ตั้งค่าแอปพลิเคชัน (App Settings)</h2>
+       </header>
+
+       <div class="content-area">
+          
+          <!-- SCREEN: SETTINGS (ตั้งค่าระบบหลัก) -->
+          <div id="settings-screen" class="screen active">
+             <div class="card" style="max-width: 800px;">
+                <div class="card-header">
+                   <h3>ตั้งค่าการจัดส่งและแบนเนอร์หน้าแอป</h3>
+                </div>
+                
+                <h4 style="margin: 0 0 15px; color: var(--sadmin-primary);">อัตราค่าจัดส่ง</h4>
+                <div class="form-row">
+                   <div class="input-group">
+                      <label>ค่าส่งเริ่มต้น (บาท)</label>
+                      <input type="number" id="sys-base-fee" placeholder="เช่น 15">
+                   </div>
+                   <div class="input-group">
+                      <label>ค่าส่งต่อกิโลเมตร (บาท/กม.)</label>
+                      <input type="number" id="sys-km-fee" placeholder="เช่น 5">
+                   </div>
+                </div>
+
+                <hr style="border:0; border-top:1px dashed #e2e8f0; margin:25px 0;">
+
+                <h4 style="margin: 0 0 15px; color: var(--sadmin-primary);">ป้ายโฆษณาหน้าแรก (Banner)</h4>
+                <div class="form-row">
+                   <div class="input-group">
+                      <label>หัวข้อโฆษณา (Title)</label>
+                      <input type="text" id="sys-banner-title" placeholder="เช่น 🔥 โค้ดลดชุมชน">
+                   </div>
+                   <div class="input-group">
+                      <label>รายละเอียด (Subtitle)</label>
+                      <input type="text" id="sys-banner-sub" placeholder="เช่น ใส่โค้ด LOCAL50 ลดทันที 50.-">
+                   </div>
+                </div>
+                <div class="input-group">
+                   <label>รูปภาพพื้นหลังแบนเนอร์</label>
+                   <img id="sys-banner-preview" src="" style="width:100%; height:150px; object-fit:cover; border-radius:12px; margin-bottom:10px; display:none; background:#e2e8f0;">
+                   <input type="file" id="sys-banner-file" accept="image/*" onchange="previewImage(event, 'sys-banner-preview')">
+                   <input type="hidden" id="sys-banner-url">
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                   <button class="btn btn-primary" id="btn-save-sys" onclick="saveSystemSettings()"><span class="material-icons">save</span> บันทึกการตั้งค่า</button>
+                </div>
+             </div>
+          </div>
+
+          <!-- SCREEN: PROMOTIONS (จัดการคูปอง) -->
+          <div id="promos-screen" class="screen">
+             <div class="card" style="max-width: 800px; margin-bottom: 20px;">
+                <div class="card-header"><h3>สร้างโค้ดส่วนลดใหม่</h3></div>
+                <div class="form-row">
+                   <div class="input-group">
+                      <label>รหัสโค้ด (พิมพ์ใหญ่)</label>
+                      <input type="text" id="promo-code" placeholder="เช่น SALE50" style="text-transform: uppercase;">
+                   </div>
+                   <div class="input-group">
+                      <label>มูลค่าส่วนลด (บาท)</label>
+                      <input type="number" id="promo-discount" placeholder="เช่น 50">
+                   </div>
+                   <div class="input-group">
+                      <label>ยอดสั่งซื้อขั้นต่ำ (บาท)</label>
+                      <input type="number" id="promo-min" placeholder="เช่น 150">
+                   </div>
+                </div>
+                <div style="text-align: right;">
+                   <button class="btn btn-primary" onclick="addPromotion()"><span class="material-icons">add_circle</span> เพิ่มคูปอง</button>
+                </div>
+             </div>
+
+             <div class="card">
+                <div class="card-header"><h3>คูปองส่วนลดที่ใช้งานอยู่</h3></div>
+                <div style="overflow-x:auto;">
+                   <table>
+                      <thead><tr><th>รหัสโค้ด</th><th>ส่วนลด (บาท)</th><th>ขั้นต่ำการใช้ (บาท)</th><th>จัดการ</th></tr></thead>
+                      <tbody id="promos-table"><tr><td colspan="4" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
+                   </table>
+                </div>
+             </div>
+          </div>
+
+          <!-- SCREEN: MERCHANTS (จัดการร้านค้า) -->
+          <div id="merchants-screen" class="screen">
+             <div class="card">
+                <div class="card-header">
+                   <h3>รายชื่อร้านค้าในระบบ</h3>
+                </div>
+                <div style="overflow-x:auto;">
+                   <table>
+                      <thead><tr><th>เบอร์โทรอ้างอิง</th><th>ชื่อร้านค้า</th><th>หมวดหมู่</th><th>สถานะบัญชี</th><th>จัดการสิทธิ์</th></tr></thead>
+                      <tbody id="merchants-table"><tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
+                   </table>
+                </div>
+             </div>
+          </div>
+
+          <!-- SCREEN: RIDERS (จัดการไรเดอร์) -->
+          <div id="riders-screen" class="screen">
+             <div class="card">
+                <div class="card-header">
+                   <h3>รายชื่อไรเดอร์ในระบบ</h3>
+                </div>
+                <div style="overflow-x:auto;">
+                   <table>
+                      <thead><tr><th>เบอร์โทรอ้างอิง</th><th>ชื่อไรเดอร์</th><th>ป้ายทะเบียน</th><th>สถานะบัญชี</th><th>จัดการสิทธิ์</th></tr></thead>
+                      <tbody id="riders-table"><tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
+                   </table>
+                </div>
+             </div>
+          </div>
+
+       </div>
+    </main>
+  </div>
+
+  <div id="custom-toast" class="toast">ข้อความ</div>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script>
+    // ==========================================
+    // ⚠️ คำเตือนสำคัญ: กรุณาแก้ไข firebaseConfig 
+    // ให้เป็นข้อมูลจาก Firebase Project ของคุณเอง
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
+      authDomain: "fooddelivery-h.firebaseapp.com",
+      projectId: "fooddelivery-h",
+      storageBucket: "fooddelivery-h.firebasestorage.app",
+      messagingSenderId: "901130815996",
+      appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
+    };
+
+    try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    } catch (error) {
+        alert("⚠️ เกิดข้อผิดพลาดในการตั้งค่า Firebase: " + error.message);
+    }
+    
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // แสดงภาพก่อนอัปโหลด
+    function previewImage(event, previewElementId) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(previewElementId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // --- 1. AUTHENTICATION ---
+    window.onload = function() {
+        if(sessionStorage.getItem('hk_sadmin_logged_in') === 'true') {
+            initSAdminApp();
+        }
+    }
+
+    function loginSAdmin() {
+        const pin = document.getElementById('sadmin-pin').value;
+        if(pin.length > 0) { // รับรหัสผ่าน (สามารถตั้งค่าความปลอดภัยเพิ่มได้ทีหลัง)
+            sessionStorage.setItem('hk_sadmin_logged_in', 'true');
+            initSAdminApp();
+        } else {
+            showToast("กรุณาใส่รหัสผ่าน");
+        }
+    }
+
+    function logoutSAdmin() {
+        sessionStorage.removeItem('hk_sadmin_logged_in');
+        location.reload();
+    }
+
+    // --- 2. INITIALIZATION ---
+    function initSAdminApp() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('sadmin-app').style.display = 'flex';
+        
+        loadSystemSettings();
+        loadPromotions();
+        loadMerchants();
+        loadRiders();
+    }
+
+    function switchScreen(screenName) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenName + '-screen').classList.add('active');
+        
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById('nav-' + screenName).classList.add('active');
+
+        const titles = {
+            'settings': 'ตั้งค่าแอปพลิเคชัน (App Settings)',
+            'promos': 'จัดการคูปองส่วนลด (Promotions)',
+            'merchants': 'จัดการบัญชีร้านค้า (Merchants)',
+            'riders': 'จัดการบัญชีไรเดอร์ (Riders)'
+        };
+        document.getElementById('page-title').innerText = titles[screenName];
+    }
+
+    // --- 3. SYSTEM SETTINGS ---
+    function loadSystemSettings() {
+        db.collection("settings").doc("system").onSnapshot(doc => {
+            if(doc.exists) {
+                const d = doc.data();
+                document.getElementById('sys-base-fee').value = d.baseFee || 15;
+                document.getElementById('sys-km-fee').value = d.kmFee || 5;
+                document.getElementById('sys-banner-title').value = d.bannerTitle || "";
+                document.getElementById('sys-banner-sub').value = d.bannerSub || "";
+                
+                document.getElementById('sys-banner-url').value = d.bannerImg || "";
+                if(d.bannerImg) {
+                    document.getElementById('sys-banner-preview').src = d.bannerImg;
+                    document.getElementById('sys-banner-preview').style.display = 'block';
+                }
+            }
+        });
+    }
+
+    async function saveSystemSettings() {
+        const btn = document.getElementById('btn-save-sys');
+        const originalText = btn.innerHTML;
+        
+        const baseFee = parseFloat(document.getElementById('sys-base-fee').value);
+        const kmFee = parseFloat(document.getElementById('sys-km-fee').value);
+        const title = document.getElementById('sys-banner-title').value.trim();
+        const sub = document.getElementById('sys-banner-sub').value.trim();
+
+        if(isNaN(baseFee) || isNaN(kmFee)) return showToast("กรุณาระบุค่าส่งให้ถูกต้อง");
+
+        btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">autorenew</span> กำลังบันทึก...';
+        btn.disabled = true;
+
+        try {
+            let imgUrl = document.getElementById('sys-banner-url').value;
+            const file = document.getElementById('sys-banner-file').files[0];
+            
+            // อัปโหลดแบนเนอร์ใหม่
+            if(file) {
+                const ref = storage.ref(`system/banner_${Date.now()}_${file.name}`);
+                const snapshot = await ref.put(file);
+                imgUrl = await snapshot.ref.getDownloadURL();
+                document.getElementById('sys-banner-url').value = imgUrl; 
+            }
+
+            await db.collection("settings").doc("system").set({
+                baseFee: baseFee,
+                kmFee: kmFee,
+                bannerTitle: title,
+                bannerSub: sub,
+                bannerImg: imgUrl,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            
+            showToast("อัปเดตการตั้งค่าระบบและแบนเนอร์สำเร็จ");
+        } catch(e) {
+            console.error(e);
+            showToast("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // --- 4. PROMOTIONS ---
+    function loadPromotions() {
+        db.collection("promotions").orderBy("createdAt", "desc").onSnapshot(snap => {
+            const tbody = document.getElementById('promos-table');
+            if(snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ยังไม่มีคูปองส่วนลดในระบบ</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                html += `
+                    <tr>
+                       <td><b style="color:var(--sadmin-primary);">${doc.id}</b></td>
+                       <td>฿${d.discount}</td>
+                       <td>฿${d.minPurchase}</td>
+                       <td>
+                          <button class="btn btn-danger" onclick="deletePromotion('${doc.id}')"><span class="material-icons" style="font-size:14px;">delete</span> ลบ</button>
+                       </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    async function addPromotion() {
+        const code = document.getElementById('promo-code').value.toUpperCase().trim();
+        const discount = parseFloat(document.getElementById('promo-discount').value);
+        const min = parseFloat(document.getElementById('promo-min').value);
+
+        if(!code || isNaN(discount) || isNaN(min)) return showToast("กรุณากรอกข้อมูลให้ครบถ้วน");
+
+        try {
+            await db.collection("promotions").doc(code).set({
+                discount: discount,
+                minPurchase: min,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast("เพิ่มคูปองสำเร็จ");
+            document.getElementById('promo-code').value = "";
+            document.getElementById('promo-discount').value = "";
+            document.getElementById('promo-min').value = "";
+        } catch(e) { showToast("Error: " + e.message); }
+    }
+
+    async function deletePromotion(code) {
+        if(!confirm(`ต้องการลบคูปอง ${code} ใช่หรือไม่?`)) return;
+        try {
+            await db.collection("promotions").doc(code).delete();
+            showToast("ลบคูปองสำเร็จ");
+        } catch(e) { showToast("Error: " + e.message); }
+    }
+
+    // --- 5. MERCHANTS MANAGEMENT ---
+    function loadMerchants() {
+        db.collection("merchants").orderBy("createdAt", "desc").onSnapshot(snap => {
+            const tbody = document.getElementById('merchants-table');
+            if(snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่มีข้อมูลร้านค้า</td></tr>';
+                return;
+            }
+
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const isBanned = d.isBanned || false;
+                const statusBadge = isBanned 
+                    ? `<span class="badge badge-danger">ระงับการใช้งาน</span>` 
+                    : `<span class="badge badge-success">ปกติ</span>`;
+                
+                const actionBtn = isBanned
+                    ? `<button class="btn btn-success" onclick="toggleBanMerchant('${doc.id}', false)">ปลดแบน</button>`
+                    : `<button class="btn btn-danger" onclick="toggleBanMerchant('${doc.id}', true)">แบน (ระงับ)</button>`;
+
+                html += `
+                    <tr>
+                       <td>${doc.id}</td>
+                       <td><b>${d.storeName || '-'}</b></td>
+                       <td>${d.category || '-'}</td>
+                       <td>${statusBadge}</td>
+                       <td>${actionBtn}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    async function toggleBanMerchant(merchantId, setBan) {
+        const actionText = setBan ? "ระงับการใช้งาน" : "ปลดแบน";
+        if(!confirm(`ต้องการ ${actionText} ร้านค้านี้ใช่หรือไม่?`)) return;
+        try {
+            await db.collection("merchants").doc(merchantId).update({ isBanned: setBan });
+            showToast(`อัปเดตสถานะร้านค้าสำเร็จ`);
+        } catch(e) { showToast("Error: " + e.message); }
+    }
+
+    // --- 6. RIDERS MANAGEMENT ---
+    function loadRiders() {
+        db.collection("riders").orderBy("createdAt", "desc").onSnapshot(snap => {
+            const tbody = document.getElementById('riders-table');
+            if(snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่มีข้อมูลไรเดอร์</td></tr>';
+                return;
+            }
+
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const isBanned = d.isBanned || false;
+                const statusBadge = isBanned 
+                    ? `<span class="badge badge-danger">ระงับการใช้งาน</span>` 
+                    : `<span class="badge badge-success">ปกติ</span>`;
+                
+                const actionBtn = isBanned
+                    ? `<button class="btn btn-success" onclick="toggleBanRider('${doc.id}', false)">ปลดแบน</button>`
+                    : `<button class="btn btn-danger" onclick="toggleBanRider('${doc.id}', true)">แบน (ระงับ)</button>`;
+
+                html += `
+                    <tr>
+                       <td>${doc.id}</td>
+                       <td><b>${d.name || '-'}</b></td>
+                       <td>${d.plate || '-'}</td>
+                       <td>${statusBadge}</td>
+                       <td>${actionBtn}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    async function toggleBanRider(riderId, setBan) {
+        const actionText = setBan ? "ระงับการใช้งาน" : "ปลดแบน";
+        if(!confirm(`ต้องการ ${actionText} ไรเดอร์นี้ใช่หรือไม่?`)) return;
+        try {
+            await db.collection("riders").doc(riderId).update({ isBanned: setBan, isOnline: false }); // บังคับออฟไลน์ถ้าโดนแบน
+            showToast(`อัปเดตสถานะไรเดอร์สำเร็จ`);
+        } catch(e) { showToast("Error: " + e.message); }
+    }
+
+    // --- UTILS ---
+    function showToast(message) { 
+        const toast = document.getElementById("custom-toast"); 
+        toast.innerText = message; 
+        toast.classList.add('show'); 
+        setTimeout(() => toast.classList.remove('show'), 3000); 
+    }
+  </script>
+</body>
+</html>
