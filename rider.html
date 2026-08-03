@@ -9,12 +9,15 @@
   
   <title>Rider App - ห้วยเกิ้ง Delivery</title>
   
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
+  <!-- Map (Leaflet) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
@@ -22,6 +25,7 @@
     :root {
       --rider-primary: #10b981; 
       --rider-dark: #059669;
+      --rider-light: #d1fae5;
       --bg-color: #f1f5f9;
       --white: #ffffff;
       --text-dark: #0f172a;
@@ -29,67 +33,80 @@
       --danger: #ef4444;
       --warning: #f59e0b;
       --glass-bg: rgba(255, 255, 255, 0.95);
+      --border: #e2e8f0;
     }
-    * { box-sizing: border-box; font-family: 'Prompt', sans-serif; margin: 0; padding: 0; }
+    * { box-sizing: border-box; font-family: 'Prompt', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow: hidden; animation: fadeIn 0.4s ease; position: relative; }
+    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow: hidden; animation: fadeIn 0.3s ease; position: relative; }
     .screen.active { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    #login-screen { background: linear-gradient(135deg, #0f172a, #1e293b); justify-content: center; align-items: center; z-index: 9999; }
+    /* Login Screen */
+    #login-screen { background: linear-gradient(135deg, #0f172a, #1e293b); justify-content: center; align-items: center; z-index: 9999; display: flex; }
     .login-box { background: var(--white); padding: 40px 30px; border-radius: 24px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    .login-box input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 20px; font-family: 'Prompt'; font-size: 16px; outline: none; text-align: center; background: #f8fafc; }
+    .login-box input { width: 100%; padding: 15px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; font-family: 'Prompt'; font-size: 16px; outline: none; text-align: center; background: #f8fafc; }
     .login-box input:focus { border-color: var(--rider-primary); background: white; }
 
-    .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 10; padding-top: calc(15px + env(safe-area-inset-top)); }
-    .btn-main { background: var(--rider-primary); color: white; border: none; padding: 15px; border-radius: 16px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 15px rgba(16, 185, 129, 0.3); transition: 0.3s; }
-    .btn-main:active { transform: translateY(2px); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); }
-    .btn-main:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
-    
+    /* UI Components */
+    .btn { padding: 15px; border-radius: 14px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Prompt'; transition: 0.2s; border: none; }
+    .btn-main { background: var(--rider-primary); color: white; box-shadow: 0 8px 15px rgba(16, 185, 129, 0.2); }
+    .btn-main:active { transform: scale(0.98); }
+    .btn-outline { background: white; color: var(--rider-primary); border: 1px solid var(--rider-primary); }
+    .btn-danger-outline { background: white; color: var(--danger); border: 1px solid var(--danger); }
+
+    /* Header & Navbar */
+    .rider-header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 15px rgba(0,0,0,0.05); z-index: 10; padding-top: calc(15px + env(safe-area-inset-top)); }
+    .bottom-nav { background: var(--white); display: flex; justify-content: space-around; padding: 15px 0 calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); z-index: 10; border-radius: 24px 24px 0 0; position: relative; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-light); font-size: 11px; font-weight: 500; cursor: pointer; transition: 0.3s; position: relative; }
+    .nav-item.active { color: var(--rider-primary); }
+    .nav-item .material-icons { font-size: 24px; margin-bottom: 4px; }
+    .nav-badge { position: absolute; top: -5px; right: 10%; background: var(--danger); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; display: none; }
+
+    /* Map & Radar */
     #rider-map { flex-grow: 1; width: 100%; z-index: 1; }
     .radar-pulse { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; z-index: 2; pointer-events: none; animation: pulse 2s infinite; display: none; }
     @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
 
+    /* Panels */
     .glass-panel { position: absolute; bottom: 20px; left: 20px; right: 20px; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.8); z-index: 1000; }
-    
-    .bottom-nav { background: var(--white); display: flex; justify-content: space-around; padding: 15px 0 calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); z-index: 10; border-radius: 30px 30px 0 0; position: relative; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; color: #94a3b8; font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.3s; position: relative; }
-    .nav-item.active { color: var(--rider-primary); }
-    .nav-item .material-icons { font-size: 26px; margin-bottom: 4px; transition: 0.3s; }
-    .nav-item.active .material-icons { transform: translateY(-3px); }
-    .nav-badge { position: absolute; top: -5px; right: 10%; background: var(--danger); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; display: none; }
+    .info-list { background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; max-height: 120px; overflow-y: auto; border: 1px solid var(--border); font-size: 13px; color: var(--text-dark); line-height: 1.5; }
 
-    .wallet-card-rider { background: linear-gradient(135deg, #10b981, #047857); border-radius: 24px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3); }
+    /* CRM & Wallet */
+    .wallet-card { background: linear-gradient(135deg, #10b981, #047857); border-radius: 24px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); }
     .crm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .crm-box { background: var(--white); border-radius: 16px; padding: 15px 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-    .crm-title { font-size: 11px; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
-    .crm-value { font-size: 18px; font-weight: 700; color: var(--rider-dark); }
-    .tx-item { background: var(--white); border-radius: 16px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-
-    .job-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-    .job-ring { width: 100px; height: 100px; background: var(--rider-primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; animation: ring 1s infinite alternate; margin-bottom: 30px; box-shadow: 0 0 30px var(--rider-primary); }
-    .job-ring .material-icons { font-size: 50px; color: white; }
-    @keyframes ring { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
-    .modal-content { background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 350px; display: flex; flex-direction: column; max-height: 90vh; }
-    
-    .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; border-radius: 12px; margin-bottom: 15px; }
-    .chat-bubble { max-width: 75%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
-    .chat-bubble.me { background: var(--rider-primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-    .chat-bubble.other { background: white; color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
-
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 24px; border-radius: 30px; font-size: 14px; z-index: 100000; display: none; white-space: nowrap; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 500; }
-    .toast.show { display: block; animation: fadeUp 0.3s ease; }
-    @keyframes fadeUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    .crm-box { background: var(--white); border-radius: 16px; padding: 15px 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+    .tx-item { background: var(--white); border-radius: 16px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
 
     /* Custom Toggle Switch */
-    .toggle-switch { position:relative; width:54px; height:30px; background:#cbd5e1; border-radius:30px; transition:0.3s; cursor:pointer; display:inline-block; }
+    .toggle-switch { position:relative; width:54px; height:30px; background:var(--border); border-radius:30px; transition:0.3s; cursor:pointer; display:inline-block; }
     .toggle-switch input { opacity:0; width:0; height:0; }
     .toggle-slider { position:absolute; top:3px; left:3px; width:24px; height:24px; background:white; border-radius:50%; transition:0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     .toggle-switch input:checked + .toggle-slider { transform: translateX(24px); }
     .toggle-switch.active-bg { background: var(--rider-primary); }
+
+    /* Job Alert Modal */
+    .job-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+    .job-ring { width: 90px; height: 90px; background: var(--rider-primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; animation: ring 1s infinite alternate; margin-bottom: 20px; box-shadow: 0 0 30px var(--rider-primary); }
+    @keyframes ring { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+    /* Default Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 9999; backdrop-filter: blur(3px); }
+    .modal-content { background: white; width: 100%; padding: 25px 20px 40px; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; max-height: 90vh; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
+    .input-group input { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; font-family: 'Prompt'; font-size: 14px; outline: none; background: #f8fafc; }
+    .input-group input:focus { border-color: var(--rider-primary); background: white; }
+
+    /* Chat */
+    .chat-messages { flex-grow: 1; overflow-y: auto; padding: 15px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+    .chat-bubble { max-width: 75%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
+    .chat-bubble.me { background: var(--rider-primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-bubble.other { background: white; color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+
+    .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; z-index: 100000; display: none; white-space: nowrap; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 500; }
+    .toast.show { display: block; animation: fadeDown 0.3s ease; }
+    @keyframes fadeDown { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
   </style>
 </head>
 <body>
@@ -97,16 +114,16 @@
   <!-- ================= 1. LOGIN SCREEN ================= -->
   <div id="login-screen" class="screen active">
     <div class="login-box">
-      <div style="width:80px; height:80px; background:#eff6ff; border-radius:24px; display:flex; justify-content:center; align-items:center; margin:0 auto 20px;">
+      <div style="width:80px; height:80px; background:var(--rider-light); border-radius:24px; display:flex; justify-content:center; align-items:center; margin:0 auto 20px;">
         <span class="material-icons" style="font-size:40px; color:var(--rider-primary);">sports_motorsports</span>
       </div>
       <h2 style="margin:0 0 5px; color:var(--text-dark);">Rider App</h2>
-      <p style="color:var(--text-light); font-size:13px; margin-bottom:30px;">ระบบรับงานส่งอาหารสำหรับคนขับ</p>
+      <p style="color:var(--text-light); font-size:13px; margin-bottom:30px;">ระบบรับงานส่งอาหาร (Enterprise)</p>
       
       <input type="tel" id="login-phone" placeholder="เบอร์โทรศัพท์มือถือ" maxlength="10">
       <input type="text" id="login-name" placeholder="ชื่อ-นามสกุล (กรณีเข้าครั้งแรก)" style="display:none;">
       
-      <button class="btn-main" onclick="handleLogin()">เข้าสู่ระบบรับงาน</button>
+      <button class="btn btn-main" onclick="handleLogin()">เข้าสู่ระบบ</button>
     </div>
   </div>
 
@@ -125,7 +142,7 @@
             <p style="margin:0; font-size:12px; color:var(--text-light);" id="display-rider-plate">-</p>
           </div>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; background:#f8fafc; padding:8px 15px; border-radius:20px; border:1px solid #e2e8f0;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; background:#f8fafc; padding:8px 15px; border-radius:20px; border:1px solid var(--border);">
           <span id="online-status-text" style="color:var(--text-light);">ออฟไลน์</span>
           <div class="toggle-switch" id="toggle-bg">
              <input type="checkbox" id="online-toggle" onchange="toggleOnlineStatus()">
@@ -138,18 +155,18 @@
         <div id="rider-map"></div>
         <div class="radar-pulse" id="radar-anim"></div>
         
-        <!-- แผงสถานะกำลังค้นหางาน -->
+        <!-- แผงค้นหางาน -->
         <div id="searching-panel" class="glass-panel" style="display:none; text-align:center;">
            <span class="material-icons" style="font-size:30px; color:var(--rider-primary); animation: pulse 2s infinite;">radar</span>
            <h3 style="margin:10px 0 5px; font-size:16px;">กำลังค้นหาออเดอร์...</h3>
-           <p style="margin:0; font-size:12px; color:var(--text-light);">เปิดแอปทิ้งไว้ ระบบจะแจ้งเตือนเมื่อมีงานเข้า</p>
+           <p style="margin:0; font-size:12px; color:var(--text-light);">ระบบจะส่งงานให้เมื่อร้านทำอาหารเสร็จแล้ว</p>
         </div>
 
-        <!-- แผงควบคุมงานที่กำลังทำ (Active Job) -->
+        <!-- แผงงานที่กำลังทำ (Active Job) -->
         <div id="active-order-panel" class="glass-panel" style="display:none;">
            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
              <div>
-                <span class="badge" style="background:var(--primary-light); color:var(--rider-dark); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700; margin-bottom:8px; display:inline-block;" id="active-job-status">สถานะงาน</span>
+                <span style="background:var(--rider-light); color:var(--rider-dark); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700; margin-bottom:8px; display:inline-block;" id="active-job-status">สถานะงาน</span>
                 <h3 style="margin:0 0 5px; font-size:18px; font-weight:700;" id="active-res-name">ชื่อร้าน</h3>
                 <p style="margin:0; font-size:13px; color:var(--text-light);" id="active-cus-name">ส่งให้: ลูกค้า</p>
                 <p style="margin:2px 0 0; font-size:11px; color:var(--text-light);" id="active-cus-address">ที่อยู่...</p>
@@ -160,19 +177,17 @@
              </div>
            </div>
            
-           <div id="active-items-list" style="background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:15px; max-height:120px; overflow-y:auto; border:1px solid #e2e8f0;">
-               <!-- รายการอาหารพร้อมรูปจะมาแสดงตรงนี้ -->
-           </div>
+           <div class="info-list" id="active-items-list"></div>
 
            <div style="display:flex; gap:10px;">
-              <button class="btn-main" id="job-action-btn" onclick="updateOrderStatus()">รับอาหารแล้ว / ไปส่ง</button>
+              <button class="btn btn-main" id="job-action-btn" style="flex:1;" onclick="updateOrderStatus()">รับอาหารแล้ว / ไปส่ง</button>
               
-              <button style="background:white; border:none; border-radius:16px; width:55px; display:flex; justify-content:center; align-items:center; position:relative; box-shadow:0 4px 10px rgba(0,0,0,0.05); cursor:pointer;" onclick="openChatModal()">
+              <button style="background:white; border:1px solid var(--border); border-radius:14px; width:55px; display:flex; justify-content:center; align-items:center; position:relative; cursor:pointer;" onclick="openChatModal()">
                  <span class="material-icons" style="color:var(--text-dark);">chat</span>
                  <div id="chat-badge" style="display:none; position:absolute; top:-2px; right:-2px; width:14px; height:14px; background:var(--danger); border-radius:50%; border:2px solid white;"></div>
               </button>
               
-              <a id="call-cus-btn" href="#" style="background:var(--text-dark); color:white; border-radius:16px; width:55px; display:flex; justify-content:center; align-items:center; text-decoration:none; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+              <a id="call-cus-btn" href="#" style="background:var(--text-dark); color:white; border-radius:14px; width:55px; display:flex; justify-content:center; align-items:center; text-decoration:none;">
                  <span class="material-icons">call</span>
               </a>
            </div>
@@ -183,12 +198,12 @@
     <!-- WALLET & CRM SCREEN -->
     <div id="wallet-screen" class="screen">
       <div class="rider-header" style="justify-content:center;"><h2 style="margin:0; font-size:18px;">กระเป๋าเงิน (Wallet)</h2></div>
-      <div style="padding: 25px; flex-grow: 1; overflow-y: auto;">
-        <div class="wallet-card-rider">
-          <p style="margin: 0 0 10px; font-size: 14px; opacity: 0.9;">เครดิตคงเหลือ / ถอนได้</p>
-          <h1 style="margin: 0 0 20px; font-size: 46px; font-weight:700;">฿<span id="rider-wallet-balance">0.00</span></h1>
-          <button class="btn-main" style="background: white; color: var(--rider-dark); padding: 12px; font-size: 15px;" onclick="openWithdrawModal()">
-            <span class="material-icons">account_balance</span> แจ้งถอนเงินเข้าบัญชี
+      <div style="padding: 20px; overflow-y: auto; flex-grow: 1;">
+        <div class="wallet-card">
+          <p style="margin: 0 0 10px; font-size: 14px; opacity: 0.9;">รายได้ที่ถอนได้</p>
+          <h1 style="margin: 0 0 20px; font-size: 40px; font-weight:700;">฿<span id="rider-wallet-balance">0.00</span></h1>
+          <button class="btn" style="background: white; color: var(--rider-dark);" onclick="openWithdrawModal()">
+            <span class="material-icons">account_balance</span> แจ้งถอนเงิน
           </button>
         </div>
         
@@ -199,7 +214,7 @@
           <div class="crm-box"><div class="crm-title">30 วัน</div><div class="crm-value">฿<span id="sum-30d">0</span></div></div>
         </div>
         
-        <h3 style="margin: 20px 0 15px; font-size: 15px; font-weight:700;">ประวัติการเงินล่าสุด</h3>
+        <h3 style="margin: 20px 0 10px; font-size: 15px; font-weight:700;">ประวัติการเงินล่าสุด</h3>
         <div id="rider-tx-list"><p style="text-align: center; color: var(--text-light);">กำลังโหลดข้อมูล...</p></div>
       </div>
     </div>
@@ -207,77 +222,77 @@
     <!-- PROFILE SCREEN -->
     <div id="profile-screen" class="screen">
       <div class="rider-header" style="justify-content:center;"><h2 style="margin:0; font-size:18px;">บัญชีของฉัน</h2></div>
-      <div style="padding: 25px; flex-grow: 1; overflow-y: auto;">
-         <div style="background:white; padding:30px 20px; border-radius:24px; margin-bottom:20px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
-            <div style="width:90px; height:90px; background:#f1f5f9; border-radius:50%; margin:0 auto 15px; display:flex; justify-content:center; align-items:center; border:3px solid var(--rider-primary);">
+      <div style="padding: 20px; overflow-y: auto; flex-grow: 1;">
+         <div style="background:white; padding:30px 20px; border-radius:24px; margin-bottom:20px; text-align:center; border:1px solid var(--border);">
+            <div style="width:90px; height:90px; background:var(--bg-color); border-radius:50%; margin:0 auto 15px; display:flex; justify-content:center; align-items:center; border:3px solid var(--rider-primary);">
                <span class="material-icons" style="font-size:45px; color:var(--text-light);">person</span>
             </div>
             <h3 style="margin:0 0 5px; font-size:20px;" id="profile-name">ชื่อคนขับ</h3>
             <p style="margin:0; color:var(--text-light); font-size:14px;" id="profile-phone">เบอร์โทร</p>
          </div>
          
-         <div style="background:white; padding:25px; border-radius:24px; margin-bottom:20px; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
-            <div style="margin-bottom:15px;">
-               <label style="display:block; font-size:13px; color:var(--text-light); margin-bottom:8px;">ป้ายทะเบียนรถ</label>
-               <input type="text" id="edit-plate" placeholder="เช่น กท 1234 กทม" style="width:100%; padding:15px; border-radius:12px; border:1px solid #e2e8f0; font-family:'Prompt'; outline:none; background:#f8fafc;">
+         <div style="background:white; padding:20px; border-radius:24px; margin-bottom:20px; border:1px solid var(--border);">
+            <div class="input-group">
+               <label>ป้ายทะเบียนรถ (ไว้โชว์ให้ลูกค้าดู)</label>
+               <input type="text" id="edit-plate" placeholder="เช่น กท 1234 กทม">
             </div>
-            <button class="btn-main" onclick="saveProfile()"><span class="material-icons">save</span> บันทึกข้อมูล</button>
+            <button class="btn btn-main" onclick="saveProfile()">บันทึกข้อมูล</button>
          </div>
          
-         <button class="btn-main" style="background:transparent; border:1px solid var(--danger); color:var(--danger); box-shadow:none;" onclick="logout()">ออกจากระบบ</button>
+         <button class="btn btn-danger-outline" onclick="logout()">ออกจากระบบ</button>
       </div>
     </div>
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
-      <div class="nav-item active" id="nav-map" onclick="showScreen('map-screen')">
+      <div class="nav-item active" id="nav-map" onclick="switchAppScreen('map')">
          <span class="material-icons">explore</span><span>รับงาน</span>
          <div id="nav-badge" class="nav-badge">0</div>
       </div>
-      <div class="nav-item" id="nav-wallet" onclick="showScreen('wallet-screen')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
-      <div class="nav-item" id="nav-profile" onclick="showScreen('profile-screen')"><span class="material-icons">manage_accounts</span><span>บัญชี</span></div>
+      <div class="nav-item" id="nav-wallet" onclick="switchAppScreen('wallet')"><span class="material-icons">account_balance_wallet</span><span>กระเป๋าเงิน</span></div>
+      <div class="nav-item" id="nav-profile" onclick="switchAppScreen('profile')"><span class="material-icons">manage_accounts</span><span>บัญชี</span></div>
     </div>
   </div>
 
   <!-- ================= JOB ALERT OVERLAY ================= -->
   <div class="job-alert-overlay" id="job-alert-modal">
-     <div class="job-ring"><span class="material-icons">notifications_active</span></div>
-     <h1 style="color:white; font-size:28px; margin:0 0 10px; font-weight:700; text-shadow:0 2px 10px rgba(0,0,0,0.5);">งานใหม่เข้า!</h1>
-     <div style="background:var(--white); padding:25px; border-radius:24px; width:90%; max-width:320px; text-align:center; box-shadow:0 15px 30px rgba(0,0,0,0.3);">
+     <div class="job-ring"><span class="material-icons" style="color:white; font-size:40px;">notifications_active</span></div>
+     <h1 style="color:white; font-size:28px; margin:0 0 10px; font-weight:700;">งานใหม่เข้า!</h1>
+     <div style="background:var(--white); padding:25px; border-radius:24px; width:90%; max-width:320px; text-align:center;">
         <h3 style="margin:0 0 5px; color:var(--text-dark); font-size:20px;" id="alert-res-name">ร้านค้า</h3>
-        <p style="margin:0 0 15px; color:var(--text-light); font-size:13px;">รับที่: ร้านค้า ➡️ ส่งที่: ลูกค้า</p>
-        <p style="margin:0 0 20px; color:var(--rider-primary); font-size:14px; font-weight:700;">ค่ารอบจัดส่ง: ฿25</p>
-        <button class="btn-main" style="padding:18px; font-size:18px; border-radius:20px; animation: pulse 2s infinite;" onclick="acceptIncomingJob()">กดรับงานนี้</button>
+        <p style="margin:0 0 15px; color:var(--text-light); font-size:13px;">รับอาหารจากร้าน ➡️ ส่งให้ลูกค้า</p>
+        <p style="margin:0 0 20px; color:var(--rider-primary); font-size:15px; font-weight:700;">ค่ารอบจัดส่ง: ฿<span id="alert-fee">25</span></p>
+        <button class="btn btn-main" style="padding:18px; font-size:18px;" onclick="acceptIncomingJob()">กดรับงานนี้</button>
         <button style="background:transparent; border:none; color:var(--text-light); margin-top:15px; font-family:'Prompt'; cursor:pointer; padding:10px; width:100%;" onclick="ignoreJob()">ข้ามงานนี้</button>
      </div>
   </div>
 
-  <!-- ================= MODALS & TOAST ================= -->
+  <!-- ================= MODALS ================= -->
   <!-- Withdraw Modal -->
-  <div class="modal-overlay" id="withdraw-modal" style="z-index:99999;">
-    <div class="modal-content" style="max-height:unset; display:block;">
-      <h3 style="margin-top:0; margin-bottom:20px; color:var(--rider-primary); text-align:center; font-size:20px;">แจ้งถอนเงิน</h3>
-      <div style="margin-bottom:15px;"><label style="font-size:12px; color:var(--text-light); margin-bottom:5px; display:block;">ธนาคาร/พร้อมเพย์</label><input type="text" id="wd-bank" placeholder="เช่น กสิกรไทย" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ccc; font-family:'Prompt'; outline:none;"></div>
-      <div style="margin-bottom:15px;"><label style="font-size:12px; color:var(--text-light); margin-bottom:5px; display:block;">เลขบัญชี</label><input type="text" id="wd-acc" placeholder="ระบุเลขบัญชี" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ccc; font-family:'Prompt'; outline:none;"></div>
-      <div style="margin-bottom:20px;"><label style="font-size:12px; color:var(--text-light); margin-bottom:5px; display:block;">จำนวนเงิน (บาท)</label><input type="number" id="withdraw-amount" placeholder="ขั้นต่ำ 100 บาท" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ccc; font-family:'Prompt'; outline:none;"></div>
+  <div class="modal-overlay" id="withdraw-modal">
+    <div class="modal-content">
+      <h3 style="margin-top:0; margin-bottom:20px; color:var(--rider-primary); font-size:18px; text-align:center;">แจ้งถอนเงิน</h3>
+      <div class="input-group"><label>ธนาคาร/พร้อมเพย์</label><input type="text" id="wd-bank" placeholder="เช่น กสิกรไทย"></div>
+      <div class="input-group"><label>เลขบัญชี</label><input type="text" id="wd-acc" placeholder="ระบุเลขบัญชี"></div>
+      <div class="input-group"><label>จำนวนเงิน (บาท)</label><input type="number" id="withdraw-amount" placeholder="ขั้นต่ำ 100 บาท"></div>
       <div style="display:flex; gap:10px;">
-        <button style="flex:1; padding:15px; border-radius:12px; border:1px solid #ccc; background:white; font-family:'Prompt'; font-weight:600; cursor:pointer;" onclick="document.getElementById('withdraw-modal').style.display='none'">ยกเลิก</button>
-        <button style="flex:1; padding:15px; border-radius:12px; border:none; background:var(--rider-primary); color:white; font-family:'Prompt'; font-weight:600; cursor:pointer;" onclick="submitWithdraw()">ยืนยัน</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('withdraw-modal').style.display='none'">ยกเลิก</button>
+        <button class="btn btn-main" style="flex:1;" onclick="submitWithdraw()">ยืนยันถอน</button>
       </div>
     </div>
   </div>
 
   <!-- Chat Modal -->
-  <div class="modal-overlay" id="chat-modal" style="background:white; z-index:99999;">
-    <div class="modal-content" style="height:100vh; max-height:100vh; padding:0; border-radius:0;">
-       <div class="rider-header" style="border-radius:0;">
-          <span class="material-icons" style="cursor:pointer;" onclick="document.getElementById('chat-modal').style.display='none'">arrow_back_ios</span>
+  <div class="modal-overlay" id="chat-modal">
+    <div class="modal-content" style="height:85vh; padding:0; display:flex; flex-direction:column;">
+       <div class="rider-header" style="border-radius:24px 24px 0 0; padding:20px;">
+          <span class="material-icons" style="cursor:pointer;" onclick="document.getElementById('chat-modal').style.display='none'">close</span>
           <h3 style="margin:0; font-size:16px;">แชทกับลูกค้า</h3>
           <div style="width:24px;"></div>
        </div>
-       <div class="chat-messages" id="chat-messages-container"></div>
-       <div style="padding:15px; background:white; border-top:1px solid #eee; display:flex; gap:10px; padding-bottom:calc(15px + env(safe-area-inset-bottom));">
-          <input type="text" id="chat-input" placeholder="พิมพ์ข้อความ..." style="flex:1; padding:15px; border-radius:24px; border:1px solid #cbd5e1; outline:none; font-family:'Prompt';">
+       <div class="chat-messages" id="chat-messages-container" style="border-radius:0; border-left:none; border-right:none; margin-bottom:0;"></div>
+       <div style="padding:15px; background:white; display:flex; gap:10px; padding-bottom:calc(15px + env(safe-area-inset-bottom));">
+          <input type="text" id="chat-input" placeholder="พิมพ์ข้อความ..." style="flex:1; padding:15px; border-radius:24px; border:1px solid var(--border); outline:none; font-family:'Prompt';">
           <button style="background:var(--rider-primary); color:white; border:none; border-radius:50%; width:50px; height:50px; display:flex; justify-content:center; align-items:center; cursor:pointer;" onclick="sendChatMessage()">
              <span class="material-icons">send</span>
           </button>
@@ -290,12 +305,10 @@
   <!-- ================= SCRIPTS ================= -->
   <script>
     // ==========================================
-    // ⚠️ คำเตือนสำคัญ: กรุณาแก้ไข firebaseConfig ด้านล่างนี้
-    // ให้เป็นข้อมูลจาก Firebase Project ของคุณเอง
-    // มิฉะนั้นระบบจะไม่สามารถเชื่อมต่อฐานข้อมูลได้!
+    // ⚠️ Firebase Config 
     // ==========================================
     const firebaseConfig = {
-      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI", // เปลี่ยนเป็น API Key ของคุณ
+      apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
       projectId: "fooddelivery-h",
       storageBucket: "fooddelivery-h.firebasestorage.app",
@@ -327,24 +340,14 @@
 
     // Mapping สถานะอังกฤษเป็นไทย
     const statusMap = {
-        "Pending": "รอร้านรับออเดอร์",
-        "Merchant Accept": "ร้านรับออเดอร์แล้ว",
-        "Preparing": "กำลังทำอาหาร",
-        "Searching Rider": "กำลังค้นหาไรเดอร์",
-        "Rider Accepted": "กำลังเดินทางไปร้าน",
-        "Rider Arrived": "ถึงร้านแล้ว",
+        "Rider Accepted": "กำลังไปรับที่ร้าน",
+        "Rider Arrived": "ถึงร้านค้าแล้ว",
         "Picked Up": "รับอาหารแล้ว",
-        "On Delivery": "กำลังจัดส่ง",
-        "Delivered": "จัดส่งสำเร็จ",
-        "Completed": "เสร็จสิ้น",
-        "Cancelled Customer": "ลูกค้ายกเลิก",
-        "Cancelled Merchant": "ร้านค้ายกเลิก",
-        "Cancelled Rider": "ไรเดอร์ยกเลิก"
+        "On Delivery": "กำลังจัดส่งให้ลูกค้า",
+        "Delivered": "จัดส่งสำเร็จ"
     };
 
-    function translateStatus(dbStatus) {
-        return statusMap[dbStatus] || dbStatus; 
-    }
+    function translateStatus(s) { return statusMap[s] || s; }
 
     window.onload = async function() {
        if(currentRiderId) { initApp(); } 
@@ -356,7 +359,7 @@
         const phone = document.getElementById('login-phone').value.trim();
         const nameInput = document.getElementById('login-name');
         
-        if(!phone || phone.length < 9) return showToast("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง");
+        if(!phone || phone.length < 9) return showToast("กรุณากรอกเบอร์โทรให้ถูกต้อง");
         
         try {
             const docRef = db.collection("riders").doc(phone);
@@ -377,14 +380,11 @@
                     await docRef.set({ name: name, phone: phone, plate: "-", walletBalance: 0, isOnline: false, isBanned: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                     currentRiderId = phone;
                     localStorage.setItem('hk_rider_id', currentRiderId);
-                    showToast("ลงทะเบียนและเข้าสู่ระบบสำเร็จ");
+                    showToast("ลงทะเบียนสำเร็จ");
                     initApp();
                 }
             }
-        } catch(e) { 
-            showToast("Database Error: " + e.message); 
-            alert("⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาตรวจสอบ Firebase Config หรือสิทธิ์ Rules\n\nรายละเอียด: " + e.message);
-        }
+        } catch(e) { showToast("Error: " + e.message); }
     }
 
     function logout() { localStorage.removeItem('hk_rider_id'); location.reload(); }
@@ -394,11 +394,6 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
         
-        // Check DB Connection immediately
-        db.collection("riders").limit(1).get().catch(e => {
-            alert("⚠️ ตรวจพบปัญหาการดึงข้อมูลจาก Firebase: " + e.message);
-        });
-
         initMap();
         loadRiderProfile();
         checkActiveJob();
@@ -407,7 +402,7 @@
     function initMap() {
        try {
            riderMap = L.map('rider-map', { zoomControl: false }).setView([riderLat, riderLng], 15);
-           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OS' }).addTo(riderMap);
+           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(riderMap);
            
            const riderIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--rider-primary); width:35px; height:35px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><span class="material-icons" style="color:white; font-size:20px;">motorcycle</span></div>`, iconSize: [35, 35], iconAnchor: [17, 17] });
            riderMarker = L.marker([riderLat, riderLng], { icon: riderIcon }).addTo(riderMap);
@@ -416,8 +411,8 @@
                navigator.geolocation.watchPosition(pos => {
                    riderLat = pos.coords.latitude; riderLng = pos.coords.longitude;
                    riderMarker.setLatLng(new L.LatLng(riderLat, riderLng));
-                   // อัปเดตพิกัดลง Firestore ให้ลูกค้า/ร้านค้าเห็น
-                   if(riderData && riderData.isOnline && !activeOrderId) {
+                   // อัปเดตพิกัดลง Firestore ให้ลูกค้าเห็น (เฉพาะตอนออนไลน์)
+                   if(riderData && riderData.isOnline && activeOrderId) {
                        db.collection("riders").doc(currentRiderId).update({ lat: riderLat, lng: riderLng }).catch(()=>{});
                    }
                }, e => console.log(e), { enableHighAccuracy: true, maximumAge: 10000 });
@@ -460,16 +455,14 @@
           if(riderData.isOnline && !activeOrderId) listenToJobPool();
           else if(!riderData.isOnline && jobPoolListener) { jobPoolListener(); jobPoolListener = null; hideNewJobPopup(); }
         }
-      }, err => {
-          alert("⚠️ หลุดการเชื่อมต่อจากฐานข้อมูล (Profile): " + err.message);
       });
     }
 
     function toggleOnlineStatus() {
        const isOnline = document.getElementById('online-toggle').checked;
        db.collection("riders").doc(currentRiderId).update({ isOnline: isOnline }).then(() => {
-           showToast(isOnline ? "ออนไลน์: กำลังค้นหางาน" : "ออฟไลน์: ปิดรับงาน");
-       }).catch(err => alert("⚠️ เปลี่ยนสถานะไม่สำเร็จ: " + err.message));
+           showToast(isOnline ? "ออนไลน์: ระบบกำลังค้นหางาน" : "ออฟไลน์: ปิดรับงานแล้ว");
+       });
     }
 
     function saveProfile() {
@@ -477,16 +470,17 @@
        db.collection("riders").doc(currentRiderId).update({ plate: plate }).then(() => showToast("บันทึกข้อมูลสำเร็จ"));
     }
 
-    // --- 3. JOB POOL (ค้นหางาน) ---
+    // --- 3. JOB POOL (ค้นหางาน - Flow 100%) ---
     function listenToJobPool() {
         if(jobPoolListener) jobPoolListener();
         
-        // ไรเดอร์จะเห็นงานก็ต่อเมื่อสถานะเป็น Searching Rider (ร้านกดเรียกแล้ว)
+        // กรองเฉพาะงานที่สถานะเป็น "Searching Rider" เท่านั้น
         jobPoolListener = db.collection("orders")
             .where("status", "==", "Searching Rider")
             .onSnapshot(snap => {
                 let foundJob = null;
                 snap.forEach(doc => {
+                    // ถ้ายังไม่มีคนรับงาน
                     if(!doc.data().riderId) { 
                         foundJob = {id: doc.id, ...doc.data()};
                     }
@@ -497,8 +491,6 @@
                 } else {
                     hideNewJobPopup();
                 }
-            }, err => {
-                console.error("Job Pool Error:", err);
             });
     }
 
@@ -507,13 +499,11 @@
         
         incomingJobId = jobId;
         document.getElementById('alert-res-name').innerText = jobData.restaurantName;
-        document.getElementById('job-alert-modal').style.display = 'flex';
+        // ดึงค่าจัดส่ง ถ้ามีตั้งไว้ใน Order หรือใช้ Default 25 บาท
+        const deliveryFee = jobData.deliveryFee || 25; 
+        document.getElementById('alert-fee').innerText = deliveryFee;
         
-        // เสียงแจ้งเตือน
-        if ('speechSynthesis' in window) {
-            const msg = new SpeechSynthesisUtterance("มีออเดอร์ใหม่เข้าครับ");
-            msg.lang = 'th-TH'; window.speechSynthesis.speak(msg);
-        }
+        document.getElementById('job-alert-modal').style.display = 'flex';
     }
 
     function hideNewJobPopup() {
@@ -533,10 +523,9 @@
                 const doc = await t.get(docRef);
                 const d = doc.data();
                 
-                // กันชน: ถ้ามีไรเดอร์รับไปก่อนแล้ว
-                if(d.riderId) throw "เสียใจด้วย! มีไรเดอร์คนอื่นรับงานนี้ไปแล้ว";
+                if(d.riderId) throw "มีไรเดอร์คนอื่นรับงานนี้ไปแล้ว";
                 
-                // รับงาน -> เปลี่ยนสถานะเป็น Rider Accepted
+                // รับงาน -> เปลี่ยนสถานะ
                 t.update(docRef, { riderId: currentRiderId, riderName: riderData.name, status: "Rider Accepted" });
             });
             hideNewJobPopup();
@@ -559,7 +548,6 @@
         
         snapshot.forEach(doc => {
             const st = doc.data().status;
-            // ลำดับสถานะงานที่ไรเดอร์ต้องทำ
             if (st === "Rider Accepted" || st === "Rider Arrived" || st === "Picked Up" || st === "On Delivery") {
                 activeOrderId = doc.id;
                 activeOrderData = doc.data();
@@ -581,7 +569,7 @@
             document.getElementById('active-total').innerText = activeOrderData.totalPrice;
             
             if(activeOrderData.paymentMethod === 'transfer' || activeOrderData.paymentMethod === 'wallet') {
-                document.getElementById('active-pay-method').innerText = '(ชำระเงินแล้ว)';
+                document.getElementById('active-pay-method').innerText = '(ชำระแล้ว)';
                 document.getElementById('active-pay-method').style.color = "var(--rider-primary)";
             } else {
                 document.getElementById('active-pay-method').innerText = '(เก็บเงินสดปลายทาง)';
@@ -590,15 +578,14 @@
             
             document.getElementById('call-cus-btn').href = `tel:${activeOrderData.customerPhone || ''}`;
 
-            // โชว์ภาพและรายการอาหาร
+            // โชว์รายการอาหาร
             const listContainer = document.getElementById('active-items-list');
             if(activeOrderData.fullItems && activeOrderData.fullItems.length > 0) {
                 listContainer.innerHTML = activeOrderData.fullItems.map(itm => {
-                    let imgHtml = itm.image ? `<img src="${itm.image}" style="width:35px; height:35px; border-radius:6px; object-fit:cover;">` : `<div style="width:35px; height:35px; border-radius:6px; background:var(--primary-light); display:flex; justify-content:center; align-items:center; color:var(--rider-primary);"><span class="material-icons" style="font-size:16px;">restaurant</span></div>`;
-                    return `<div style="display:flex; gap:10px; align-items:center; margin-bottom:8px; border-bottom:1px dashed #e2e8f0; padding-bottom:5px;">${imgHtml} <span style="font-size:13px; font-weight:500;">${itm.name}</span></div>`;
+                    return `<div style="margin-bottom:5px;"><b>${itm.qty}x</b> ${itm.name}</div>`;
                 }).join('');
             } else {
-                listContainer.innerHTML = activeOrderData.items ? activeOrderData.items.map(i => `<div style="font-size:13px; margin-bottom:5px;">- ${i}</div>`).join('') : 'ไม่มีรายละเอียด';
+                listContainer.innerHTML = activeOrderData.items ? activeOrderData.items.map(i => `<div style="margin-bottom:5px;">- ${i}</div>`).join('') : 'ไม่มีรายละเอียด';
             }
 
             updateButtonUI();
@@ -613,9 +600,6 @@
                listenToJobPool();
             }
         }
-      }, err => {
-          console.error("Firebase Error:", err);
-          showToast("ไม่สามารถเชื่อมต่อระบบออเดอร์ได้");
       });
     }
 
@@ -623,18 +607,22 @@
         const btn = document.getElementById('job-action-btn');
         if(currentOrderStatus === "Rider Accepted") { 
             btn.innerText = "ถึงร้านอาหารแล้ว"; 
+            btn.className = "btn btn-main";
             btn.style.background = "var(--warning)"; 
         }
         else if(currentOrderStatus === "Rider Arrived") { 
-            btn.innerText = "รับอาหารแล้ว"; 
+            btn.innerText = "รับอาหารแล้ว (เตรียมไปส่ง)"; 
+            btn.className = "btn btn-main";
             btn.style.background = "var(--warning)"; 
         }
         else if(currentOrderStatus === "Picked Up") { 
             btn.innerText = "กำลังจัดส่งไปหาลูกค้า"; 
+            btn.className = "btn btn-main";
             btn.style.background = "var(--rider-primary)"; 
         }
         else if(currentOrderStatus === "On Delivery") { 
-            btn.innerText = "จัดส่งสำเร็จแล้ว"; 
+            btn.innerText = "จัดส่งให้ลูกค้าสำเร็จ"; 
+            btn.className = "btn btn-main";
             btn.style.background = "var(--rider-primary)"; 
         }
     }
@@ -651,22 +639,24 @@
              await db.collection("orders").doc(activeOrderId).update({ status: nextStatus });
              
              if(nextStatus === "Delivered") {
-                 // 1. จ่ายเงินให้ไรเดอร์ (ค่ารอบ 25 บาท)
-                 await db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(25) });
+                 const deliveryFee = activeOrderData.deliveryFee || 25; 
+                 
+                 // 1. เพิ่มเงินให้ Rider
+                 await db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(deliveryFee) });
                  await db.collection("riders").doc(currentRiderId).collection("transactions").add({
-                    title: `ค่าจัดส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`, amount: 25, type: 'income', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    title: `ค่าจัดส่ง ออเดอร์ #${activeOrderId.substring(0,6).toUpperCase()}`, amount: deliveryFee, type: 'income', createdAt: firebase.firestore.FieldValue.serverTimestamp()
                  });
                  
-                 // 2. อัปเดตยอดขาย (orderCount) ให้ร้านค้าโดยอัตโนมัติ
-                 if (activeOrderData && activeOrderData.merchantId) {
+                 // 2. อัปเดตยอดขายของร้านค้า (orderCount)
+                 if (activeOrderData.merchantId) {
                      await db.collection("merchants").doc(activeOrderData.merchantId).update({
                          orderCount: firebase.firestore.FieldValue.increment(1)
                      });
                  }
                  
-                 showToast("จัดส่งสำเร็จ! รับรายได้ 25 บาท เข้ากระเป๋า");
+                 showToast(`จัดส่งสำเร็จ! รับรายได้ ${deliveryFee} บาท`);
              } else {
-                 showToast(`อัปเดตสถานะเป็น: ${translateStatus(nextStatus)}`);
+                 showToast(`อัปเดตสถานะ: ${translateStatus(nextStatus)}`);
              }
          } catch (e) {
              console.error(e);
@@ -685,7 +675,7 @@
             const now = new Date(); const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const sevenDaysAgoTime = startOfToday - (7 * 24 * 60 * 60 * 1000);
 
-            if(snapshot.empty) { list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ยังไม่มีประวัติทำรายการ</p>'; return; }
+            if(snapshot.empty) { list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการเงิน</p>'; return; }
             let html = ''; let count = 0;
 
             snapshot.forEach(doc => {
@@ -701,18 +691,23 @@
                  html += `<div class="tx-item">
                    <div style="display:flex; align-items:center; gap:12px;">
                      <div style="width:40px; height:40px; border-radius:12px; background:${isIncome?'#d1fae5':'#fee2e2'}; color:${isIncome?'var(--rider-primary)':'var(--danger)'}; display:flex; justify-content:center; align-items:center;"><span class="material-icons">${isIncome?'payments':'account_balance'}</span></div>
-                     <div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div>
+                     <div><div style="font-weight:600; font-size:13px;">${tx.title}</div><div style="font-size:11px; color:var(--text-light);">${dateText}</div></div>
                    </div>
-                   <div style="font-weight:700; font-size:16px; color:${isIncome ? 'var(--rider-primary)' : 'var(--danger)'};">${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}</div>
+                   <div style="font-weight:700; font-size:15px; color:${isIncome ? 'var(--rider-primary)' : 'var(--danger)'};">${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}</div>
                  </div>`; count++;
                }
             });
             list.innerHTML = html;
-            document.getElementById('sum-today').innerText = sumToday; document.getElementById('sum-7d').innerText = sum7; document.getElementById('sum-30d').innerText = sum30;
+            document.getElementById('sum-today').innerText = sumToday; 
+            document.getElementById('sum-7d').innerText = sum7; 
+            document.getElementById('sum-30d').innerText = sum30;
          });
     }
 
-    function openWithdrawModal() { document.getElementById('withdraw-amount').value = ''; document.getElementById('withdraw-modal').style.display = 'flex'; }
+    function openWithdrawModal() { 
+        document.getElementById('withdraw-amount').value = ''; 
+        document.getElementById('withdraw-modal').style.display = 'flex'; 
+    }
     
     function submitWithdraw() {
        const bank = document.getElementById('wd-bank').value.trim();
@@ -720,15 +715,15 @@
        const amount = parseFloat(document.getElementById('withdraw-amount').value);
        const currentBalance = riderData.walletBalance || 0;
        
-       if(!bank || !acc) return showToast("กรุณากรอกธนาคารและเลขบัญชี");
-       if(isNaN(amount) || amount <= 0 || amount > currentBalance) return showToast("ยอดเงินไม่ถูกต้องหรือไม่เพียงพอ");
+       if(!bank || !acc) return showToast("กรุณากรอกข้อมูลบัญชีให้ครบ");
+       if(isNaN(amount) || amount <= 0 || amount > currentBalance) return showToast("ยอดเงินไม่ถูกต้อง");
        if(amount < 100) return showToast("ถอนขั้นต่ำ 100 บาท");
 
        db.collection("riders").doc(currentRiderId).update({ walletBalance: firebase.firestore.FieldValue.increment(-amount) }).then(() => {
           db.collection("riders").doc(currentRiderId).collection("transactions").add({
              title: "ถอนเงิน (รอตรวจสอบ)", amount: amount, type: 'expense', bankAccount: { bank: bank, accountNo: acc }, createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          showToast(`ทำรายการแจ้งถอน ฿${amount} สำเร็จ`);
+          showToast(`ส่งคำขอถอนเงิน ฿${amount} สำเร็จ`);
           document.getElementById('withdraw-modal').style.display = 'none';
        });
     }
@@ -773,12 +768,16 @@
     }
 
     // --- UTILS ---
-    function showScreen(screenId) { 
+    function switchAppScreen(screenId) { 
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-      document.getElementById(screenId).classList.add('active'); 
+      document.getElementById(screenId + '-screen').classList.add('active'); 
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      document.getElementById('nav-' + screenId.replace('-screen','')).classList.add('active');
-      if (screenId === 'map-screen') { document.getElementById('nav-badge').style.display = 'none'; document.getElementById('nav-badge').innerText = '0'; if(riderMap) riderMap.invalidateSize(); }
+      document.getElementById('nav-' + screenId).classList.add('active');
+      if (screenId === 'map') { 
+          document.getElementById('nav-badge').style.display = 'none'; 
+          document.getElementById('nav-badge').innerText = '0'; 
+          if(riderMap) riderMap.invalidateSize(); 
+      }
     }
     
     function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
