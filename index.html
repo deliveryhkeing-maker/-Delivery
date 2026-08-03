@@ -9,12 +9,15 @@
   
   <title>ห้วยเกิ้ง Delivery</title>
   
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
+  <!-- Map (Leaflet) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
   
@@ -74,7 +77,7 @@
       background: var(--primary-color);
       color: white;
       border-radius: 50%;
-      display: none;
+      display: none; 
       justify-content: center;
       align-items: center;
       box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
@@ -107,22 +110,21 @@
     .nav-item.active { color: var(--primary-color); }
     .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
 
-    /* Active Order Tracker */
+    /* Active Order Tracker (ปรับปรุงใหม่ให้มีปุ่มยกเลิกด้านนอก) */
     .active-order-tracker { 
       position: fixed; 
       bottom: 90px; 
       left: 20px; 
-      width: calc(100% - 100px); 
+      width: calc(100% - 100px); /* เว้นที่ให้ปุ่มตะกร้าลอยด้านขวา */
       background: white; 
-      padding: 15px; 
+      padding: 10px 15px; 
       border-radius: 16px; 
       box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
       display: none; 
       align-items: center; 
-      gap: 12px; 
+      justify-content: space-between;
       z-index: 98; 
       border: 2px solid var(--primary-color); 
-      cursor: pointer; 
     }
 
     /* Modals & Inputs */
@@ -340,22 +342,26 @@
     <div id="history-list" style="padding: 20px;"><p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p></div>
   </div>
 
-  <!-- ================= FLOATING CART (ตระกร้าแบบลอย) ================= -->
+  <!-- ================= FLOATING CART (ตะกร้าแบบลอย) ================= -->
   <div class="fab-cart" id="fab-cart" onclick="goToPayment()">
     <span class="material-icons">shopping_cart</span>
     <div class="fab-badge" id="fab-cart-count">0</div>
   </div>
 
-  <!-- ================= ACTIVE ORDER TRACKER ================= -->
-  <div class="active-order-tracker" id="active-order-tracker" onclick="openTrackerModal()">
-    <div style="width: 45px; height: 45px; background: var(--primary-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative;">
-      <span class="material-icons" style="color: var(--primary-color);">delivery_dining</span>
-      <div id="tracker-dot" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; border: 2px solid white;"></div>
+  <!-- ================= ACTIVE ORDER TRACKER (มีปุ่มยกเลิกด้านนอกชัดเจน) ================= -->
+  <div class="active-order-tracker" id="active-order-tracker">
+    <div style="display: flex; align-items: center; flex: 1; cursor: pointer; overflow: hidden;" onclick="openTrackerModal()">
+      <div style="width: 40px; height: 40px; background: var(--primary-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative; margin-right: 12px; flex-shrink: 0;">
+        <span class="material-icons" style="color: var(--primary-color);">delivery_dining</span>
+        <div id="tracker-dot" style="position: absolute; top: 0; right: 0; width: 10px; height: 10px; background: #f59e0b; border-radius: 50%; border: 2px solid white;"></div>
+      </div>
+      <div style="flex: 1; overflow: hidden;">
+        <h4 style="margin: 0 0 3px; font-size: 14px; color: var(--primary-color);" id="tracker-status">สถานะ</h4>
+        <p style="margin: 0; font-size: 12px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="tracker-res">ชื่อร้าน</p>
+      </div>
     </div>
-    <div style="flex: 1; overflow: hidden;">
-      <h4 style="margin: 0 0 3px; font-size: 15px; color: var(--primary-color);" id="tracker-status">สถานะ</h4>
-      <p style="margin: 0; font-size: 12px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="tracker-res">ชื่อร้าน</p>
-    </div>
+    <!-- ปุ่มยกเลิกเด่นๆ ด้านนอก -->
+    <button id="quick-cancel-btn" style="background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: none; flex-shrink: 0; box-shadow: 0 2px 5px rgba(239,68,68,0.3);" onclick="cancelActiveOrder(event)">ยกเลิก</button>
   </div>
 
   <!-- ================= BOTTOM NAVIGATION ================= -->
@@ -366,7 +372,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal -->
+  <!-- Topping Modal (สแกนหาตัวแปรครอบจักรวาล ป้องกัน undefined) -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -427,8 +433,8 @@
                 <h2 style="margin: 0 0 5px; color: var(--primary-color);" id="track-status-text">สถานะ...</h2>
                 <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
              </div>
-             <!-- ปุ่มยกเลิกออเดอร์ -->
-             <button id="btn-cancel-order" style="background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: none;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
+             <!-- ปุ่มยกเลิกออเดอร์ใน Modal -->
+             <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder()">ยกเลิกออเดอร์</button>
           </div>
           
           <!-- Animation ค้นหาไรเดอร์ -->
@@ -698,6 +704,7 @@
       showScreen('menu-screen');
     }
 
+    // ================= ระบบ Topping =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options || menu.extra || menu.choices || menu.Addons || menu.Toppings || []; 
@@ -932,14 +939,7 @@
         });
     }
 
-    function openTrackerModal() {
-        document.getElementById('order-detail-modal').style.display='flex';
-        if (trackingMap) {
-            setTimeout(() => { trackingMap.invalidateSize(); }, 300);
-        }
-    }
-
-    // ================= Tracker, Map & Chat (แก้ไขสถานะให้ปุ่มยกเลิกโชว์แน่ๆ) =================
+    // ================= Tracker, Map & Chat (ระบบดักจับออเดอร์ผี + ปุ่มยกเลิกข้างนอก) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -947,15 +947,21 @@
          let activeFound = false;
          let latestActiveOrder = null;
          let latestTime = 0;
+         
+         // ป้องกันออเดอร์ค้างข้ามวัน: สนใจแค่ออเดอร์ภายใน 12 ชั่วโมงที่ผ่านมา
+         const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000); 
 
          snapshot.forEach(doc => {
              const d = doc.data();
              if(!d.status.includes('สำเร็จ') && !d.status.includes('ยกเลิก') && !d.status.includes('ปฏิเสธ')) {
-                 const t = d.createdAt ? d.createdAt.toMillis() : 0;
-                 if(t > latestTime) {
-                     latestTime = t;
-                     latestActiveOrder = { id: doc.id, ...d };
-                     activeFound = true;
+                 const t = d.createdAt ? d.createdAt.toMillis() : Date.now();
+                 // ดักออเดอร์ผี: เอาแค่รายการที่ใหม่กว่า 12 ชั่วโมง
+                 if (t > twelveHoursAgo) {
+                     if(t > latestTime) {
+                         latestTime = t;
+                         latestActiveOrder = { id: doc.id, ...d };
+                         activeFound = true;
+                     }
                  }
              }
          });
@@ -968,15 +974,15 @@
             document.getElementById('tracker-status').innerText = d.status;
             document.getElementById('tracker-res').innerText = d.restaurantName;
             
-            // เช็คว่าสถานะกำลังรอดำเนินการหรือไม่ (ใช้ .includes แทน === เพื่อกันบั๊กข้อความไม่ตรง)
             const isWaiting = d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์');
 
-            if (isWaiting || !d.riderName) {
-                document.getElementById('tracker-rider').innerText = "กำลังค้นหาไรเดอร์...";
+            // โชว์ปุ่มยกเลิกบนแถบ Tracking Bar โดยตรง
+            if(isWaiting) {
+                document.getElementById('quick-cancel-btn').style.display = 'block';
             } else {
-                document.getElementById('tracker-rider').innerText = "ไรเดอร์: " + d.riderName;
+                document.getElementById('quick-cancel-btn').style.display = 'none';
             }
-            
+
             const dot = document.getElementById('tracker-dot');
             if(isWaiting || d.status.includes('เตรียม')) { 
                 dot.style.background = '#f59e0b'; 
@@ -993,6 +999,13 @@
       }, err => { console.error(err); });
     }
 
+    function openTrackerModal() {
+        document.getElementById('order-detail-modal').style.display='flex';
+        if (trackingMap) {
+            setTimeout(() => { trackingMap.invalidateSize(); }, 300);
+        }
+    }
+
     function updateOrderDetailModal(d) {
         document.getElementById('track-status-text').innerText = d.status;
         document.getElementById('track-res-name').innerText = d.restaurantName;
@@ -1000,7 +1013,6 @@
         const btnCancel = document.getElementById('btn-cancel-order');
         const isWaiting = d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์');
         
-        // ให้ปุ่มยกเลิกและเรดาร์โชว์ทันทีเมื่อยังหาไรเดอร์
         if (isWaiting) {
             btnCancel.style.display = 'block';
             document.getElementById('wait-animation').style.display = 'block';
@@ -1078,23 +1090,27 @@
         }
     }
 
-    async function cancelActiveOrder() {
+    async function cancelActiveOrder(event) {
+        if(event) event.stopPropagation(); // กันไม่ให้กดแล้วป๊อปอัปเด้งซ้อน
         if(!activeOrderId) return;
         if(!confirm("คุณต้องการยกเลิกออเดอร์นี้ใช่หรือไม่?")) return;
 
         try {
             if(riderLocationListener) { riderLocationListener(); riderLocationListener = null; }
             
+            // ซ่อน UI ทันทีเพื่อความรวดเร็ว
+            document.getElementById('active-order-tracker').style.display = 'none';
+            document.getElementById('order-detail-modal').style.display = 'none';
+
             const docRef = db.collection("orders").doc(activeOrderId);
             const docSnap = await docRef.get();
             if(!docSnap.exists) return;
             const d = docSnap.data();
-            
+
             const isWaiting = d.status.includes('ค้นหา') || d.status.includes('รอรับ') || d.status.includes('รอไรเดอร์');
 
             if(!isWaiting) {
                 showToast("ออเดอร์กำลังดำเนินการ ไม่สามารถยกเลิกได้ กรุณาติดต่อแอดมิน");
-                document.getElementById('btn-cancel-order').style.display = 'none';
                 return;
             }
 
@@ -1113,8 +1129,6 @@
             }
 
             showToast("ยกเลิกออเดอร์และคืนเงินสำเร็จ");
-            document.getElementById('order-detail-modal').style.display = 'none';
-            document.getElementById('active-order-tracker').style.display = 'none';
             fetchOrderHistory();
 
         } catch(e) {
