@@ -31,7 +31,7 @@
     * { box-sizing: border-box; font-family: 'Prompt', sans-serif; margin: 0; padding: 0; }
     body { background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 80px; animation: fadeIn 0.3s ease; }
+    .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 90px; animation: fadeIn 0.3s ease; }
     .screen.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -49,18 +49,21 @@
     .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
 
     .card { background: white; border-radius: 16px; margin: 0 20px 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-    .btn-main { background: var(--merchant-primary); color: white; border: none; padding: 15px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); }
-    .btn-outline { background: white; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; width: 100%; cursor: pointer; }
+    .btn-main { background: var(--merchant-primary); color: white; border: none; padding: 15px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); transition: 0.2s; }
+    .btn-main:active { transform: scale(0.98); }
+    .btn-outline { background: white; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; width: 100%; cursor: pointer; transition: 0.2s; }
+    .btn-outline:active { background: #f8fafc; }
     
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
     .input-group input, .input-group textarea { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-family: 'Prompt'; font-size: 14px; outline: none; background: #f8fafc; }
+    .input-group input:focus, .input-group textarea:focus { border-color: var(--merchant-primary); background: white; }
     
-    .order-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-left: 5px solid var(--warning); }
+    .order-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-left: 5px solid var(--warning); transition: 0.3s; }
     .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 10px; }
     .order-items { font-size: 14px; color: var(--text-dark); line-height: 1.6; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 12px; }
     
-    .menu-item { display: flex; padding: 15px; border: 1px solid #f1f5f9; background: white; align-items: flex-start; gap: 15px; border-radius: 16px; margin-bottom: 10px; }
+    .menu-item { display: flex; padding: 15px; border: 1px solid #f1f5f9; background: white; align-items: flex-start; gap: 15px; border-radius: 16px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
     .menu-img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; background: #e2e8f0; flex-shrink: 0; }
     .menu-details { flex: 1; }
     
@@ -70,6 +73,13 @@
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 24px; border-radius: 30px; font-size: 14px; z-index: 10000; display: none; white-space: nowrap; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .toast.show { display: block; animation: fadeUp 0.3s ease; }
     @keyframes fadeUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* Custom Toggle Switch */
+    .toggle-switch { position:relative; width:54px; height:30px; background:#cbd5e1; border-radius:30px; transition:0.3s; cursor:pointer; display:inline-block; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; top:3px; left:3px; width:24px; height:24px; background:white; border-radius:50%; transition:0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .toggle-switch input:checked + .toggle-slider { transform: translateX(24px); }
+    .toggle-switch.active-bg { background: var(--success); }
   </style>
 </head>
 <body>
@@ -107,8 +117,9 @@
 
       <div style="padding: 0 20px; margin-bottom: 15px;">
          <div style="display:flex; background:white; border-radius:12px; padding:5px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
-            <div style="flex:1; text-align:center; padding:10px; font-size:14px; font-weight:600; cursor:pointer; background:var(--merchant-light); color:var(--merchant-primary); border-radius:10px;" id="tab-new" onclick="switchOrderTab('new')">มาใหม่ / กำลังทำ</div>
-            <div style="flex:1; text-align:center; padding:10px; font-size:14px; font-weight:600; cursor:pointer; color:var(--text-light);" id="tab-history" onclick="switchOrderTab('history')">ประวัติวันนี้</div>
+            <div style="flex:1; text-align:center; padding:10px; font-size:13px; font-weight:600; cursor:pointer; background:var(--merchant-light); color:var(--merchant-primary); border-radius:10px;" id="tab-new" onclick="switchOrderTab('new')">มาใหม่ (รอยืนยัน)</div>
+            <div style="flex:1; text-align:center; padding:10px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-light);" id="tab-cooking" onclick="switchOrderTab('cooking')">กำลังทำ / รอรับ</div>
+            <div style="flex:1; text-align:center; padding:10px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-light);" id="tab-history" onclick="switchOrderTab('history')">ประวัติวันนี้</div>
          </div>
       </div>
 
@@ -150,14 +161,14 @@
       <div class="header" style="justify-content: center;"><h2>ตั้งค่าร้านค้า</h2></div>
       <div style="padding: 20px;">
          
-         <div class="card" style="margin: 0 0 20px; display:flex; justify-content:space-between; align-items:center;">
+         <div class="card" style="margin: 0 0 20px; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:2px solid #e2e8f0;">
             <div>
-               <h3 style="margin:0 0 5px; font-size:16px;">สถานะร้านค้า</h3>
-               <p style="margin:0; font-size:12px; color:var(--text-light);">เปิด/ปิด การรับออเดอร์</p>
+               <h3 style="margin:0 0 5px; font-size:16px; color:var(--text-dark);">สถานะร้านค้า</h3>
+               <p style="margin:0; font-size:12px; color:var(--text-light);" id="store-status-text">ปิดรับออเดอร์</p>
             </div>
-            <label style="position:relative; width:50px; height:28px; background:#cbd5e1; border-radius:20px; transition:0.3s; cursor:pointer;" id="store-toggle-bg">
-               <input type="checkbox" id="store-open-toggle" style="opacity:0; width:0; height:0;" onchange="toggleStoreStatus()">
-               <div style="position:absolute; top:3px; left:3px; width:22px; height:22px; background:white; border-radius:50%; transition:0.3s;" id="store-toggle-dot"></div>
+            <label class="toggle-switch" id="store-toggle-bg">
+               <input type="checkbox" id="store-open-toggle" onchange="toggleStoreStatus()">
+               <div class="toggle-slider"></div>
             </label>
          </div>
 
@@ -196,6 +207,13 @@
        <div class="input-group"><label>ราคา (บาท)</label><input type="number" id="m-price" placeholder="50"></div>
        <div class="input-group"><label>ลิงก์รูปภาพเมนู</label><input type="text" id="m-img" placeholder="https://..."></div>
        
+       <!-- ส่วนเพิ่ม Addon/Topping อย่างง่าย -->
+       <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #e2e8f0;">
+          <label style="font-size:13px; color:var(--text-dark); font-weight:600; display:block; margin-bottom:10px;">ตัวเลือกเสริม / ท็อปปิ้ง (คั่นด้วยลูกน้ำ)</label>
+          <input type="text" id="m-addons" placeholder="เช่น ไข่ดาว:10, ไข่เจียว:10, พิเศษ:15" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-family:'Prompt'; font-size:13px; outline:none;">
+          <p style="font-size:11px; color:#94a3b8; margin-top:5px; margin-bottom:0;">รูปแบบ: ชื่อท็อปปิ้ง:ราคา (เช่น ไข่ดาว:10)</p>
+       </div>
+
        <button class="btn-main" onclick="saveMenu()"><span class="material-icons">save</span> บันทึกเมนู</button>
     </div>
   </div>
@@ -235,6 +253,24 @@
     let currentTab = 'new';
     let rawOrders = [];
 
+    // Mapping ภาษาอังกฤษ -> ไทย สำหรับแสดงผลให้ร้านค้าดู
+    const statusMap = {
+        "Pending": "รอร้านรับออเดอร์",
+        "Merchant Accept": "ร้านรับออเดอร์แล้ว",
+        "Preparing": "กำลังทำอาหาร",
+        "Searching Rider": "กำลังค้นหาไรเดอร์",
+        "Rider Accepted": "ไรเดอร์กำลังเดินทางมา",
+        "Rider Arrived": "ไรเดอร์ถึงร้านแล้ว",
+        "Picked Up": "ไรเดอร์รับอาหารไปแล้ว",
+        "On Delivery": "กำลังจัดส่ง",
+        "Delivered": "จัดส่งสำเร็จ",
+        "Completed": "เสร็จสิ้น",
+        "Cancelled Customer": "ลูกค้ายกเลิก",
+        "Cancelled Merchant": "ร้านค้ายกเลิก",
+        "Cancelled Rider": "ไรเดอร์ยกเลิก",
+        "Cancelled Admin": "แอดมินยกเลิก"
+    };
+
     window.onload = function() {
        if(currentMerchantId) { initApp(); } 
        else { document.getElementById('login-screen').style.display = 'flex'; }
@@ -264,7 +300,7 @@
                     const name = nameInput.value.trim();
                     if(!name) return showToast("กรุณากรอกชื่อร้านค้า");
                     await docRef.set({ 
-                        storeName: name, phone: phone, category: "ทั่วไป", isOpen: false, walletBalance: 0, menus: [], isBanned: false, lat: 17.1593, lng: 102.9737, createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                        storeName: name, phone: phone, category: "ทั่วไป", isOpen: false, walletBalance: 0, menus: [], rating: 5.0, reviewCount: 0, orderCount: 0, isBanned: false, lat: 17.1593, lng: 102.9737, createdAt: firebase.firestore.FieldValue.serverTimestamp() 
                     });
                     currentMerchantId = phone;
                     localStorage.setItem('hk_merchant_id', currentMerchantId);
@@ -289,7 +325,7 @@
       db.collection("merchants").doc(currentMerchantId).onSnapshot(doc => {
         if(doc.exists) { 
           merchantData = doc.data(); 
-          document.getElementById('display-store-name').innerText = merchantData.storeName; 
+          document.getElementById('display-store-name').innerText = merchantData.storeName || "ชื่อร้าน"; 
           document.getElementById('edit-store-name').value = merchantData.storeName || "";
           document.getElementById('edit-store-cat').value = merchantData.category || "";
           document.getElementById('edit-store-img').value = merchantData.image || "";
@@ -297,9 +333,19 @@
           document.getElementById('merchant-wallet-balance').innerText = (merchantData.walletBalance || 0).toFixed(2);
           
           const toggle = document.getElementById('store-open-toggle');
+          const toggleBg = document.getElementById('store-toggle-bg');
+          const statusText = document.getElementById('store-status-text');
+
           toggle.checked = merchantData.isOpen || false;
-          document.getElementById('store-toggle-bg').style.background = merchantData.isOpen ? "var(--success)" : "#cbd5e1";
-          document.getElementById('store-toggle-dot').style.transform = merchantData.isOpen ? "translateX(22px)" : "translateX(0)";
+          if(merchantData.isOpen) {
+              toggleBg.classList.add('active-bg');
+              statusText.innerText = "เปิดรับออเดอร์ปกติ";
+              statusText.style.color = "var(--success)";
+          } else {
+              toggleBg.classList.remove('active-bg');
+              statusText.innerText = "ปิดรับออเดอร์";
+              statusText.style.color = "var(--danger)";
+          }
 
           renderMenus();
           loadMerchantTransactions();
@@ -308,7 +354,7 @@
     }
 
     function toggleStoreStatus() {
-       const isOpen = !document.getElementById('store-open-toggle').checked;
+       const isOpen = document.getElementById('store-open-toggle').checked;
        db.collection("merchants").doc(currentMerchantId).update({ isOpen: isOpen }).then(() => {
            showToast(isOpen ? "เปิดร้านรับออเดอร์แล้ว" : "ปิดร้านเรียบร้อย");
        });
@@ -321,11 +367,11 @@
        db.collection("merchants").doc(currentMerchantId).update({ storeName: name, category: cat, image: img }).then(() => showToast("บันทึกข้อมูลร้านสำเร็จ"));
     }
 
-    // --- 3. ORDER MANAGEMENT (แก้ไขให้ดึง fullItems มาโชว์) ---
+    // --- 3. ORDER MANAGEMENT (Flow ใหม่) ---
     function listenToOrders() {
         if(orderListener) orderListener();
         
-        // แก้ไขปัญหาสาย Index ของ Firebase โดยดึงมาทั้งหมดของร้าน แล้วกรองเวลาด้วย Javascript
+        // ดึงเฉพาะออเดอร์ของวันนี้ (เพื่อไม่ให้แอปอืด)
         orderListener = db.collection("orders")
           .where("merchantId", "==", currentMerchantId)
           .onSnapshot(snap => {
@@ -336,7 +382,7 @@
              snap.forEach(doc => { 
                  const data = doc.data();
                  const t = data.createdAt ? data.createdAt.toMillis() : 0;
-                 if(t >= startOfDay) { // กรองเอาเฉพาะออเดอร์วันนี้
+                 if(t >= startOfDay) { 
                      rawOrders.push({ id: doc.id, ...data }); 
                  }
              });
@@ -344,7 +390,7 @@
              rawOrders.sort((a,b) => {
                  const tA = a.createdAt ? a.createdAt.toMillis() : 0;
                  const tB = b.createdAt ? b.createdAt.toMillis() : 0;
-                 return tB - tA;
+                 return tB - tA; // ล่าสุดขึ้นก่อน
              });
              
              document.getElementById('today-order-count').innerText = rawOrders.length;
@@ -356,6 +402,10 @@
         currentTab = tab;
         document.getElementById('tab-new').style.background = tab === 'new' ? 'var(--merchant-light)' : 'transparent';
         document.getElementById('tab-new').style.color = tab === 'new' ? 'var(--merchant-primary)' : 'var(--text-light)';
+        
+        document.getElementById('tab-cooking').style.background = tab === 'cooking' ? 'var(--merchant-light)' : 'transparent';
+        document.getElementById('tab-cooking').style.color = tab === 'cooking' ? 'var(--merchant-primary)' : 'var(--text-light)';
+        
         document.getElementById('tab-history').style.background = tab === 'history' ? 'var(--merchant-light)' : 'transparent';
         document.getElementById('tab-history').style.color = tab === 'history' ? 'var(--merchant-primary)' : 'var(--text-light)';
         renderOrders();
@@ -366,8 +416,12 @@
         let html = '';
         
         const filtered = rawOrders.filter(o => {
-            const isOngoing = o.status === "ค้นหาไรเดอร์" || o.status === "รอรับออเดอร์" || o.status === "ไรเดอร์กำลังไปรับอาหาร" || o.status === "กำลังเตรียมอาหาร" || o.status === "รอไรเดอร์มารับอาหาร";
-            return currentTab === 'new' ? isOngoing : !isOngoing;
+            const s = o.status;
+            // จัดกลุ่มสถานะตาม Tab
+            if(currentTab === 'new') return s === "Pending";
+            if(currentTab === 'cooking') return s === "Preparing" || s === "Searching Rider" || s === "Rider Accepted" || s === "Rider Arrived" || s === "Picked Up";
+            if(currentTab === 'history') return s === "Delivered" || s === "Completed" || s.includes("Cancel") || s.includes("สำเร็จ") || s.includes("ยกเลิก");
+            return false;
         });
 
         if(filtered.length === 0) {
@@ -377,15 +431,17 @@
 
         filtered.forEach(o => {
             const dateStr = o.createdAt ? new Date(o.createdAt.toMillis()).toLocaleTimeString('th-TH') : '';
+            const displayStatus = translateStatus(o.status);
             
             let statusColor = "var(--text-light)";
             let borderColor = "#e2e8f0";
-            if(o.status.includes('ค้นหา') || o.status.includes('รอรับ')) { statusColor = "var(--danger)"; borderColor = "var(--danger)"; }
-            else if(o.status.includes('เตรียม')) { statusColor = "var(--warning)"; borderColor = "var(--warning)"; }
-            else if(o.status.includes('รับอาหาร') || o.status.includes('ส่งอาหาร')) { statusColor = "var(--merchant-primary)"; borderColor = "var(--merchant-primary)"; }
-            else if(o.status.includes('สำเร็จ')) { statusColor = "var(--success)"; borderColor = "var(--success)"; }
+            
+            if(o.status === 'Pending') { statusColor = "var(--danger)"; borderColor = "var(--danger)"; }
+            else if(o.status === 'Preparing') { statusColor = "var(--warning)"; borderColor = "var(--warning)"; }
+            else if(o.status === 'Searching Rider' || o.status === 'Rider Accepted' || o.status === 'Rider Arrived') { statusColor = "var(--merchant-primary)"; borderColor = "var(--merchant-primary)"; }
+            else if(o.status === 'Picked Up' || o.status === 'On Delivery' || o.status === 'Delivered' || o.status === 'Completed') { statusColor = "var(--success)"; borderColor = "var(--success)"; }
 
-            // ดึงรายละเอียดสินค้า (ภาพและชื่อพร้อมท็อปปิ้ง) จาก fullItems
+            // ดึงรายละเอียดสินค้าพร้อมภาพ
             let itemsHtml = '';
             if(o.fullItems && o.fullItems.length > 0) {
                 itemsHtml = o.fullItems.map(itm => {
@@ -402,14 +458,16 @@
                 itemsHtml = o.items ? o.items.map(i => `<div style="margin-bottom:5px;">- ${i}</div>`).join('') : 'ไม่มีรายละเอียด';
             }
 
-            // จัดการปุ่มรับงาน/สถานะ ให้สอดคล้องกับไรเดอร์
+            // ปุ่มจัดการสถานะ (ตรงตาม Flow ใหม่)
             let actionHtml = '';
-            if(!o.status.includes('สำเร็จ') && !o.status.includes('ยกเลิก')) {
-                if(o.status === "ค้นหาไรเดอร์" || o.status === "รอรับออเดอร์") {
-                    actionHtml = `<button class="btn-main" style="padding:10px; font-size:14px; background:var(--warning);" onclick="updateOrderStatus('${o.id}', 'กำลังเตรียมอาหาร')">ร้านกดรับออเดอร์ / เริ่มทำอาหาร</button>`;
-                } else if (o.status === "กำลังเตรียมอาหาร" || o.status === "ไรเดอร์กำลังไปรับอาหาร") {
-                    actionHtml = `<button class="btn-main" style="padding:10px; font-size:14px; background:var(--success);" onclick="updateOrderStatus('${o.id}', 'รอไรเดอร์มารับอาหาร')">อาหารเสร็จแล้ว</button>`;
-                }
+            if (o.status === "Pending") {
+                actionHtml = `
+                <div style="display:flex; gap:10px;">
+                   <button class="btn-outline" style="border-color:var(--danger); color:var(--danger);" onclick="cancelOrder('${o.id}', ${o.totalPrice}, '${o.paymentMethod}')">ปฏิเสธรับงาน</button>
+                   <button class="btn-main" style="background:var(--merchant-primary);" onclick="updateOrderStatus('${o.id}', 'Preparing')">รับออเดอร์ (เริ่มทำอาหาร)</button>
+                </div>`;
+            } else if (o.status === "Preparing") {
+                actionHtml = `<button class="btn-main" style="background:var(--success);" onclick="updateOrderStatus('${o.id}', 'Searching Rider')">อาหารพร้อมแล้ว (เรียกไรเดอร์)</button>`;
             }
 
             html += `
@@ -420,13 +478,13 @@
                        <div style="font-size:12px; color:var(--text-light);">${dateStr}</div>
                     </div>
                     <div style="text-align:right;">
-                       <div style="color:${statusColor}; font-weight:700; font-size:13px;">${o.status}</div>
-                       <div style="font-size:11px; color:var(--text-light);">ไรเดอร์: ${o.riderName || 'ยังไม่มีไรเดอร์'}</div>
+                       <div style="color:${statusColor}; font-weight:700; font-size:13px;">${displayStatus}</div>
+                       <div style="font-size:11px; color:var(--text-light);">ไรเดอร์: ${o.riderName || '-'}</div>
                     </div>
                  </div>
                  
                  <div class="order-items">
-                    <div style="font-size:12px; color:var(--text-light); margin-bottom:5px;">รายการอาหาร:</div>
+                    <div style="font-size:12px; color:var(--text-light); margin-bottom:5px;">ลูกค้า: ${o.customerName || 'ลูกค้า'}</div>
                     ${itemsHtml}
                  </div>
                  
@@ -443,8 +501,37 @@
 
     function updateOrderStatus(orderId, newStatus) {
         db.collection("orders").doc(orderId).update({ status: newStatus }).then(() => {
-            showToast(`อัปเดตสถานะเป็น: ${newStatus}`);
+            showToast(`อัปเดตสถานะสำเร็จ`);
         });
+    }
+
+    async function cancelOrder(orderId, amount, payMethod) {
+        if(!confirm("คุณต้องการปฏิเสธ/ยกเลิกออเดอร์นี้ใช่หรือไม่? (ระบบจะคืนเงินลูกค้าอัตโนมัติหากมีการชำระแล้ว)")) return;
+        try {
+            const docRef = db.collection("orders").doc(orderId);
+            const docSnap = await docRef.get();
+            if(!docSnap.exists) return;
+            const d = docSnap.data();
+
+            await docRef.update({ status: "Cancelled Merchant" });
+
+            // คืนเงินลูกค้าถ้าจ่ายผ่านช่องทางที่จ่ายก่อน
+            if(d.paymentMethod === 'wallet' || d.paymentMethod === 'transfer') {
+                await db.collection("users").doc(d.userId).update({
+                    walletBalance: firebase.firestore.FieldValue.increment(d.totalPrice)
+                });
+                await db.collection("users").doc(d.userId).collection("transactions").add({
+                    title: `คืนเงิน (ร้านค้ายกเลิก) บิล #${orderId.substring(0,6).toUpperCase()}`,
+                    amount: d.totalPrice,
+                    type: 'income',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            showToast("ปฏิเสธออเดอร์เรียบร้อย");
+        } catch(e) {
+            console.error(e);
+            showToast("เกิดข้อผิดพลาด");
+        }
     }
 
     // --- 4. MENU MANAGEMENT ---
@@ -456,12 +543,21 @@
 
         let html = '';
         merchantData.menus.forEach((m, idx) => {
+            // ดึง Addon มาโชว์คร่าวๆ
+            let addonsText = '';
+            if(m.addons && m.addons.length > 0) {
+                addonsText = m.addons.map(a => `${a.name}(+${a.price})`).join(', ');
+            } else if (typeof m.addons === 'object' && m.addons !== null) {
+                addonsText = Object.keys(m.addons).map(k => `${k}(+${m.addons[k]})`).join(', ');
+            }
+
             html += `
               <div class="menu-item">
                  <img src="${m.image || 'https://via.placeholder.com/150'}" class="menu-img">
                  <div class="menu-details">
                     <div style="font-size:15px; font-weight:700; margin-bottom:4px;">${m.name}</div>
-                    <div style="font-size:12px; color:var(--text-light); margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${m.description || '-'}</div>
+                    <div style="font-size:12px; color:var(--text-light); margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${m.description || '-'}</div>
+                    ${addonsText ? `<div style="font-size:11px; color:var(--warning); margin-bottom:8px;">ตัวเลือก: ${addonsText}</div>` : ''}
                     <div style="font-size:15px; font-weight:700; color:var(--merchant-primary);">฿${m.price}</div>
                  </div>
                  <div style="display:flex; flex-direction:column; gap:8px;">
@@ -481,6 +577,7 @@
         document.getElementById('m-desc').value = "";
         document.getElementById('m-price').value = "";
         document.getElementById('m-img').value = "";
+        document.getElementById('m-addons').value = "";
         document.getElementById('menu-modal').style.display = 'flex';
     }
 
@@ -488,10 +585,19 @@
         const m = merchantData.menus[idx];
         document.getElementById('menu-modal-title').innerText = "แก้ไขเมนู";
         document.getElementById('menu-edit-idx').value = idx;
-        document.getElementById('m-name').value = m.name;
+        document.getElementById('m-name').value = m.name || "";
         document.getElementById('m-desc').value = m.description || "";
-        document.getElementById('m-price').value = m.price;
+        document.getElementById('m-price').value = m.price || 0;
         document.getElementById('m-img').value = m.image || "";
+        
+        let addonStr = "";
+        if(m.addons && Array.isArray(m.addons)) {
+            addonStr = m.addons.map(a => `${a.name}:${a.price}`).join(', ');
+        } else if (m.addons && typeof m.addons === 'object') {
+            addonStr = Object.keys(m.addons).map(k => `${k}:${m.addons[k]}`).join(', ');
+        }
+        document.getElementById('m-addons').value = addonStr;
+        
         document.getElementById('menu-modal').style.display = 'flex';
     }
 
@@ -501,11 +607,24 @@
         const desc = document.getElementById('m-desc').value.trim();
         const price = parseFloat(document.getElementById('m-price').value);
         const img = document.getElementById('m-img').value.trim();
+        const addonsStr = document.getElementById('m-addons').value.trim();
 
         if(!name || isNaN(price)) return showToast("กรุณาระบุชื่อและราคาให้ถูกต้อง");
 
+        // แปลงข้อความท็อปปิ้งเป็น Array
+        let addonsArray = [];
+        if (addonsStr) {
+            const pairs = addonsStr.split(',');
+            pairs.forEach(p => {
+                const parts = p.split(':');
+                if(parts.length === 2) {
+                    addonsArray.push({ name: parts[0].trim(), price: parseFloat(parts[1].trim()) || 0 });
+                }
+            });
+        }
+
         let updatedMenus = merchantData.menus ? [...merchantData.menus] : [];
-        const newMenu = { name, description: desc, price, image: img, addons: [] };
+        const newMenu = { name, description: desc, price, image: img, addons: addonsArray };
 
         if(idx >= 0) updatedMenus[idx] = { ...updatedMenus[idx], ...newMenu };
         else updatedMenus.push(newMenu);
@@ -539,7 +658,7 @@
                const isIncome = tx.type === 'income';
                const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
                html += `
-                 <div class="tx-item">
+                 <div class="tx-item" style="background:white; border-radius:12px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #f1f5f9;">
                    <div style="display:flex; align-items:center; gap:12px;">
                      <div style="width:40px; height:40px; border-radius:12px; background:${isIncome?'#d1fae5':'#fee2e2'}; color:${isIncome?'var(--success)':'var(--danger)'}; display:flex; justify-content:center; align-items:center;"><span class="material-icons">${isIncome?'payments':'account_balance'}</span></div>
                      <div><div style="font-weight:600; font-size:14px;">${tx.title}</div><div style="font-size:12px; color:var(--text-light);">${dateText}</div></div>
