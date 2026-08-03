@@ -12,8 +12,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   
+  <!-- เพิ่ม Firebase Storage ควบคู่กับ Firestore -->
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js"></script>
   
   <style>
     :root {
@@ -34,6 +36,7 @@
     .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 90px; animation: fadeIn 0.3s ease; }
     .screen.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     #login-screen { background: linear-gradient(135deg, #0f172a, #1e293b); justify-content: center; align-items: center; z-index: 9999; display: flex; }
     .login-box { background: var(--white); padding: 40px 30px; border-radius: 24px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
@@ -51,12 +54,14 @@
     .card { background: white; border-radius: 16px; margin: 0 20px 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
     .btn-main { background: var(--merchant-primary); color: white; border: none; padding: 15px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); transition: 0.2s; }
     .btn-main:active { transform: scale(0.98); }
+    .btn-main:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
     .btn-outline { background: white; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; width: 100%; cursor: pointer; transition: 0.2s; }
     .btn-outline:active { background: #f8fafc; }
     
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
-    .input-group input, .input-group textarea { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-family: 'Prompt'; font-size: 14px; outline: none; background: #f8fafc; }
+    .input-group input[type="text"], .input-group input[type="number"], .input-group textarea { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-family: 'Prompt'; font-size: 14px; outline: none; background: #f8fafc; }
+    .input-group input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 12px; font-family: 'Prompt'; font-size: 13px; outline: none; background: white; cursor: pointer; }
     .input-group input:focus, .input-group textarea:focus { border-color: var(--merchant-primary); background: white; }
     
     .order-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-left: 5px solid var(--warning); transition: 0.3s; }
@@ -175,8 +180,15 @@
          <div class="card" style="margin: 0 0 20px;">
             <div class="input-group"><label>ชื่อร้านค้า</label><input type="text" id="edit-store-name"></div>
             <div class="input-group"><label>หมวดหมู่อาหาร</label><input type="text" id="edit-store-cat" placeholder="เช่น อาหารตามสั่ง, เครื่องดื่ม"></div>
-            <div class="input-group"><label>ลิงก์รูปภาพปกหน้าร้าน</label><input type="text" id="edit-store-img" placeholder="https://..."></div>
-            <button class="btn-main" onclick="saveStoreProfile()"><span class="material-icons">save</span> บันทึกข้อมูลร้าน</button>
+            
+            <div class="input-group">
+               <label>รูประบุร้านค้า / ภาพปก</label>
+               <img id="store-img-preview" src="" style="width:100%; height:140px; object-fit:cover; border-radius:12px; margin-bottom:10px; display:none; background:#e2e8f0;">
+               <input type="file" id="store-img-file" accept="image/*" onchange="previewImage(event, 'store-img-preview')">
+               <input type="hidden" id="store-img-url">
+            </div>
+
+            <button class="btn-main" id="btn-save-store" onclick="saveStoreProfile()"><span class="material-icons">save</span> บันทึกข้อมูลร้าน</button>
          </div>
 
          <button class="btn-main" style="background:transparent; border:1px solid var(--danger); color:var(--danger); box-shadow:none;" onclick="logout()">ออกจากระบบ</button>
@@ -202,19 +214,25 @@
           <span class="material-icons" style="cursor:pointer; color:var(--text-light);" onclick="document.getElementById('menu-modal').style.display='none'">close</span>
        </div>
        <input type="hidden" id="menu-edit-idx" value="-1">
+       
+       <div class="input-group">
+          <label>รูปภาพเมนู</label>
+          <img id="m-img-preview" src="" style="width:100%; height:150px; object-fit:cover; border-radius:12px; margin-bottom:10px; display:none; background:#e2e8f0;">
+          <input type="file" id="m-img-file" accept="image/*" onchange="previewImage(event, 'm-img-preview')">
+          <input type="hidden" id="m-img-url">
+       </div>
+
        <div class="input-group"><label>ชื่อเมนูอาหาร</label><input type="text" id="m-name" placeholder="เช่น ข้าวกะเพราหมูกรอบ"></div>
        <div class="input-group"><label>รายละเอียด (ถ้ามี)</label><textarea id="m-desc" rows="2" placeholder="เช่น เผ็ดน้อย, ใส่ถั่วฝักยาว"></textarea></div>
        <div class="input-group"><label>ราคา (บาท)</label><input type="number" id="m-price" placeholder="50"></div>
-       <div class="input-group"><label>ลิงก์รูปภาพเมนู</label><input type="text" id="m-img" placeholder="https://..."></div>
        
-       <!-- ส่วนเพิ่ม Addon/Topping อย่างง่าย -->
        <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #e2e8f0;">
           <label style="font-size:13px; color:var(--text-dark); font-weight:600; display:block; margin-bottom:10px;">ตัวเลือกเสริม / ท็อปปิ้ง (คั่นด้วยลูกน้ำ)</label>
           <input type="text" id="m-addons" placeholder="เช่น ไข่ดาว:10, ไข่เจียว:10, พิเศษ:15" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-family:'Prompt'; font-size:13px; outline:none;">
           <p style="font-size:11px; color:#94a3b8; margin-top:5px; margin-bottom:0;">รูปแบบ: ชื่อท็อปปิ้ง:ราคา (เช่น ไข่ดาว:10)</p>
        </div>
 
-       <button class="btn-main" onclick="saveMenu()"><span class="material-icons">save</span> บันทึกเมนู</button>
+       <button class="btn-main" id="btn-save-menu" onclick="saveMenu()"><span class="material-icons">save</span> บันทึกเมนู</button>
     </div>
   </div>
 
@@ -245,7 +263,10 @@
       appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    
+    // ประกาศใช้งาน Database และ Storage
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     let currentMerchantId = localStorage.getItem('hk_merchant_id');
     let merchantData = {};
@@ -253,7 +274,6 @@
     let currentTab = 'new';
     let rawOrders = [];
 
-    // Mapping ภาษาอังกฤษ -> ไทย สำหรับแสดงผลให้ร้านค้าดู
     const statusMap = {
         "Pending": "รอร้านรับออเดอร์",
         "Merchant Accept": "ร้านรับออเดอร์แล้ว",
@@ -275,6 +295,20 @@
        if(currentMerchantId) { initApp(); } 
        else { document.getElementById('login-screen').style.display = 'flex'; }
     };
+
+    // แสดงภาพก่อนอัปโหลด
+    function previewImage(event, previewElementId) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(previewElementId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
 
     // --- 1. AUTHENTICATION ---
     async function handleLogin() {
@@ -328,7 +362,14 @@
           document.getElementById('display-store-name').innerText = merchantData.storeName || "ชื่อร้าน"; 
           document.getElementById('edit-store-name').value = merchantData.storeName || "";
           document.getElementById('edit-store-cat').value = merchantData.category || "";
-          document.getElementById('edit-store-img').value = merchantData.image || "";
+          
+          document.getElementById('store-img-url').value = merchantData.image || "";
+          if(merchantData.image) {
+              document.getElementById('store-img-preview').src = merchantData.image;
+              document.getElementById('store-img-preview').style.display = 'block';
+          } else {
+              document.getElementById('store-img-preview').style.display = 'none';
+          }
           
           document.getElementById('merchant-wallet-balance').innerText = (merchantData.walletBalance || 0).toFixed(2);
           
@@ -360,18 +401,49 @@
        });
     }
 
-    function saveStoreProfile() {
+    async function saveStoreProfile() {
+       const btn = document.getElementById('btn-save-store');
+       const originalText = btn.innerHTML;
+       
        const name = document.getElementById('edit-store-name').value.trim();
        const cat = document.getElementById('edit-store-cat').value.trim();
-       const img = document.getElementById('edit-store-img').value.trim();
-       db.collection("merchants").doc(currentMerchantId).update({ storeName: name, category: cat, image: img }).then(() => showToast("บันทึกข้อมูลร้านสำเร็จ"));
+       
+       if(!name) return showToast('กรุณากรอกชื่อร้านค้า');
+
+       btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">autorenew</span> กำลังบันทึก...';
+       btn.disabled = true;
+
+       try {
+           let imgUrl = document.getElementById('store-img-url').value;
+           const file = document.getElementById('store-img-file').files[0];
+           
+           if(file) {
+               const ref = storage.ref(`stores/${currentMerchantId}/cover_${Date.now()}_${file.name}`);
+               const snapshot = await ref.put(file);
+               imgUrl = await snapshot.ref.getDownloadURL();
+               document.getElementById('store-img-url').value = imgUrl; // อัปเดตช่องซ่อน
+           }
+
+           await db.collection("merchants").doc(currentMerchantId).update({ 
+               storeName: name, 
+               category: cat, 
+               image: imgUrl 
+           });
+           
+           showToast("บันทึกข้อมูลร้านสำเร็จ");
+       } catch(e) {
+           console.error(e);
+           showToast("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+       } finally {
+           btn.innerHTML = originalText;
+           btn.disabled = false;
+       }
     }
 
-    // --- 3. ORDER MANAGEMENT (Flow ใหม่) ---
+    // --- 3. ORDER MANAGEMENT ---
     function listenToOrders() {
         if(orderListener) orderListener();
         
-        // ดึงเฉพาะออเดอร์ของวันนี้ (เพื่อไม่ให้แอปอืด)
         orderListener = db.collection("orders")
           .where("merchantId", "==", currentMerchantId)
           .onSnapshot(snap => {
@@ -390,7 +462,7 @@
              rawOrders.sort((a,b) => {
                  const tA = a.createdAt ? a.createdAt.toMillis() : 0;
                  const tB = b.createdAt ? b.createdAt.toMillis() : 0;
-                 return tB - tA; // ล่าสุดขึ้นก่อน
+                 return tB - tA; 
              });
              
              document.getElementById('today-order-count').innerText = rawOrders.length;
@@ -417,7 +489,6 @@
         
         const filtered = rawOrders.filter(o => {
             const s = o.status;
-            // จัดกลุ่มสถานะตาม Tab
             if(currentTab === 'new') return s === "Pending";
             if(currentTab === 'cooking') return s === "Preparing" || s === "Searching Rider" || s === "Rider Accepted" || s === "Rider Arrived" || s === "Picked Up";
             if(currentTab === 'history') return s === "Delivered" || s === "Completed" || s.includes("Cancel") || s.includes("สำเร็จ") || s.includes("ยกเลิก");
@@ -441,7 +512,6 @@
             else if(o.status === 'Searching Rider' || o.status === 'Rider Accepted' || o.status === 'Rider Arrived') { statusColor = "var(--merchant-primary)"; borderColor = "var(--merchant-primary)"; }
             else if(o.status === 'Picked Up' || o.status === 'On Delivery' || o.status === 'Delivered' || o.status === 'Completed') { statusColor = "var(--success)"; borderColor = "var(--success)"; }
 
-            // ดึงรายละเอียดสินค้าพร้อมภาพ
             let itemsHtml = '';
             if(o.fullItems && o.fullItems.length > 0) {
                 itemsHtml = o.fullItems.map(itm => {
@@ -458,7 +528,6 @@
                 itemsHtml = o.items ? o.items.map(i => `<div style="margin-bottom:5px;">- ${i}</div>`).join('') : 'ไม่มีรายละเอียด';
             }
 
-            // ปุ่มจัดการสถานะ (ตรงตาม Flow ใหม่)
             let actionHtml = '';
             if (o.status === "Pending") {
                 actionHtml = `
@@ -515,7 +584,6 @@
 
             await docRef.update({ status: "Cancelled Merchant" });
 
-            // คืนเงินลูกค้าถ้าจ่ายผ่านช่องทางที่จ่ายก่อน
             if(d.paymentMethod === 'wallet' || d.paymentMethod === 'transfer') {
                 await db.collection("users").doc(d.userId).update({
                     walletBalance: firebase.firestore.FieldValue.increment(d.totalPrice)
@@ -534,7 +602,7 @@
         }
     }
 
-    // --- 4. MENU MANAGEMENT ---
+    // --- 4. MENU MANAGEMENT (อัปเกรดระบบอัปโหลดรูป) ---
     function renderMenus() {
         const list = document.getElementById('merchant-menus-list');
         if(!merchantData.menus || merchantData.menus.length === 0) {
@@ -543,7 +611,6 @@
 
         let html = '';
         merchantData.menus.forEach((m, idx) => {
-            // ดึง Addon มาโชว์คร่าวๆ
             let addonsText = '';
             if(m.addons && m.addons.length > 0) {
                 addonsText = m.addons.map(a => `${a.name}(+${a.price})`).join(', ');
@@ -573,10 +640,16 @@
     function openMenuModal() {
         document.getElementById('menu-modal-title').innerText = "เพิ่มเมนูใหม่";
         document.getElementById('menu-edit-idx').value = "-1";
+        
+        // เคลียร์ข้อมูลรูปภาพ
+        document.getElementById('m-img-file').value = "";
+        document.getElementById('m-img-url').value = "";
+        document.getElementById('m-img-preview').src = "";
+        document.getElementById('m-img-preview').style.display = "none";
+        
         document.getElementById('m-name').value = "";
         document.getElementById('m-desc').value = "";
         document.getElementById('m-price').value = "";
-        document.getElementById('m-img').value = "";
         document.getElementById('m-addons').value = "";
         document.getElementById('menu-modal').style.display = 'flex';
     }
@@ -585,10 +658,20 @@
         const m = merchantData.menus[idx];
         document.getElementById('menu-modal-title').innerText = "แก้ไขเมนู";
         document.getElementById('menu-edit-idx').value = idx;
+        
+        // ใส่ข้อมูลรูปภาพเดิม
+        document.getElementById('m-img-file').value = ""; // เคลียร์ input file
+        document.getElementById('m-img-url').value = m.image || "";
+        if(m.image) {
+            document.getElementById('m-img-preview').src = m.image;
+            document.getElementById('m-img-preview').style.display = 'block';
+        } else {
+            document.getElementById('m-img-preview').style.display = 'none';
+        }
+        
         document.getElementById('m-name').value = m.name || "";
         document.getElementById('m-desc').value = m.description || "";
         document.getElementById('m-price').value = m.price || 0;
-        document.getElementById('m-img').value = m.image || "";
         
         let addonStr = "";
         if(m.addons && Array.isArray(m.addons)) {
@@ -601,38 +684,60 @@
         document.getElementById('menu-modal').style.display = 'flex';
     }
 
-    function saveMenu() {
+    async function saveMenu() {
+        const btn = document.getElementById('btn-save-menu');
+        const originalText = btn.innerHTML;
+        
         const idx = parseInt(document.getElementById('menu-edit-idx').value);
         const name = document.getElementById('m-name').value.trim();
         const desc = document.getElementById('m-desc').value.trim();
         const price = parseFloat(document.getElementById('m-price').value);
-        const img = document.getElementById('m-img').value.trim();
         const addonsStr = document.getElementById('m-addons').value.trim();
 
         if(!name || isNaN(price)) return showToast("กรุณาระบุชื่อและราคาให้ถูกต้อง");
 
-        // แปลงข้อความท็อปปิ้งเป็น Array
-        let addonsArray = [];
-        if (addonsStr) {
-            const pairs = addonsStr.split(',');
-            pairs.forEach(p => {
-                const parts = p.split(':');
-                if(parts.length === 2) {
-                    addonsArray.push({ name: parts[0].trim(), price: parseFloat(parts[1].trim()) || 0 });
-                }
-            });
-        }
+        btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">autorenew</span> กำลังบันทึกภาพและเมนู...';
+        btn.disabled = true;
 
-        let updatedMenus = merchantData.menus ? [...merchantData.menus] : [];
-        const newMenu = { name, description: desc, price, image: img, addons: addonsArray };
+        try {
+            let imgUrl = document.getElementById('m-img-url').value;
+            const file = document.getElementById('m-img-file').files[0];
+            
+            // ถ้ามีการเลือกไฟล์รูปมาใหม่ ให้อัปโหลดเข้า Firebase Storage
+            if(file) {
+                const ref = storage.ref(`menus/${currentMerchantId}/${Date.now()}_${file.name}`);
+                const snapshot = await ref.put(file);
+                imgUrl = await snapshot.ref.getDownloadURL();
+            }
 
-        if(idx >= 0) updatedMenus[idx] = { ...updatedMenus[idx], ...newMenu };
-        else updatedMenus.push(newMenu);
+            let addonsArray = [];
+            if (addonsStr) {
+                const pairs = addonsStr.split(',');
+                pairs.forEach(p => {
+                    const parts = p.split(':');
+                    if(parts.length === 2) {
+                        addonsArray.push({ name: parts[0].trim(), price: parseFloat(parts[1].trim()) || 0 });
+                    }
+                });
+            }
 
-        db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus }).then(() => {
+            let updatedMenus = merchantData.menus ? [...merchantData.menus] : [];
+            const newMenu = { name, description: desc, price, image: imgUrl, addons: addonsArray };
+
+            if(idx >= 0) updatedMenus[idx] = { ...updatedMenus[idx], ...newMenu };
+            else updatedMenus.push(newMenu);
+
+            await db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus });
+            
             showToast("บันทึกเมนูสำเร็จ");
             document.getElementById('menu-modal').style.display = 'none';
-        });
+        } catch(e) {
+            console.error(e);
+            showToast("เกิดข้อผิดพลาดในการอัปโหลด: " + e.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
     function deleteMenu(idx) {
