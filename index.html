@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   
-  <title>ห้วยเกิ้ง Delivery - Customer</title>
+  <title>ห้วยเกิ้ง Delivery</title>
   
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -77,7 +77,7 @@
       background: var(--primary-color);
       color: white;
       border-radius: 50%;
-      display: none; 
+      display: none;
       justify-content: center;
       align-items: center;
       box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
@@ -139,10 +139,14 @@
     .btn-primary { background: var(--primary-color); color: white; border: none; padding: 15px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 8px 15px rgba(16, 185, 129, 0.2); }
     .btn-outline { background: white; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 15px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; }
 
-    /* Toppings List */
-    .topping-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-    .topping-item label { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; width: 100%; }
-    .topping-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary-color); }
+    /* Review Stars */
+    .star-rating { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-direction: row-reverse; }
+    .star-rating input { display: none; }
+    .star-rating label { font-size: 40px; color: #cbd5e1; cursor: pointer; transition: 0.2s; }
+    .star-rating input:checked ~ label { color: var(--secondary-color); }
+    .star-rating label:hover, .star-rating label:hover ~ label { color: var(--secondary-color); }
+
+    .review-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
 
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 24px; border-radius: 30px; font-size: 14px; z-index: 10000; display: none; white-space: nowrap; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .toast.show { display: block; animation: fadeUp 0.3s ease; }
@@ -204,7 +208,10 @@
     <div style="background: white; padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
       <p style="margin: 0 0 5px; color: var(--text-light); font-size: 13px;" id="res-detail-cat">หมวดหมู่</p>
       <div style="display: flex; gap: 15px; font-size: 13px; font-weight: 500; color: var(--text-dark);">
-        <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--secondary-color);">star</span> <span id="res-detail-rating">0.0</span></span>
+        <!-- กดที่ดาวเพื่อดูรีวิวย้อนหลัง -->
+        <span style="display: flex; align-items: center; gap: 4px; cursor: pointer; text-decoration: underline; color: var(--text-dark);" onclick="openReviewsListModal()">
+           <span class="material-icons" style="font-size: 16px; color: var(--secondary-color);">star</span> <span id="res-detail-rating">0.0</span> (<span id="res-detail-review-count">0</span> รีวิว)
+        </span>
         <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--primary-color);">receipt_long</span> ขายแล้ว <span id="res-detail-orders">0</span></span>
         <span style="display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px; color: var(--primary-color);">moped</span> ระยะทาง <span id="res-detail-dist">0</span> กม.</span>
       </div>
@@ -339,7 +346,7 @@
 
   <div id="order-history-screen" class="screen">
     <div class="header"><span class="material-icons" style="cursor:pointer;" onclick="showScreen('profile-screen')">arrow_back</span><h2>ประวัติการสั่งซื้อ</h2><div style="width:24px;"></div></div>
-    <div id="history-list" style="padding: 20px;"><p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p></div>
+    <div id="history-list" style="padding: 20px; padding-bottom: 100px;"><p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p></div>
   </div>
 
   <!-- ================= FLOATING CART (ตะกร้าแบบลอย) ================= -->
@@ -348,7 +355,7 @@
     <div class="fab-badge" id="fab-cart-count">0</div>
   </div>
 
-  <!-- ================= ACTIVE ORDER TRACKER (ปรับโครงสร้างปุ่มยกเลิกไว้ด้านนอก) ================= -->
+  <!-- ================= ACTIVE ORDER TRACKER ================= -->
   <div class="active-order-tracker" id="active-order-tracker">
     <div style="display: flex; align-items: center; flex: 1; cursor: pointer; overflow: hidden;" onclick="openTrackerModal()">
       <div style="width: 40px; height: 40px; background: var(--primary-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative; margin-right: 12px; flex-shrink: 0;">
@@ -372,7 +379,7 @@
 
   <!-- ================= MODALS ================= -->
   
-  <!-- Topping Modal (สแกนหาตัวแปรครอบจักรวาล ป้องกัน undefined) -->
+  <!-- Topping Modal -->
   <div class="modal-overlay" id="topping-modal">
     <div class="modal-content">
        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -420,7 +427,7 @@
     </div>
   </div>
 
-  <!-- Order Detail / Chat Modal (แผนที่, แอนิเมชัน, ยกเลิก, ซ่อนแชท) -->
+  <!-- Order Detail / Chat Modal -->
   <div class="modal-overlay" id="order-detail-modal">
     <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column; padding: 0;">
        <div style="padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center;">
@@ -433,11 +440,9 @@
                 <h2 style="margin: 0 0 5px; color: var(--primary-color);" id="track-status-text">สถานะ...</h2>
                 <p style="margin: 0; font-size: 13px;" id="track-res-name">ร้านค้า</p>
              </div>
-             <!-- ปุ่มยกเลิกออเดอร์ใน Modal -->
              <button id="btn-cancel-order" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none; margin: 0;" onclick="cancelActiveOrder(event)">ยกเลิกออเดอร์</button>
           </div>
           
-          <!-- Animation ค้นหาไรเดอร์ -->
           <div id="wait-animation" style="text-align: center; display: none; padding: 20px 0;">
              <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 15px;">
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-light); border-radius: 50%;" class="radar-pulse-anim"></div>
@@ -449,7 +454,6 @@
              <p style="margin: 0; font-size: 12px; color: var(--text-light);">กรุณารอสักครู่ ระบบกำลังจับคู่ไรเดอร์ให้คุณ</p>
           </div>
 
-          <!-- แผนที่ Tracking -->
           <div id="tracking-map"></div>
 
           <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -465,13 +469,51 @@
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">พื้นที่แชทกับไรเดอร์ (จะเปิดเมื่อไรเดอร์รับงาน)</p>
        </div>
        
-       <!-- ส่วนแชท -->
        <div id="chat-input-wrapper" style="padding: 15px; background: white; border-top: 1px solid #eee; display: none; gap: 10px; padding-bottom: calc(15px + env(safe-area-bottom));">
           <input type="text" id="cus-chat-input" placeholder="พิมพ์ข้อความหาไรเดอร์..." style="flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-family: 'Prompt';">
           <button id="cus-chat-send" style="background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;" onclick="sendChatToRider()">
              <span class="material-icons">send</span>
           </button>
        </div>
+    </div>
+  </div>
+
+  <!-- Review Form Modal -->
+  <div class="modal-overlay" id="review-modal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 style="margin-top:0; margin-bottom:10px; color:var(--primary-color);">รีวิวร้านอาหาร</h3>
+      <p style="color:var(--text-light); font-size:13px; margin-bottom:20px;">ให้คะแนนเพื่อเป็นกำลังใจให้ร้านค้า</p>
+      
+      <div class="star-rating">
+        <input type="radio" id="star5" name="rate" value="5"><label for="star5">★</label>
+        <input type="radio" id="star4" name="rate" value="4"><label for="star4">★</label>
+        <input type="radio" id="star3" name="rate" value="3"><label for="star3">★</label>
+        <input type="radio" id="star2" name="rate" value="2"><label for="star2">★</label>
+        <input type="radio" id="star1" name="rate" value="1"><label for="star1">★</label>
+      </div>
+
+      <textarea id="review-comment" rows="3" placeholder="เขียนรีวิวของคุณที่นี่..." style="width:100%; padding:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Prompt'; outline:none; margin-bottom:20px; font-size:13px;"></textarea>
+      
+      <input type="hidden" id="review-order-id">
+      <input type="hidden" id="review-merchant-id">
+      
+      <div style="display:flex; gap:10px;">
+         <button class="btn-outline" onclick="document.getElementById('review-modal').style.display='none'">ยกเลิก</button>
+         <button class="btn-primary" onclick="submitReview()">ส่งรีวิว</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews List Modal (ดูรีวิวย้อนหลัง) -->
+  <div class="modal-overlay" id="reviews-list-modal">
+    <div class="modal-content" style="max-height: 80vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 style="margin:0; font-size:18px;">รีวิวจากลูกค้า</h3>
+        <span class="material-icons" style="cursor:pointer;" onclick="document.getElementById('reviews-list-modal').style.display='none'">close</span>
+      </div>
+      <div id="reviews-list-container" style="overflow-y:auto; flex-grow:1;">
+         <p style="text-align:center; color:#999;">กำลังโหลด...</p>
+      </div>
     </div>
   </div>
 
@@ -517,7 +559,6 @@
     let userMarker = null;
     let riderLocationListener = null;
 
-    // ระบบ Mapping สถานะเป็นภาษาไทย
     const statusMap = {
         "Pending": "รอร้านรับออเดอร์",
         "Merchant Accept": "ร้านรับออเดอร์แล้ว",
@@ -536,7 +577,6 @@
     };
 
     function translateStatus(dbStatus) {
-        // หากใน DB เป็นคำไทยอยู่แล้วให้ใช้เลย (รองรับระบบเดิม) หรือใช้ statusMap สำหรับโครงสร้างใหม่
         return statusMap[dbStatus] || dbStatus; 
     }
 
@@ -673,8 +713,9 @@
           const res = { id: doc.id, ...doc.data() };
           allRestaurants.push(res);
           
-          const rating = res.rating || res.score || '4.5';
-          const orderCount = res.orderCount || res.sold || res.reviews || '0';
+          // ดึง Rating ของจริงจาก Database
+          const rating = res.rating ? parseFloat(res.rating).toFixed(1) : '5.0';
+          const orderCount = res.orderCount || 0; // ดึงยอดขายจริงที่ไรเดอร์บวกให้
           
           html += `
             <div class="restaurant-card" onclick="openRestaurant('${res.id}')">
@@ -697,8 +738,9 @@
       document.getElementById('res-detail-cat').innerText = selectedRestaurant.category || 'อาหารทั่วไป';
       document.getElementById('res-detail-dist').innerText = getDistance(userLat, userLng, selectedRestaurant.lat, selectedRestaurant.lng);
       
-      document.getElementById('res-detail-rating').innerText = selectedRestaurant.rating || selectedRestaurant.score || '4.5';
-      document.getElementById('res-detail-orders').innerText = selectedRestaurant.orderCount || selectedRestaurant.sold || selectedRestaurant.reviews || '0';
+      document.getElementById('res-detail-rating').innerText = selectedRestaurant.rating ? parseFloat(selectedRestaurant.rating).toFixed(1) : '5.0';
+      document.getElementById('res-detail-review-count').innerText = selectedRestaurant.reviewCount || 0;
+      document.getElementById('res-detail-orders').innerText = selectedRestaurant.orderCount || 0;
       
       const menuList = document.getElementById('menu-list');
       if(!selectedRestaurant.menus || selectedRestaurant.menus.length === 0) {
@@ -727,7 +769,7 @@
       showScreen('menu-screen');
     }
 
-    // ================= ระบบ Topping (สแกนหาคีย์แบบครอบจักรวาล) =================
+    // ================= ระบบ Topping =================
     function handleMenuClick(idx, event) {
         const menu = selectedRestaurant.menus[idx];
         const addons = menu.addons || menu.toppings || menu.options || menu.extra || menu.choices || menu.Addons || menu.Toppings || []; 
@@ -925,7 +967,6 @@
             slipUrl = "รอการตรวจสอบสลิป";
         }
 
-        // สถานะเริ่มต้นของ Flow ใหม่คือ "Pending"
         const orderData = {
           userId: currentUserId || "guest", 
           customerName: currentUserName || "ลูกค้าทั่วไป", 
@@ -940,7 +981,8 @@
           promoCode: appliedPromoCodeStr || "",
           paymentMethod: method || "cash", 
           slipImage: slipUrl || "",
-          status: "Pending", // ใช้ภาษาอังกฤษคุมหลังบ้าน (แปลไทยที่หน้าจอ)
+          status: "Pending", 
+          isReviewed: false, // สถานะว่ารีวิวหรือยัง
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -963,14 +1005,7 @@
         });
     }
 
-    function openTrackerModal() {
-        document.getElementById('order-detail-modal').style.display='flex';
-        if (trackingMap) {
-            setTimeout(() => { trackingMap.invalidateSize(); }, 300);
-        }
-    }
-
-    // ================= Tracker, Map & Chat (ระบบดักออเดอร์ผี + แปลสถานะ + ปุ่มยกเลิกข้างนอก) =================
+    // ================= Tracker, Map & Chat (ซ่อนออเดอร์ค้าง) =================
     function checkActiveOrder() {
       if (!currentUserId || currentUserId.startsWith('guest')) return;
       
@@ -979,19 +1014,16 @@
          let latestActiveOrder = null;
          let latestTime = 0;
          
-         // ดักออเดอร์ผี (ออเดอร์เก่าที่ค้างในฐานข้อมูลเกิน 12 ชั่วโมง)
          const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000); 
 
          snapshot.forEach(doc => {
              const d = doc.data();
              const status = d.status || "";
              
-             // ดักจับสถานะที่เสร็จสมบูรณ์หรือถูกยกเลิกแล้ว (ทั้งคีย์ใหม่และคีย์เก่า)
              const isCompletedOrCancelled = status.includes('สำเร็จ') || status.includes('เสร็จสิ้น') || status.includes('ยกเลิก') || status === 'Delivered' || status === 'Completed' || status.includes('Cancelled');
              
              if(!isCompletedOrCancelled) {
                  const t = d.createdAt ? d.createdAt.toMillis() : Date.now();
-                 // ล้างออเดอร์ที่ค้างเกิน 12 ชม.
                  if (t > twelveHoursAgo) {
                      if(t > latestTime) {
                          latestTime = t;
@@ -1006,17 +1038,14 @@
             const d = latestActiveOrder;
             activeOrderId = d.id;
             
-            // แปลงสถานะจากอังกฤษเป็นไทย (หรือถ้าเป็นไทยอยู่แล้วก็ปล่อยผ่าน)
             const thaiStatus = translateStatus(d.status);
 
             document.getElementById('active-order-tracker').style.display = 'flex';
             document.getElementById('tracker-status').innerText = thaiStatus;
             document.getElementById('tracker-res').innerText = d.restaurantName;
             
-            // ตรวจจับคำว่ารอหรือค้นหา (ทั้งอังกฤษและไทย)
             const isWaiting = thaiStatus.includes('ค้นหา') || thaiStatus.includes('รอ') || d.status === 'Pending' || d.status === 'Merchant Accept' || d.status === 'Searching Rider';
 
-            // โชว์ปุ่มยกเลิกบนแถบ Tracking Bar
             if(isWaiting) {
                 document.getElementById('quick-cancel-btn').style.display = 'block';
             } else {
@@ -1052,7 +1081,6 @@
         
         const btnCancel = document.getElementById('btn-cancel-order');
         
-        // ให้ปุ่มยกเลิกและเรดาร์โชว์เมื่อร้านยังไม่เสร็จอาหารหรือยังไม่มีไรเดอร์
         if (isWaiting) {
             btnCancel.style.display = 'block';
             document.getElementById('wait-animation').style.display = 'block';
@@ -1188,6 +1216,160 @@
         input.value = '';
     }
 
+    // ================= ระบบให้ดาว และดูรีวิวย้อนหลัง =================
+    function fetchOrderHistory() {
+       if (currentUserId.startsWith('guest')) return;
+       db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
+           const list = document.getElementById('history-list');
+           if(snap.empty) {
+               list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p>'; 
+               return;
+           }
+           let orders = [];
+           snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
+           orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+           let html = '';
+           orders.slice(0, 15).forEach(d => {
+              const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
+              const thaiStatus = translateStatus(d.status || "");
+              const isCompleted = d.status === 'Delivered' || d.status === 'Completed' || thaiStatus.includes('สำเร็จ');
+              
+              let itemsHtml = '';
+              if(d.fullItems && d.fullItems.length > 0) {
+                  itemsHtml = d.fullItems.map(itm => {
+                      let imgHtml = itm.image ? `<img src="${itm.image}" style="width:36px; height:36px; border-radius:8px; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:8px; background:var(--primary-light); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:16px; color:var(--primary-color);">restaurant</span></div>`;
+                      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">${imgHtml} <span style="font-size:13px; font-weight:500; color:var(--text-dark);">${itm.name}</span></div>`;
+                  }).join('');
+              } else {
+                  itemsHtml = `<div style="font-size:13px; color:var(--text-light); margin-bottom:5px;">${d.items ? d.items.join(', ') : ''}</div>`;
+              }
+
+              // ปุ่มรีวิว ถ้าส่งสำเร็จและยังไม่ได้รีวิว
+              let reviewBtn = '';
+              if (isCompleted && !d.isReviewed) {
+                  reviewBtn = `<button class="btn-outline" style="padding:6px 12px; font-size:12px; border-color:var(--secondary-color); color:var(--secondary-color); width:auto;" onclick="openReviewModal('${d.id}', '${d.merchantId}')"><span class="material-icons" style="font-size:14px; vertical-align:middle;">star</span> ให้คะแนนร้านนี้</button>`;
+              }
+
+              html += `<div style="background:white; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #eee;">
+                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><b>${d.restaurantName}</b><span style="font-size:12px; color:#999;">${date}</span></div>
+                 ${itemsHtml}
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top:1px dashed #eee; padding-top:10px;">
+                    <span style="color:var(--primary-color); font-weight:700;">฿${d.totalPrice}</span>
+                    <span class="badge" style="background:#f1f5f9; color:#64748b; padding:4px 8px; font-size:11px; border-radius:12px;">${thaiStatus}</span>
+                 </div>
+                 ${reviewBtn ? `<div style="margin-top:10px; text-align:right;">${reviewBtn}</div>` : ''}
+              </div>`;
+           });
+           list.innerHTML = html;
+       });
+    }
+
+    function openReviewModal(orderId, merchantId) {
+        document.getElementById('review-order-id').value = orderId;
+        document.getElementById('review-merchant-id').value = merchantId;
+        document.getElementById('review-comment').value = '';
+        // Reset stars
+        document.querySelectorAll('input[name="rate"]').forEach(radio => radio.checked = false);
+        document.getElementById('review-modal').style.display = 'flex';
+    }
+
+    async function submitReview() {
+        const orderId = document.getElementById('review-order-id').value;
+        const merchantId = document.getElementById('review-merchant-id').value;
+        const comment = document.getElementById('review-comment').value.trim();
+        
+        let selectedStars = 0;
+        document.querySelectorAll('input[name="rate"]').forEach(radio => {
+            if(radio.checked) selectedStars = parseInt(radio.value);
+        });
+
+        if (selectedStars === 0) return showToast('กรุณาให้ดาวร้านค้าอย่างน้อย 1 ดาว');
+
+        try {
+            // 1. บันทึกรีวิวลงร้านค้า
+            await db.collection("merchants").doc(merchantId).collection("reviews").add({
+                userId: currentUserId,
+                userName: currentUserName,
+                rating: selectedStars,
+                comment: comment,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // 2. อัปเดตสถานะว่ารีวิวแล้ว
+            await db.collection("orders").doc(orderId).update({ isReviewed: true });
+
+            // 3. ดึงและคำนวณดาวเฉลี่ยของร้านค้า
+            const mRef = db.collection("merchants").doc(merchantId);
+            const mDoc = await mRef.get();
+            if(mDoc.exists) {
+                const mData = mDoc.data();
+                const currentReviewCount = mData.reviewCount || 0;
+                const currentRating = parseFloat(mData.rating || 5.0);
+                
+                // คำนวณค่าเฉลี่ยใหม่
+                const newReviewCount = currentReviewCount + 1;
+                const totalScore = (currentRating * currentReviewCount) + selectedStars;
+                const newAverageRating = (totalScore / newReviewCount).toFixed(1);
+
+                await mRef.update({
+                    rating: parseFloat(newAverageRating),
+                    reviewCount: newReviewCount
+                });
+            }
+
+            showToast('ขอบคุณสำหรับรีวิวครับ!');
+            document.getElementById('review-modal').style.display = 'none';
+            fetchOrderHistory(); // รีเฟรชหน้าประวัติ
+            loadRestaurants(); // รีเฟรชดาวหน้าร้าน
+
+        } catch (error) {
+            console.error(error);
+            showToast('เกิดข้อผิดพลาดในการบันทึกรีวิว');
+        }
+    }
+
+    function openReviewsListModal() {
+        if(!selectedRestaurant) return;
+        const merchantId = selectedRestaurant.id;
+        const container = document.getElementById('reviews-list-container');
+        container.innerHTML = '<p style="text-align:center; color:#999;">กำลังโหลด...</p>';
+        document.getElementById('reviews-list-modal').style.display = 'flex';
+
+        db.collection("merchants").doc(merchantId).collection("reviews").orderBy("createdAt", "desc").get().then(snap => {
+            if (snap.empty) {
+                container.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">ยังไม่มีรีวิวจากลูกค้า</p>';
+                return;
+            }
+            let html = '';
+            snap.forEach(doc => {
+                const r = doc.data();
+                const date = r.createdAt ? new Date(r.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
+                
+                // วาดดาว
+                let stars = '';
+                for(let i=1; i<=5; i++) {
+                    stars += `<span style="color:${i <= r.rating ? 'var(--secondary-color)' : '#e2e8f0'}; font-size:16px;">★</span>`;
+                }
+
+                html += `
+                <div class="review-card">
+                   <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                      <strong style="font-size:14px;">${r.userName}</strong>
+                      <span style="font-size:11px; color:#999;">${date}</span>
+                   </div>
+                   <div style="margin-bottom:8px;">${stars}</div>
+                   <p style="margin:0; font-size:13px; color:var(--text-dark);">${r.comment || '-'}</p>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }).catch(err => {
+            container.innerHTML = '<p style="text-align:center; color:var(--danger);">เกิดข้อผิดพลาดในการดึงข้อมูล</p>';
+        });
+    }
+
+    // --- Utils ---
     function showScreen(screenId) { 
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
       document.getElementById(screenId).classList.add('active'); 
@@ -1232,46 +1414,6 @@
         if(!msg) return showToast("กรุณาพิมพ์รายละเอียดปัญหา");
         db.collection("support_tickets").add({ userId: currentUserId, userName: currentUserName, userPhone: userProfileData.phone || "ไม่ระบุ", message: msg, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() })
         .then(() => { showToast("ส่งเรื่องสำเร็จ แอดมินจะรีบตรวจสอบครับ!"); document.getElementById('ticket-msg').value = ''; document.getElementById('help-modal').style.display = 'none'; });
-    }
-
-    function fetchOrderHistory() {
-       if (currentUserId.startsWith('guest')) return;
-       db.collection("orders").where("userId", "==", currentUserId).get().then(snap => {
-           const list = document.getElementById('history-list');
-           if(snap.empty) {
-               list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ไม่มีประวัติการสั่งซื้อ</p>'; 
-               return;
-           }
-           let orders = [];
-           snap.forEach(doc => orders.push({id: doc.id, ...doc.data()}));
-           orders.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
-
-           let html = '';
-           orders.slice(0, 15).forEach(d => {
-              const date = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('th-TH') : '';
-              const thaiStatus = translateStatus(d.status || "");
-              
-              let itemsHtml = '';
-              if(d.fullItems && d.fullItems.length > 0) {
-                  itemsHtml = d.fullItems.map(itm => {
-                      let imgHtml = itm.image ? `<img src="${itm.image}" style="width:36px; height:36px; border-radius:8px; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:8px; background:var(--primary-light); display:flex; justify-content:center; align-items:center;"><span class="material-icons" style="font-size:16px; color:var(--primary-color);">restaurant</span></div>`;
-                      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">${imgHtml} <span style="font-size:13px; font-weight:500; color:var(--text-dark);">${itm.name}</span></div>`;
-                  }).join('');
-              } else {
-                  itemsHtml = `<div style="font-size:13px; color:var(--text-light); margin-bottom:5px;">${d.items ? d.items.join(', ') : ''}</div>`;
-              }
-
-              html += `<div style="background:white; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #eee;">
-                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><b>${d.restaurantName}</b><span style="font-size:12px; color:#999;">${date}</span></div>
-                 ${itemsHtml}
-                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top:1px dashed #eee; padding-top:10px;">
-                    <span style="color:var(--primary-color); font-weight:700;">฿${d.totalPrice}</span>
-                    <span class="badge" style="background:#f1f5f9; color:#64748b; padding:4px 8px; font-size:11px; border-radius:12px;">${thaiStatus}</span>
-                 </div>
-              </div>`;
-           });
-           list.innerHTML = html;
-       });
     }
 
     function flyToCartAnimation(e) {
