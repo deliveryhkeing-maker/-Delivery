@@ -3,11 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  
-  <title>Merchant App - ห้วยเกิ้ง Delivery</title>
+  <title>Merchant App (Stable) - ห้วยเกิ้ง Delivery</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -37,7 +33,6 @@
     .screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 90px; animation: fadeIn 0.3s ease; }
     .screen.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     /* Login Screen */
     #login-screen { background: linear-gradient(135deg, #0f172a, #1e293b); justify-content: center; align-items: center; z-index: 9999; display: flex; }
@@ -82,17 +77,17 @@
     .menu-item { display: flex; padding: 15px; border: 1px solid var(--border); background: white; align-items: flex-start; gap: 15px; border-radius: 16px; margin-bottom: 10px; }
     .menu-img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; background: #e2e8f0; flex-shrink: 0; }
     
-    /* Modals */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 1000; backdrop-filter: blur(2px); }
-    .modal-content { background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 25px 20px 40px; max-height: 90vh; overflow-y: auto; }
-    .modal-close { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-
     /* Custom Toggle Switch */
     .toggle-switch { position:relative; width:54px; height:30px; background:var(--border); border-radius:30px; transition:0.3s; cursor:pointer; display:inline-block; }
     .toggle-switch input { opacity:0; width:0; height:0; }
     .toggle-slider { position:absolute; top:3px; left:3px; width:24px; height:24px; background:white; border-radius:50%; transition:0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     .toggle-switch input:checked + .toggle-slider { transform: translateX(24px); }
     .toggle-switch.active-bg { background: var(--success); }
+
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 1000; backdrop-filter: blur(2px); }
+    .modal-content { background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 25px 20px 40px; max-height: 90vh; overflow-y: auto; }
+    .modal-close { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
     .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; z-index: 10000; display: none; white-space: nowrap; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .toast.show { display: block; animation: fadeDown 0.3s ease; }
@@ -145,9 +140,7 @@
 
     <!-- 2. MENU MANAGER SCREEN -->
     <div id="menus-screen" class="screen">
-      <div class="header" style="justify-content: center;">
-         <h2>จัดการเมนูอาหาร</h2>
-      </div>
+      <div class="header" style="justify-content: center;"><h2>จัดการเมนูอาหาร</h2></div>
       <div style="padding: 20px;">
          <button class="btn btn-main" style="margin-bottom: 20px;" onclick="openMenuModal()"><span class="material-icons">add_circle</span> เพิ่มเมนูใหม่</button>
          <div id="merchant-menus-list"></div>
@@ -161,11 +154,7 @@
         <div style="background: linear-gradient(135deg, var(--merchant-primary), var(--merchant-dark)); border-radius: 24px; padding: 30px 20px; color: white; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(59,130,246,0.3);">
           <p style="margin: 0 0 10px; font-size: 14px; opacity: 0.9;">ยอดเงินคงเหลือ / ถอนได้</p>
           <h1 style="margin: 0 0 20px; font-size: 46px; font-weight:700;">฿<span id="merchant-wallet-balance">0.00</span></h1>
-          <button class="btn" style="background: white; color: var(--merchant-dark); padding: 12px; font-size: 15px;" onclick="document.getElementById('withdraw-modal').style.display='flex'">
-            <span class="material-icons">account_balance</span> แจ้งถอนยอดขาย
-          </button>
         </div>
-        
         <h3 style="margin: 20px 0 15px; font-size: 16px; font-weight:700;">ประวัติการทำรายการล่าสุด</h3>
         <div id="merchant-tx-list"><p style="text-align: center; color: var(--text-light);">กำลังโหลด...</p></div>
       </div>
@@ -175,8 +164,6 @@
     <div id="profile-screen" class="screen">
       <div class="header" style="justify-content: center;"><h2>ตั้งค่าร้านค้า</h2></div>
       <div style="padding: 20px;">
-         
-         <!-- เปิด/ปิด ร้าน -->
          <div class="card" style="margin: 0 0 20px; display:flex; justify-content:space-between; align-items:center;">
             <div>
                <h3 style="margin:0 0 5px; font-size:16px; color:var(--text-dark);">สถานะร้านค้า</h3>
@@ -187,22 +174,11 @@
                <div class="toggle-slider"></div>
             </label>
          </div>
-
-         <!-- ข้อมูลร้าน -->
          <div class="card" style="margin: 0 0 20px;">
             <div class="input-group"><label>ชื่อร้านค้า</label><input type="text" id="edit-store-name"></div>
             <div class="input-group"><label>หมวดหมู่อาหาร</label><input type="text" id="edit-store-cat" placeholder="เช่น อาหารตามสั่ง, เครื่องดื่ม"></div>
-            
-            <div class="input-group">
-               <label>รูปภาพปกหน้าร้าน</label>
-               <img id="store-img-preview" src="" style="width:100%; height:140px; object-fit:cover; border-radius:12px; margin-bottom:10px; display:none; background:#e2e8f0;">
-               <input type="file" id="store-img-file" accept="image/*" onchange="previewImage(event, 'store-img-preview')">
-               <input type="hidden" id="store-img-url">
-            </div>
-
-            <button class="btn btn-main" id="btn-save-store" onclick="saveStoreProfile()"><span class="material-icons">save</span> บันทึกข้อมูลร้าน</button>
+            <button class="btn btn-main" onclick="saveStoreProfile()">บันทึกข้อมูลร้าน</button>
          </div>
-
          <button class="btn btn-danger-outline" onclick="logout()">ออกจากระบบ</button>
       </div>
     </div>
@@ -216,48 +192,20 @@
     </div>
   </div>
 
-  <!-- ================= MODALS ================= -->
-
-  <!-- Modal จัดการเมนู (รองรับการอัปโหลดรูปและเพิ่ม Option) -->
+  <!-- Modal จัดการเมนู -->
   <div class="modal-overlay" id="menu-modal">
     <div class="modal-content" style="position:relative;">
        <div class="modal-close" onclick="document.getElementById('menu-modal').style.display='none'"><span class="material-icons">close</span></div>
        <h3 style="margin:0 0 20px; font-size:18px;" id="menu-modal-title">เพิ่มเมนูใหม่</h3>
-       
        <input type="hidden" id="menu-edit-idx" value="-1">
        
-       <div class="input-group">
-          <label>รูปภาพเมนู</label>
-          <img id="m-img-preview" src="" style="width:100%; height:150px; object-fit:cover; border-radius:12px; margin-bottom:10px; display:none; background:#e2e8f0;">
-          <input type="file" id="m-img-file" accept="image/*" onchange="previewImage(event, 'm-img-preview')">
-          <input type="hidden" id="m-img-url">
-       </div>
-
        <div class="input-group"><label>ชื่อเมนูอาหาร</label><input type="text" id="m-name" placeholder="เช่น ข้าวกะเพราหมูกรอบ"></div>
-       <div class="input-group"><label>รายละเอียด (ถ้ามี)</label><textarea id="m-desc" rows="2" placeholder="เช่น เมนูเด็ดประจำร้าน..."></textarea></div>
        <div class="input-group"><label>ราคา (บาท)</label><input type="number" id="m-price" placeholder="50"></div>
-       
        <div style="background:var(--bg-color); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--border);">
           <label style="font-size:13px; color:var(--text-dark); font-weight:600; display:block; margin-bottom:5px;">ตัวเลือกเสริม / ท็อปปิ้ง (คั่นด้วยลูกน้ำ)</label>
-          <input type="text" id="m-addons" placeholder="เช่น ไข่ดาว:10, เพิ่มข้าว:5" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'Prompt'; font-size:13px; outline:none;">
-          <p style="font-size:11px; color:var(--text-light); margin-top:8px; margin-bottom:0;">รูปแบบ: ชื่อ:ราคา (เช่น ไข่ดาว:10, พิเศษ:15)</p>
+          <input type="text" id="m-addons" placeholder="เช่น ไข่ดาว:10, เพิ่มข้าว:5" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'Prompt'; outline:none;">
        </div>
-
-       <button class="btn btn-main" id="btn-save-menu" onclick="saveMenu()"><span class="material-icons">save</span> บันทึกเมนู</button>
-    </div>
-  </div>
-
-  <!-- Modal ถอนเงิน -->
-  <div class="modal-overlay" id="withdraw-modal">
-    <div class="modal-content" style="position:relative;">
-      <div class="modal-close" onclick="document.getElementById('withdraw-modal').style.display='none'"><span class="material-icons">close</span></div>
-      <h3 style="margin-top:0; margin-bottom:20px; color:var(--merchant-primary); font-size:18px;">แจ้งถอนยอดขาย</h3>
-      
-      <div class="input-group"><label>ธนาคาร/พร้อมเพย์</label><input type="text" id="wd-bank" placeholder="เช่น กสิกรไทย"></div>
-      <div class="input-group"><label>เลขบัญชี</label><input type="text" id="wd-acc" placeholder="ระบุเลขบัญชี"></div>
-      <div class="input-group"><label>จำนวนเงิน (บาท)</label><input type="number" id="withdraw-amount" placeholder="ขั้นต่ำ 100 บาท"></div>
-      
-      <button class="btn btn-main" onclick="submitWithdraw()">ยืนยันถอนเงิน</button>
+       <button class="btn btn-main" onclick="saveMenu()">บันทึกเมนู</button>
     </div>
   </div>
 
@@ -265,9 +213,7 @@
 
   <!-- ================= SCRIPTS ================= -->
   <script>
-    // ==========================================
-    // ⚠️ Firebase Config 
-    // ==========================================
+    // ⚠️ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCpthHvN4d_zT_7ZWwi9a32ItXjtrcqSSI",
       authDomain: "fooddelivery-h.firebaseapp.com",
@@ -277,14 +223,8 @@
       appId: "1:901130815996:web:25dd921cdfcc9463eeca79"
     };
 
-    try {
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    } catch (error) {
-        alert("⚠️ เกิดข้อผิดพลาดในการตั้งค่า Firebase: " + error.message);
-    }
-    
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     let currentMerchantId = localStorage.getItem('hk_merchant_id');
     let merchantData = {};
@@ -292,7 +232,6 @@
     let currentTab = 'new';
     let rawOrders = [];
 
-    // Mapping ภาษาอังกฤษ -> ไทย สำหรับแสดงผล
     const statusMap = {
         "Pending": "รอรับออเดอร์",
         "Merchant Accept": "รับออเดอร์แล้ว",
@@ -305,11 +244,8 @@
         "Delivered": "จัดส่งสำเร็จ",
         "Completed": "เสร็จสิ้น",
         "Cancelled Customer": "ลูกค้ายกเลิก",
-        "Cancelled Merchant": "ร้านค้ายกเลิก",
-        "Cancelled Rider": "ไรเดอร์ยกเลิก",
-        "Cancelled Admin": "แอดมินยกเลิก"
+        "Cancelled Merchant": "ร้านค้ายกเลิก"
     };
-
     function translateStatus(s) { return statusMap[s] || s; }
 
     window.onload = function() {
@@ -317,35 +253,19 @@
        else { document.getElementById('login-screen').style.display = 'flex'; }
     };
 
-    function previewImage(event, previewElementId) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById(previewElementId);
-                img.src = e.target.result;
-                img.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    // --- 1. AUTHENTICATION ---
+    // --- Auth ---
     async function handleLogin() {
         const phone = document.getElementById('login-phone').value.trim();
         const nameInput = document.getElementById('login-name');
-        
         if(!phone || phone.length < 9) return showToast("กรุณากรอกเบอร์โทรให้ถูกต้อง");
         
         try {
             const docRef = db.collection("merchants").doc(phone);
             const docSnap = await docRef.get();
-            
             if(docSnap.exists) {
                 currentMerchantId = phone;
                 localStorage.setItem('hk_merchant_id', currentMerchantId);
-                showToast("เข้าสู่ระบบสำเร็จ");
-                initApp();
+                showToast("เข้าสู่ระบบสำเร็จ"); initApp();
             } else {
                 if(nameInput.style.display === 'none') {
                     nameInput.style.display = 'block';
@@ -353,26 +273,21 @@
                 } else {
                     const name = nameInput.value.trim();
                     if(!name) return showToast("กรุณากรอกชื่อร้านค้า");
-                    await docRef.set({ 
-                        storeName: name, phone: phone, category: "ทั่วไป", isOpen: false, walletBalance: 0, menus: [], rating: 5.0, reviewCount: 0, orderCount: 0, isBanned: false, lat: 17.1593, lng: 102.9737, createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-                    });
+                    await docRef.set({ storeName: name, phone: phone, category: "ทั่วไป", isOpen: false, walletBalance: 0, menus: [], rating: 5.0, orderCount: 0, lat: 17.1593, lng: 102.9737, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                     currentMerchantId = phone;
                     localStorage.setItem('hk_merchant_id', currentMerchantId);
-                    showToast("ลงทะเบียนสำเร็จ");
-                    initApp();
+                    showToast("ลงทะเบียนสำเร็จ"); initApp();
                 }
             }
         } catch(e) { showToast("Error: " + e.message); }
     }
-
     function logout() { localStorage.removeItem('hk_merchant_id'); location.reload(); }
 
-    // --- 2. INITIALIZATION ---
+    // --- Init ---
     function initApp() {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
-        loadStoreProfile();
-        listenToOrders();
+        loadStoreProfile(); listenToOrders();
     }
 
     function loadStoreProfile() {
@@ -382,13 +297,6 @@
           document.getElementById('display-store-name').innerText = merchantData.storeName || "ชื่อร้าน"; 
           document.getElementById('edit-store-name').value = merchantData.storeName || "";
           document.getElementById('edit-store-cat').value = merchantData.category || "";
-          
-          document.getElementById('store-img-url').value = merchantData.image || "";
-          if(merchantData.image) {
-              document.getElementById('store-img-preview').src = merchantData.image;
-              document.getElementById('store-img-preview').style.display = 'block';
-          }
-          
           document.getElementById('merchant-wallet-balance').innerText = (merchantData.walletBalance || 0).toFixed(2);
           
           const toggle = document.getElementById('store-open-toggle');
@@ -397,17 +305,11 @@
 
           toggle.checked = merchantData.isOpen || false;
           if(merchantData.isOpen) {
-              toggleBg.classList.add('active-bg');
-              statusText.innerText = "เปิดรับออเดอร์ปกติ";
-              statusText.style.color = "var(--success)";
+              toggleBg.classList.add('active-bg'); statusText.innerText = "เปิดรับออเดอร์ปกติ"; statusText.style.color = "var(--success)";
           } else {
-              toggleBg.classList.remove('active-bg');
-              statusText.innerText = "ปิดรับออเดอร์";
-              statusText.style.color = "var(--danger)";
+              toggleBg.classList.remove('active-bg'); statusText.innerText = "ปิดรับออเดอร์"; statusText.style.color = "var(--danger)";
           }
-
-          renderMenus();
-          loadMerchantTransactions();
+          renderMenus(); loadMerchantTransactions();
         }
       });
     }
@@ -420,65 +322,24 @@
     }
 
     async function saveStoreProfile() {
-       const btn = document.getElementById('btn-save-store');
-       const originalText = btn.innerHTML;
-       
        const name = document.getElementById('edit-store-name').value.trim();
        const cat = document.getElementById('edit-store-cat').value.trim();
-       
        if(!name) return showToast('กรุณากรอกชื่อร้านค้า');
-
-       btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">autorenew</span> กำลังบันทึก...';
-       btn.disabled = true;
-
-       try {
-           let imgUrl = document.getElementById('store-img-url').value;
-           const file = document.getElementById('store-img-file').files[0];
-           
-           if(file) {
-               const ref = storage.ref(`stores/${currentMerchantId}/cover_${Date.now()}_${file.name}`);
-               const snapshot = await ref.put(file);
-               imgUrl = await snapshot.ref.getDownloadURL();
-               document.getElementById('store-img-url').value = imgUrl; 
-           }
-
-           await db.collection("merchants").doc(currentMerchantId).update({ 
-               storeName: name, 
-               category: cat, 
-               image: imgUrl 
-           });
-           
-           showToast("บันทึกข้อมูลร้านสำเร็จ");
-       } catch(e) {
-           console.error(e);
-           showToast("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
-       } finally {
-           btn.innerHTML = originalText;
-           btn.disabled = false;
-       }
+       await db.collection("merchants").doc(currentMerchantId).update({ storeName: name, category: cat });
+       showToast("บันทึกข้อมูลร้านสำเร็จ");
     }
 
-    // --- 3. ORDER MANAGEMENT (Flow 100%) ---
+    // --- Order Management ---
     function listenToOrders() {
         if(orderListener) orderListener();
-        
-        orderListener = db.collection("orders")
-          .where("merchantId", "==", currentMerchantId)
-          .onSnapshot(snap => {
-             const now = new Date();
-             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        orderListener = db.collection("orders").where("merchantId", "==", currentMerchantId).onSnapshot(snap => {
+             const now = new Date(); const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
              rawOrders = [];
-             
              snap.forEach(doc => { 
-                 const data = doc.data();
-                 const t = data.createdAt ? data.createdAt.toMillis() : 0;
-                 if(t >= startOfDay) { 
-                     rawOrders.push({ id: doc.id, ...data }); 
-                 }
+                 const data = doc.data(); const t = data.createdAt ? data.createdAt.toMillis() : 0;
+                 if(t >= startOfDay) { rawOrders.push({ id: doc.id, ...data }); }
              });
-             
              rawOrders.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
-             
              document.getElementById('today-order-count').innerText = rawOrders.length;
              renderOrders();
           });
@@ -494,7 +355,6 @@
     function renderOrders() {
         const container = document.getElementById('orders-container');
         let html = '';
-        
         const filtered = rawOrders.filter(o => {
             const s = o.status;
             if(currentTab === 'new') return s === "Pending";
@@ -512,36 +372,20 @@
             const dateStr = o.createdAt ? new Date(o.createdAt.toMillis()).toLocaleTimeString('th-TH') : '';
             const displayStatus = translateStatus(o.status);
             
-            let statusColor = "var(--text-light)";
-            let borderClass = "";
-            
+            let statusColor = "var(--text-light)"; let borderClass = "";
             if(o.status === 'Pending') { statusColor = "var(--danger)"; }
             else if(o.status === 'Preparing') { statusColor = "var(--warning)"; }
-            else if(o.status === 'Searching Rider' || o.status === 'Rider Accepted' || o.status === 'Rider Arrived') { statusColor = "var(--merchant-primary)"; borderClass = "primary-border"; }
-            else if(o.status === 'Picked Up' || o.status === 'On Delivery' || o.status === 'Delivered' || o.status === 'Completed') { statusColor = "var(--success)"; borderClass = "success-border"; }
+            else if(['Searching Rider', 'Rider Accepted', 'Rider Arrived'].includes(o.status)) { statusColor = "var(--merchant-primary)"; borderClass = "primary-border"; }
+            else if(['Picked Up', 'On Delivery', 'Delivered', 'Completed'].includes(o.status)) { statusColor = "var(--success)"; borderClass = "success-border"; }
 
-            // ดึงรายละเอียดอาหาร
-            let itemsHtml = '';
-            if(o.fullItems && o.fullItems.length > 0) {
-                itemsHtml = o.fullItems.map(itm => {
-                    return `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:8px;">
-                                <div>
-                                    <div style="font-size:14px; font-weight:600; color:var(--text-dark);">${itm.name}</div>
-                                    <div style="font-size:12px; color:var(--text-light);">จำนวน: ${itm.qty}</div>
-                                </div>
-                                <div style="font-size:14px; font-weight:600;">฿${itm.totalPrice}</div>
-                            </div>`;
-                }).join('');
-            } else {
-                itemsHtml = o.items ? o.items.map(i => `<div style="margin-bottom:5px;">- ${i}</div>`).join('') : 'ไม่มีรายละเอียด';
-            }
+            let itemsHtml = (o.fullItems || []).map(itm => `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:8px;"><div><div style="font-size:14px; font-weight:600; color:var(--text-dark);">${itm.name}</div><div style="font-size:12px; color:var(--text-light);">จำนวน: ${itm.qty}</div></div><div style="font-size:14px; font-weight:600;">฿${itm.totalPrice}</div></div>`).join('');
 
-            // ปุ่มจัดการสถานะ (ตรงตาม Flow ใหม่เป๊ะ)
             let actionHtml = '';
             if (o.status === "Pending") {
+                // ส่ง customerId เข้าไปในฟังก์ชัน cancelOrder ด้วย เพื่อการคืนเงินที่แม่นยำ
                 actionHtml = `
                 <div style="display:flex; gap:10px;">
-                   <button class="btn btn-danger-outline" style="flex:1;" onclick="cancelOrder('${o.id}', ${o.totalPrice}, '${o.paymentMethod}')">ปฏิเสธรับงาน</button>
+                   <button class="btn btn-danger-outline" style="flex:1;" onclick="cancelOrder('${o.id}', ${o.totalPrice}, '${o.paymentMethod}', '${o.userId}')">ปฏิเสธรับงาน</button>
                    <button class="btn btn-main" style="flex:2;" onclick="updateOrderStatus('${o.id}', 'Preparing')">รับออเดอร์ (ทำอาหาร)</button>
                 </div>`;
             } else if (o.status === "Preparing") {
@@ -550,26 +394,12 @@
 
             html += `
               <div class="order-card ${borderClass}">
-                 <div class="order-header">
-                    <div>
-                       <strong style="font-size:16px;">#${o.id.substring(0,6).toUpperCase()}</strong>
-                       <div style="font-size:12px; color:var(--text-light);">${dateStr}</div>
-                    </div>
-                    <div style="text-align:right;">
-                       <div style="color:${statusColor}; font-weight:700; font-size:13px;">${displayStatus}</div>
-                       <div style="font-size:11px; color:var(--text-light);">ไรเดอร์: ${o.riderName || '-'}</div>
-                    </div>
+                 <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                    <div><strong style="font-size:16px;">#${o.id.substring(0,6).toUpperCase()}</strong><div style="font-size:12px; color:var(--text-light);">${dateStr}</div></div>
+                    <div style="text-align:right;"><div style="color:${statusColor}; font-weight:700; font-size:13px;">${displayStatus}</div><div style="font-size:11px; color:var(--text-light);">ไรเดอร์: ${o.riderName || '-'}</div></div>
                  </div>
-                 
-                 <div class="order-items">
-                    <div style="font-size:12px; font-weight:600; color:var(--merchant-primary); margin-bottom:10px;">ผู้สั่ง: ${o.customerName || 'ลูกค้า'}</div>
-                    ${itemsHtml}
-                 </div>
-                 
-                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <span style="font-size:13px; color:var(--text-light);">ยอดรับสุทธิ</span>
-                    <strong style="font-size:18px; color:var(--merchant-primary);">฿${o.totalPrice}</strong>
-                 </div>
+                 <div style="margin-bottom:15px;"><div style="font-size:12px; font-weight:600; color:var(--merchant-primary); margin-bottom:10px;">ผู้สั่ง: ${o.customerName || 'ลูกค้า'}</div>${itemsHtml}</div>
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><span style="font-size:13px; color:var(--text-light);">ยอดรับสุทธิ</span><strong style="font-size:18px; color:var(--merchant-primary);">฿${o.totalPrice}</strong></div>
                  ${actionHtml}
               </div>
             `;
@@ -583,62 +413,62 @@
         });
     }
 
-    async function cancelOrder(orderId, amount, payMethod) {
-        if(!confirm("ต้องการปฏิเสธออเดอร์นี้ใช่หรือไม่? (ระบบจะคืนเงินลูกค้าอัตโนมัติหากจ่ายผ่าน Wallet/โอน)")) return;
+    // ⭐ Transaction Logic สำหรับการยกเลิกออเดอร์
+    async function cancelOrder(orderId, amount, payMethod, customerId) {
+        if(!confirm("ต้องการปฏิเสธออเดอร์นี้ใช่หรือไม่?\nระบบจะคืนเงินเข้า Wallet ลูกค้าอัตโนมัติ (หากชำระแล้ว)")) return;
+        
         try {
-            const docRef = db.collection("orders").doc(orderId);
-            const docSnap = await docRef.get();
-            if(!docSnap.exists) return;
-            const d = docSnap.data();
+            await db.runTransaction(async (transaction) => {
+                const orderRef = db.collection("orders").doc(orderId);
+                const orderDoc = await transaction.get(orderRef);
+                
+                if(!orderDoc.exists) throw "ไม่พบออเดอร์";
+                if(orderDoc.data().status !== "Pending") throw "สถานะออเดอร์เปลี่ยนไปแล้ว ไม่สามารถยกเลิกได้";
 
-            await docRef.update({ status: "Cancelled Merchant" });
+                // 1. เปลี่ยนสถานะบิล
+                transaction.update(orderRef, { status: "Cancelled Merchant" });
 
-            // คืนเงินลูกค้าถ้าจ่ายผ่าน Wallet/Transfer
-            if(d.paymentMethod === 'wallet' || d.paymentMethod === 'transfer') {
-                await db.collection("users").doc(d.userId).update({
-                    walletBalance: firebase.firestore.FieldValue.increment(d.totalPrice)
-                });
-                await db.collection("users").doc(d.userId).collection("transactions").add({
-                    title: `คืนเงิน (ร้านค้ายกเลิก) บิล #${orderId.substring(0,6).toUpperCase()}`,
-                    amount: d.totalPrice,
-                    type: 'income',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
-            showToast("ปฏิเสธออเดอร์เรียบร้อย");
+                // 2. ถ้าจ่ายผ่าน Wallet ให้คืนเงินทันทีในคำสั่งเดียวกัน
+                if(payMethod === 'wallet' && customerId) {
+                    const userRef = db.collection("users").doc(customerId);
+                    transaction.update(userRef, {
+                        walletBalance: firebase.firestore.FieldValue.increment(amount)
+                    });
+                    
+                    const txRef = userRef.collection("transactions").doc();
+                    transaction.set(txRef, {
+                        title: `คืนเงิน (ร้านค้ายกเลิก) บิล #${orderId.substring(0,6).toUpperCase()}`,
+                        amount: amount,
+                        type: 'income',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            });
+            showToast("ปฏิเสธออเดอร์และจัดการคืนเงินเรียบร้อยแล้ว");
         } catch(e) {
             console.error(e);
-            showToast("เกิดข้อผิดพลาด");
+            showToast(typeof e === 'string' ? e : "เกิดข้อผิดพลาดในการยกเลิกออเดอร์");
         }
     }
 
-    // --- 4. MENU MANAGEMENT ---
+    // --- Menu Management ---
     function renderMenus() {
         const list = document.getElementById('merchant-menus-list');
-        if(!merchantData.menus || merchantData.menus.length === 0) {
-            list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ยังไม่มีเมนูอาหาร</p>'; return;
-        }
+        if(!merchantData.menus || merchantData.menus.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ยังไม่มีเมนูอาหาร</p>'; return; }
 
         let html = '';
         merchantData.menus.forEach((m, idx) => {
-            // แปลง Array ของ Addon เป็น Text ให้ร้านดูง่าย
-            let addonsText = '';
-            if(m.addons && Array.isArray(m.addons) && m.addons.length > 0) {
-                addonsText = m.addons.map(a => `${a.name}(+${a.price})`).join(', ');
-            }
-
+            let addonsText = (m.addons || []).map(a => `${a.name}(+${a.price})`).join(', ');
             html += `
               <div class="menu-item">
-                 <img src="${m.image || 'https://via.placeholder.com/150'}" class="menu-img">
                  <div class="menu-details">
                     <div style="font-size:15px; font-weight:700; margin-bottom:2px; color:var(--text-dark);">${m.name}</div>
-                    <div style="font-size:12px; color:var(--text-light); margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${m.description || '-'}</div>
                     ${addonsText ? `<div style="font-size:11px; color:var(--warning); margin-bottom:5px;">ตัวเลือก: ${addonsText}</div>` : ''}
                     <div style="font-size:15px; font-weight:700; color:var(--merchant-primary);">฿${m.price}</div>
                  </div>
                  <div style="display:flex; flex-direction:column; gap:8px;">
-                    <button class="btn btn-outline" style="padding:6px 12px; font-size:12px;" onclick="editMenu(${idx})">แก้ไข</button>
-                    <button class="btn btn-danger-outline" style="padding:6px 12px; font-size:12px;" onclick="deleteMenu(${idx})">ลบ</button>
+                    <button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" onclick="editMenu(${idx})">แก้ไข</button>
+                    <button class="btn btn-danger-outline" style="padding:4px 10px; font-size:11px;" onclick="deleteMenu(${idx})">ลบ</button>
                  </div>
               </div>
             `;
@@ -649,16 +479,7 @@
     function openMenuModal() {
         document.getElementById('menu-modal-title').innerText = "เพิ่มเมนูใหม่";
         document.getElementById('menu-edit-idx').value = "-1";
-        
-        document.getElementById('m-img-file').value = "";
-        document.getElementById('m-img-url').value = "";
-        document.getElementById('m-img-preview').src = "";
-        document.getElementById('m-img-preview').style.display = "none";
-        
-        document.getElementById('m-name').value = "";
-        document.getElementById('m-desc').value = "";
-        document.getElementById('m-price').value = "";
-        document.getElementById('m-addons').value = "";
+        document.getElementById('m-name').value = ""; document.getElementById('m-price').value = ""; document.getElementById('m-addons').value = "";
         document.getElementById('menu-modal').style.display = 'flex';
     }
 
@@ -666,141 +487,61 @@
         const m = merchantData.menus[idx];
         document.getElementById('menu-modal-title').innerText = "แก้ไขเมนู";
         document.getElementById('menu-edit-idx').value = idx;
-        
-        document.getElementById('m-img-file').value = ""; 
-        document.getElementById('m-img-url').value = m.image || "";
-        if(m.image) {
-            document.getElementById('m-img-preview').src = m.image;
-            document.getElementById('m-img-preview').style.display = 'block';
-        } else {
-            document.getElementById('m-img-preview').style.display = 'none';
-        }
-        
-        document.getElementById('m-name').value = m.name || "";
-        document.getElementById('m-desc').value = m.description || "";
-        document.getElementById('m-price').value = m.price || 0;
-        
-        let addonStr = "";
-        if(m.addons && Array.isArray(m.addons)) {
-            addonStr = m.addons.map(a => `${a.name}:${a.price}`).join(', ');
-        }
+        document.getElementById('m-name').value = m.name || ""; document.getElementById('m-price').value = m.price || 0;
+        let addonStr = (m.addons || []).map(a => `${a.name}:${a.price}`).join(', ');
         document.getElementById('m-addons').value = addonStr;
-        
         document.getElementById('menu-modal').style.display = 'flex';
     }
 
     async function saveMenu() {
-        const btn = document.getElementById('btn-save-menu');
-        const originalText = btn.innerHTML;
-        
         const idx = parseInt(document.getElementById('menu-edit-idx').value);
         const name = document.getElementById('m-name').value.trim();
-        const desc = document.getElementById('m-desc').value.trim();
         const price = parseFloat(document.getElementById('m-price').value);
         const addonsStr = document.getElementById('m-addons').value.trim();
 
         if(!name || isNaN(price)) return showToast("กรุณาระบุชื่อและราคาให้ถูกต้อง");
 
-        btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">autorenew</span> กำลังบันทึก...';
-        btn.disabled = true;
-
-        try {
-            let imgUrl = document.getElementById('m-img-url').value;
-            const file = document.getElementById('m-img-file').files[0];
-            
-            // Upload to Storage
-            if(file) {
-                const ref = storage.ref(`menus/${currentMerchantId}/${Date.now()}_${file.name}`);
-                const snapshot = await ref.put(file);
-                imgUrl = await snapshot.ref.getDownloadURL();
-            }
-
-            // แปลง string เป็น array ของ object เพื่อให้ลูกค้ากดเลือกได้
-            let addonsArray = [];
-            if (addonsStr) {
-                const pairs = addonsStr.split(',');
-                pairs.forEach(p => {
-                    const parts = p.split(':');
-                    if(parts.length === 2) {
-                        addonsArray.push({ name: parts[0].trim(), price: parseFloat(parts[1].trim()) || 0 });
-                    }
-                });
-            }
-
-            let updatedMenus = merchantData.menus ? [...merchantData.menus] : [];
-            const newMenu = { name, description: desc, price, image: imgUrl, addons: addonsArray };
-
-            if(idx >= 0) updatedMenus[idx] = { ...updatedMenus[idx], ...newMenu };
-            else updatedMenus.push(newMenu);
-
-            await db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus });
-            
-            showToast("บันทึกเมนูสำเร็จ");
-            document.getElementById('menu-modal').style.display = 'none';
-        } catch(e) {
-            console.error(e);
-            showToast("เกิดข้อผิดพลาดในการบันทึก");
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+        let addonsArray = [];
+        if (addonsStr) {
+            addonsStr.split(',').forEach(p => {
+                const parts = p.split(':');
+                if(parts.length === 2) addonsArray.push({ name: parts[0].trim(), price: parseFloat(parts[1].trim()) || 0 });
+            });
         }
+
+        let updatedMenus = merchantData.menus ? [...merchantData.menus] : [];
+        const newMenu = { name, price, addons: addonsArray };
+
+        if(idx >= 0) updatedMenus[idx] = { ...updatedMenus[idx], ...newMenu };
+        else updatedMenus.push(newMenu);
+
+        await db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus });
+        showToast("บันทึกเมนูสำเร็จ"); document.getElementById('menu-modal').style.display = 'none';
     }
 
     function deleteMenu(idx) {
         if(confirm("ต้องการลบเมนูนี้ใช่หรือไม่?")) {
-            let updatedMenus = [...merchantData.menus];
-            updatedMenus.splice(idx, 1);
-            db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus }).then(() => {
-                showToast("ลบเมนูสำเร็จ");
-            });
+            let updatedMenus = [...merchantData.menus]; updatedMenus.splice(idx, 1);
+            db.collection("merchants").doc(currentMerchantId).update({ menus: updatedMenus }).then(() => showToast("ลบเมนูสำเร็จ"));
         }
     }
 
-    // --- 5. WALLET ---
+    // --- Wallet ---
     function loadMerchantTransactions() {
-       db.collection("merchants").doc(currentMerchantId).collection("transactions")
-         .orderBy("createdAt", "desc").limit(20).onSnapshot(snapshot => {
+       db.collection("merchants").doc(currentMerchantId).collection("transactions").orderBy("createdAt", "desc").limit(20).onSnapshot(snapshot => {
             const list = document.getElementById('merchant-tx-list');
             if(snapshot.empty) { list.innerHTML = '<p style="text-align:center; color:var(--text-light);">ยังไม่มีประวัติทำรายการ</p>'; return; }
-            
             let html = '';
             snapshot.forEach(doc => {
-               const tx = doc.data(); 
-               const isIncome = tx.type === 'income';
+               const tx = doc.data(); const isIncome = tx.type === 'income';
                const dateText = tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'ล่าสุด';
-               html += `
-                 <div style="background:white; border-radius:12px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);">
-                   <div style="display:flex; align-items:center; gap:12px;">
-                     <div style="width:40px; height:40px; border-radius:12px; background:${isIncome?'#d1fae5':'#fee2e2'}; color:${isIncome?'var(--success)':'var(--danger)'}; display:flex; justify-content:center; align-items:center;"><span class="material-icons">${isIncome?'payments':'account_balance'}</span></div>
-                     <div><div style="font-weight:600; font-size:13px; color:var(--text-dark);">${tx.title}</div><div style="font-size:11px; color:var(--text-light);">${dateText}</div></div>
-                   </div>
-                   <div style="font-weight:700; font-size:15px; color:${isIncome ? 'var(--success)' : 'var(--danger)'};">${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}</div>
-                 </div>`;
+               html += `<div style="background:white; border-radius:12px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);"><div style="display:flex; align-items:center; gap:12px;"><div style="width:40px; height:40px; border-radius:12px; background:${isIncome?'#d1fae5':'#fee2e2'}; color:${isIncome?'var(--success)':'var(--danger)'}; display:flex; justify-content:center; align-items:center;"><span class="material-icons">${isIncome?'payments':'account_balance'}</span></div><div><div style="font-weight:600; font-size:13px; color:var(--text-dark);">${tx.title}</div><div style="font-size:11px; color:var(--text-light);">${dateText}</div></div></div><div style="font-weight:700; font-size:15px; color:${isIncome ? 'var(--success)' : 'var(--danger)'};">${isIncome ? '+' : '-'}฿${tx.amount.toFixed(2)}</div></div>`;
             });
             list.innerHTML = html;
          });
     }
 
-    function submitWithdraw() {
-       const bank = document.getElementById('wd-bank').value.trim();
-       const acc = document.getElementById('wd-acc').value.trim();
-       const amount = parseFloat(document.getElementById('withdraw-amount').value);
-       const currentBalance = merchantData.walletBalance || 0;
-       
-       if(!bank || !acc) return showToast("กรุณากรอกข้อมูลธนาคาร");
-       if(isNaN(amount) || amount <= 0 || amount > currentBalance) return showToast("ยอดเงินไม่ถูกต้อง");
-       if(amount < 100) return showToast("ถอนขั้นต่ำ 100 บาท");
-
-       db.collection("merchants").doc(currentMerchantId).update({ walletBalance: firebase.firestore.FieldValue.increment(-amount) }).then(() => {
-          db.collection("merchants").doc(currentMerchantId).collection("transactions").add({
-             title: "ถอนเงิน (รอตรวจสอบ)", amount: amount, type: 'expense', bankAccount: { bank: bank, accountNo: acc }, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          showToast(`ส่งคำขอถอนเงิน ฿${amount} สำเร็จ`);
-          document.getElementById('withdraw-modal').style.display = 'none';
-       });
-    }
-
-    // --- UTILS ---
+    // --- Utils ---
     function switchAppScreen(screenId) { 
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
       document.getElementById(screenId + '-screen').classList.add('active'); 
@@ -808,7 +549,6 @@
       const activeNav = document.getElementById('nav-' + screenId);
       if(activeNav) activeNav.classList.add('active');
     }
-    
     function showToast(message) { const toast = document.getElementById("custom-toast"); toast.innerText = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
   </script>
 </body>
